@@ -6,6 +6,8 @@ import java.io.IOException;
 import edu.Kennesaw.ksumcspeedrun.ComponentHelper;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +18,8 @@ public class Config {
 
     private File file;
     private final YamlConfiguration config;
+
+    private Component pluginPrefix;
 
     public Config(Main plugin) {
         config = new YamlConfiguration();
@@ -45,61 +49,62 @@ public class Config {
     }
 
     public void load() {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-            try {
-                config.load(file);
-            } catch (IOException e) {
-                plugin.getLogger().warning("An IOException has occurred when attempting to load config.yml!");
-                plugin.getLogger().warning(e.getMessage());
-            } catch (InvalidConfigurationException e) {
-                Logger.logError("Your config.yml is configured in an invalid format! Please fix this problem or delete the config.yml for a default file.", e, plugin);
-                plugin.getServer().shutdown();
-                return;
-            }
-            Bukkit.getScheduler().runTask(plugin, this::addDefaults);
-        });
+        try {
+            config.load(file);
+        } catch (IOException e) {
+            plugin.getLogger().warning("An IOException has occurred when attempting to load config.yml!");
+            plugin.getLogger().warning(e.getMessage());
+        } catch (InvalidConfigurationException e) {
+            Logger.logError("Your config.yml is configured in an invalid format! Please fix this problem or delete the config.yml for a default file.", e, plugin);
+            plugin.getServer().shutdown();
+            return;
+        }
+        addDefaults();
+    }
+
+    public Component getPrefix() {
+        return pluginPrefix;
     }
 
     private void save() {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-            plugin.getLogger().info("Saving config.yml...");
-            try {
-                config.save(file);
-                plugin.getLogger().info("Success saving config.yml!");
-            } catch (IOException e) {
-                plugin.getLogger().warning("An IOException has occurred when attempting to save config.yml!");
-                plugin.getLogger().warning(e.getMessage());
-            }
-        });
+        plugin.getLogger().info("Saving config.yml...");
+        try {
+            config.save(file);
+            plugin.getLogger().info("Success saving config.yml!");
+        } catch (IOException e) {
+            plugin.getLogger().warning("An IOException has occurred when attempting to save config.yml!");
+            plugin.getLogger().warning(e.getMessage());
+        }
     }
 
-    // No Defaults Yet.
     private void addDefaults() {
-        /*if (!config.contains("line")) {
-            set("line", component);
+        if (!config.contains("prefix")) {
+            set("prefix", Component.text("[KSU-MC-Speedrun]").color(TextColor.color(0xFFFF55)).append(Component.text(" ").color(TextColor.color(0xFFFFFF))));
         }
-        save();*/
+        save();
+        pluginPrefix = getComponent("prefix");
     }
 
     private void generateConfig() {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-            plugin.getLogger().info("Loading config.yml...");
-            file = new File(plugin.getDataFolder(), "config.yml");
-            if (!file.exists()) {
-                plugin.getLogger().info("Config.yml does not exist");
-                if (file.getParentFile().mkdirs()) {
-                    plugin.getLogger().info("Creating parent directory \"" + plugin.getName() + "\"");
-                }
-                try {
-                    if (file.createNewFile()) {
-                        plugin.getLogger().info("Generating new config.yml...");
-                    }
-                } catch (IOException e) {
-                    plugin.getLogger().warning("An IOException has occurred when attempting to generate config.yml!");
-                    plugin.getLogger().warning(e.getMessage());
-                }
+        plugin.getLogger().info("Loading config.yml...");
+        file = new File(plugin.getDataFolder(), "config.yml");
+        if (!file.exists()) {
+            plugin.getLogger().info("Config.yml does not exist");
+            if (file.getParentFile().mkdirs()) {
+                plugin.getLogger().info("Creating parent directory \"" + plugin.getName() + "\"");
             }
-            Bukkit.getScheduler().runTask(plugin, this::addDefaults);
-        });
+            try {
+                if (file.createNewFile()) {
+                    plugin.getLogger().info("Generating new config.yml...");
+                }
+            } catch (IOException e) {
+                plugin.getLogger().warning("An IOException has occurred when attempting to generate config.yml!");
+                plugin.getLogger().warning(e.getMessage());
+            }
+        } else {
+            load();
+            return;
+        }
+        addDefaults();
     }
 }

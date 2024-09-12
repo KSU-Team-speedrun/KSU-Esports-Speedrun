@@ -1,4 +1,4 @@
-package edu.Kennesaw.ksumcspeedrun;
+package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;

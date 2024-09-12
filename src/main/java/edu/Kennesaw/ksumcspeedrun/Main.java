@@ -5,6 +5,7 @@ import edu.Kennesaw.ksumcspeedrun.Events.EntityDeath;
 import edu.Kennesaw.ksumcspeedrun.Events.ItemObtain;
 import edu.Kennesaw.ksumcspeedrun.Events.MineBlock;
 import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
+import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -19,6 +20,7 @@ public final class Main extends JavaPlugin {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onEnable() {
+
         config = new Config(this);
 
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
@@ -31,6 +33,7 @@ public final class Main extends JavaPlugin {
             final Commands commands = event.registrar();
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
         });
+
     }
 
     @Override

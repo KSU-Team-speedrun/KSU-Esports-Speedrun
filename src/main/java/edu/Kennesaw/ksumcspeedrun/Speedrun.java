@@ -17,6 +17,10 @@ public class Speedrun {
     private int timeLimit;
     private TimeUnit timeUnit;
     private int spawnRadius;
+    private int playerLimit;
+
+    private boolean isVerified;
+    private boolean isStarted;
 
     private final ObjectiveManager objectives;
     private final HashMap<GameRule<?>, Boolean> gameRules;
@@ -33,7 +37,7 @@ public class Speedrun {
         this.spawnRadius = 300;
 
         objectives = new ObjectiveManager();
-        gameRules = new HashMap<GameRule<?>, Boolean>();
+        gameRules = new HashMap<>();
 
     }
 
@@ -85,12 +89,45 @@ public class Speedrun {
         objectives.removeObjective(objectiveNum);
     }
 
+    public ObjectiveManager getObjectives() {
+        return objectives;
+    }
+
     public void setGameRule(GameRule<?> gameRule, boolean value) {
         gameRules.put(gameRule, value);
     }
 
     public boolean getGameRule(GameRule<?> gameRule) {
         return gameRules.getOrDefault(gameRule, false);
+    }
+
+    public void setPlayerLimit(int playerLimit) {
+        this.playerLimit = playerLimit;
+    }
+
+    public int getPlayerLimit() {
+        return playerLimit;
+    }
+
+    public void verifyMap() {
+        // verify map
+        isVerified = true;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setStarted() {
+        isStarted = true;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public void endGame() {
+        isStarted = false;
     }
 
 }

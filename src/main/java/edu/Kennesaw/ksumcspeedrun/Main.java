@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     private Config config;
+    private Speedrun speedrun;
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
@@ -34,6 +35,8 @@ public final class Main extends JavaPlugin {
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
         });
 
+        speedrun = new Speedrun(this);
+
     }
 
     @Override
@@ -43,6 +46,10 @@ public final class Main extends JavaPlugin {
 
     public Config getSpeedrunConfig() {
         return config;
+    }
+
+    public Speedrun getSpeedrun() {
+        return speedrun;
     }
 }
 

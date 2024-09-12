@@ -10,33 +10,33 @@ public class EnterObjective extends Objective {
     private StructureType structureTarget;
     private Portal portalType;
 
-    public EnterObjective(Biome biomeTarget, ObjectiveType type, int weight) {
-        super(type, weight);
+    public EnterObjective(Biome biomeTarget, int weight) {
+        super(ObjectiveType.ENTER, weight);
         this.biomeTarget = biomeTarget;
     }
 
-    public EnterObjective(Biome biomeTarget, ObjectiveType type) {
-        super(type);
+    public EnterObjective(Biome biomeTarget) {
+        super(ObjectiveType.ENTER);
         this.biomeTarget = biomeTarget;
     }
 
-    public EnterObjective(StructureType structureTarget, ObjectiveType type, int weight) {
-        super(type, weight);
+    public EnterObjective(StructureType structureTarget, int weight) {
+        super(ObjectiveType.ENTER, weight);
         this.structureTarget = structureTarget;
     }
 
-    public EnterObjective(StructureType structureTarget, ObjectiveType type) {
-        super(type);
+    public EnterObjective(StructureType structureTarget) {
+        super(ObjectiveType.ENTER);
         this.structureTarget = structureTarget;
     }
 
-    public EnterObjective(Portal portalType, ObjectiveType type, int weight) {
-        super(type, weight);
+    public EnterObjective(Portal portalType, int weight) {
+        super(ObjectiveType.ENTER, weight);
         this.portalType = portalType;
     }
 
-    public EnterObjective(Portal portalType, ObjectiveType type) {
-        super(type);
+    public EnterObjective(Portal portalType) {
+        super(ObjectiveType.ENTER);
         this.portalType = portalType;
     }
 }

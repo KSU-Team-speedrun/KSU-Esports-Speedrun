@@ -1,9 +1,11 @@
 package edu.Kennesaw.ksumcspeedrun;
 
+import edu.Kennesaw.ksumcspeedrun.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objective.ObjectiveManager;
 import org.bukkit.GameRule;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Speedrun {
@@ -15,11 +17,24 @@ public class Speedrun {
     private int timeLimit;
     private TimeUnit timeUnit;
     private int spawnRadius;
-    private List<String> objectives;
-    private HashMap<GameRule, Boolean> gameRules;
+
+    private final ObjectiveManager objectives;
+    private final HashMap<GameRule<?>, Boolean> gameRules;
 
     public Speedrun(Main plugin) {
+
         this.plugin = plugin;
+
+        Random rand = new Random();
+        this.seed = rand.nextInt();
+        this.border = 5000;
+        this.timeLimit = 60;
+        this.timeUnit = TimeUnit.MINUTES;
+        this.spawnRadius = 300;
+
+        objectives = new ObjectiveManager();
+        gameRules = new HashMap<GameRule<?>, Boolean>();
+
     }
 
     public void setSeed(long seed) {
@@ -60,6 +75,22 @@ public class Speedrun {
 
     public int getSpawnRadius() {
         return spawnRadius;
+    }
+
+    public void addObjective(Objective objective) {
+        objectives.addObjective(objective);
+    }
+
+    public void remObjective(int objectiveNum) {
+        objectives.removeObjective(objectiveNum);
+    }
+
+    public void setGameRule(GameRule<?> gameRule, boolean value) {
+        gameRules.put(gameRule, value);
+    }
+
+    public boolean getGameRule(GameRule<?> gameRule) {
+        return gameRules.getOrDefault(gameRule, false);
     }
 
 }

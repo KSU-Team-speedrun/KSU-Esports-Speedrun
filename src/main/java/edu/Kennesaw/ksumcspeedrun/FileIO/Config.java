@@ -1,8 +1,10 @@
-package edu.Kennesaw.ksumcspeedrun;
+package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
 
+import edu.Kennesaw.ksumcspeedrun.ComponentHelper;
+import edu.Kennesaw.ksumcspeedrun.Main;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;

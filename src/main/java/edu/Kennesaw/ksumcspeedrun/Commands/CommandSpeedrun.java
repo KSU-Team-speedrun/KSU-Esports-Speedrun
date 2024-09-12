@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CommandSpeedrun implements BasicCommand {
@@ -36,77 +37,95 @@ public class CommandSpeedrun implements BasicCommand {
         Component prefix = plugin.getSpeedrunConfig().getPrefix();
 
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-
             CommandSender sender = commandSourceStack.getSender();
-
             if (args.length == 0) {
                 // help list
             } else  {
                 if (args[0].equalsIgnoreCase("help")) {
                     // help list
                 } else if (args[0].equalsIgnoreCase("reload")) {
-                    plugin.getSpeedrunConfig().load();
-                    sender.sendMessage(prefix.append(Component.text("Plugin config has been reloaded.")));
+                    reloadConfig(sender, prefix);
                 } else if (args[0].equalsIgnoreCase("addObjective")) {
-                    if (args.length < 3 || args.length > 7) {
-                        sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
-                    } else {
-                        if (args[1].equalsIgnoreCase("kill")) {
-                            EntityType entity;
-                            try {
-                                entity = EntityType.valueOf(args[2]);
-                                if (args.length == 3) {
-                                    speedRun.addObjective(new KillObjective(entity));
-                                    sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + entity.name())));
-                                } else if (args.length == 5) {
-                                    if (args[3].equalsIgnoreCase("-w")) {
-                                        try {
-                                            int weight = Integer.parseInt(args[4]);
-                                            speedRun.addObjective(new KillObjective(entity, weight));
-                                            sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + entity.name() + " (" + weight + ")")));
-                                        } catch (NumberFormatException e) {
-                                            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[4] + "\" is not a valid number.")));
-                                        }
-                                    } else {
-                                        sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[3] + "\" is not a valid flag.")));
-                                        sender.sendMessage(prefix.append(Component.text("Valid Flags: '-w' - Set an Objective's weight.")));
-                                    }
-                                } else {
-                                    sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
-                                }
-                            } catch (IllegalArgumentException e) {
-                                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid entity type.")));
-                                sender.sendMessage(prefix.append(Component.text("For a list of possible entity types, type: /speedrun entitytypes")));
-                            } catch (NonLivingEntityException e) {
-                                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
-                                sender.sendMessage(prefix.append(Component.text("For a list of possible entity types, type: /speedrun entitytypes")));
-                            }
-                        } else if (args[1].equalsIgnoreCase("enter")) {
-
-                        } else if (args[1].equalsIgnoreCase("mine")) {
-
-                        } else if (args[1].equalsIgnoreCase("obtain")) {
-
-                        } else {
-                            sender.sendMessage(prefix.append(Component.text("Invalid argument for [event]. Possible arguments: KILL, ENTER, MINE, OBTAIN")));
-                        }
-                    }
-                } else if (args[0].equalsIgnoreCase("entitytypes")) {
-                    StringBuilder entityTypes = new StringBuilder();
-                    int livingEntities = 0;
-                    for (String str : livingEntityNames) {
-                        entityTypes.append(str);
-                        livingEntities++;
-                        if (livingEntities % 5 == 0) {
-                            sender.sendMessage(entityTypes.toString());
-                            entityTypes = new StringBuilder();
-                        }
-                    }
+                    addObjectiveHandler(sender, args, prefix);
                 }
             }
-
         });
+    }
 
+    private void reloadConfig(CommandSender sender, Component prefix) {
+        plugin.getSpeedrunConfig().load();
+        sender.sendMessage(prefix.append(Component.text("Plugin config has been reloaded.")));
+    }
+
+    private void addObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+        if (args.length == 3 || args.length == 5 || args.length == 7) {
+            String objectiveType = args[1].toLowerCase();
+            switch (objectiveType) {
+                case "kill":
+                    killObjectiveHandler(sender, args, prefix);
+                case "enter":
+                    // do something
+                case "mine":
+                    // do something
+                case "obtain":
+                    // do something
+            }
+        } else {
+            sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
+        }
+    }
+
+    private void killObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+        try {
+            EntityType e = EntityType.valueOf(args[2].toUpperCase());
+            Optional<Integer> weight = parseWeightFlag(args);
+            KillObjective ko = weight.map(w -> {
+                try {
+                    sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + e.name() + " (" + w + ")")));
+                    return new KillObjective(e, w);
+                } catch (NonLivingEntityException ex) {
+                    sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
+                    return null;
+                }
+            }).orElseGet(() -> {
+                try {
+                    sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + e.name())));
+                    return new KillObjective(e);
+                } catch (NonLivingEntityException ex) {
+                    sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
+                    return null;
+                }
+            });
+            speedRun.addObjective(ko);
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid entity type.")));
+        }
+    }
+
+    private Optional<Integer> parseWeightFlag(String[] args) {
+        for (int i = 3; i < args.length - 1; i++) {
+            if (args[i].equalsIgnoreCase("-w")) {
+                try {
+                    return Optional.of(Integer.parseInt(args[i+1]));
+                } catch(NumberFormatException e) {
+                    return Optional.empty();
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Integer> parseAmountFlag(String[] args) {
+        for (int i = 3; i < args.length - 1; i++) {
+            if (args[i].equalsIgnoreCase("-n")) {
+                try {
+                    return Optional.of(Integer.parseInt(args[i+1]));
+                } catch(NumberFormatException e) {
+                    return Optional.empty();
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -118,32 +137,10 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("addobjective");
         } else {
             if (args.length == 1) {
-                if ("help".startsWith(args[0])) {
-                    suggestions.clear();
-                    suggestions.add("help");
-                }
-                if ("reload".startsWith(args[0])) {
-                    suggestions.clear();
-                    suggestions.add("reload");
-                }
-                if ("addobjective".startsWith(args[0])) {
-                    suggestions.clear();
-                    suggestions.add("addobjective");
-                }
+                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective");
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("addobjective")) {
-                    if ("kill".startsWith(args[1])) {
-                        suggestions.add("kill");
-                    }
-                    if ("enter".startsWith(args[1])) {
-                        suggestions.add("enter");
-                    }
-                    if ("obtain".startsWith(args[1])) {
-                        suggestions.add("obtain");
-                    }
-                    if ("mine".startsWith(args[1])) {
-                        suggestions.add("mine");
-                    }
+                    addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain");
                 }
             } else if (args.length == 3) {
                 if (args[1].equalsIgnoreCase("kill")) {
@@ -158,6 +155,14 @@ public class CommandSpeedrun implements BasicCommand {
             }
         }
         return suggestions;
+    }
+
+    private void addMatchingSuggestions(List<String> suggestions, String arg, String... possibleSuggestions) {
+        for (String suggestion : possibleSuggestions) {
+            if (suggestion.startsWith(arg.toLowerCase())) {
+                suggestions.add(suggestion);
+            }
+        }
     }
 
     @Override

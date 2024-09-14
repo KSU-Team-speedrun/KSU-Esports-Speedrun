@@ -82,7 +82,9 @@ public class Speedrun {
     }
 
     public void addObjective(Objective objective) {
-        objectives.addObjective(objective);
+        if (objective != null) {
+            objectives.addObjective(objective);
+        }
     }
 
     public void remObjective(int objectiveNum) {

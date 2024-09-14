@@ -1,22 +1,24 @@
 package edu.Kennesaw.ksumcspeedrun.Commands;
 
+import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objective.KillObjective;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
+import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
+import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CommandSpeedrun implements BasicCommand {
@@ -24,11 +26,15 @@ public class CommandSpeedrun implements BasicCommand {
     Main plugin;
     Speedrun speedRun;
     List<String> livingEntityNames;
+    List<String> locationNames;
+    List<String> structures;
 
     public CommandSpeedrun(Main plugin) {
         this.plugin = plugin;
         this.speedRun = plugin.getSpeedrun();
         livingEntityNames = SpeedrunSuggestions.getLivingEntities();
+        locationNames = SpeedrunSuggestions.getLocationNames();
+        structures = SRStructure.getStructureNames();
     }
 
     @Override
@@ -47,6 +53,8 @@ public class CommandSpeedrun implements BasicCommand {
                     reloadConfig(sender, prefix);
                 } else if (args[0].equalsIgnoreCase("addObjective")) {
                     addObjectiveHandler(sender, args, prefix);
+                } else if (args[0].equalsIgnoreCase("structures")) {
+
                 }
             }
         });
@@ -58,21 +66,23 @@ public class CommandSpeedrun implements BasicCommand {
     }
 
     private void addObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
-        if (args.length == 3 || args.length == 5 || args.length == 7) {
-            String objectiveType = args[1].toLowerCase();
-            switch (objectiveType) {
-                case "kill":
-                    killObjectiveHandler(sender, args, prefix);
-                case "enter":
-                    // do something
-                case "mine":
-                    // do something
-                case "obtain":
-                    // do something
+        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+            if (args.length == 3 || args.length == 5 || args.length == 7) {
+                String objectiveType = args[1].toLowerCase();
+                switch (objectiveType) {
+                    case "kill":
+                        killObjectiveHandler(sender, args, prefix);
+                    case "enter":
+                        enterObjectiveHandler(sender, args, prefix);
+                    case "mine":
+                        // do something
+                    case "obtain":
+                        // do something
+                }
+            } else {
+                sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
             }
-        } else {
-            sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
-        }
+        });
     }
 
     private void killObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
@@ -100,6 +110,46 @@ public class CommandSpeedrun implements BasicCommand {
         } catch (IllegalArgumentException e) {
             sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid entity type.")));
         }
+    }
+
+    private void enterObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+        Object object = null;
+        String name = "";
+        try {
+            object = Biome.valueOf(args[2].toUpperCase());
+            name = ((Biome) object).name();
+        } catch (IllegalArgumentException e) {
+            if (structures.contains(args[2].toUpperCase())) {
+                object = new SRStructure(plugin, args[2].toUpperCase());
+                name = ((SRStructure) object).getName();
+            } else {
+                if (Portal.getPortalTypeNames().contains(args[2].toUpperCase())) {
+                    object = new Portal(Portal.PortalType.valueOf(args[2].toUpperCase()));
+                    name = ((Portal) object).getPortalType().name();
+                }
+            }
+        }
+        final Object finalObject = object;
+        Optional<Integer> weight = parseWeightFlag(args);
+        final String finalName = name;
+        EnterObjective eo = weight.map(w -> {
+            try {
+                sender.sendMessage(prefix.append(Component.text("Objective Added: ENTER " + finalName + " (" + w + ")")));
+                return new EnterObjective(finalObject, w);
+            } catch (InvalidTargetLocationException e) {
+                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid biome, structure, or portal type.")));
+                return null;
+            }
+        }).orElseGet(() -> {
+            try {
+                sender.sendMessage(prefix.append(Component.text("Objective Added: ENTER " + finalName)));
+                return new EnterObjective(finalObject);
+            } catch (InvalidTargetLocationException e) {
+                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid biome, structure, or portal type.")));
+                return null;
+            }
+        });
+        if (eo != null) speedRun.addObjective(eo);
     }
 
     private Optional<Integer> parseWeightFlag(String[] args) {
@@ -145,6 +195,12 @@ public class CommandSpeedrun implements BasicCommand {
             } else if (args.length == 3) {
                 if (args[1].equalsIgnoreCase("kill")) {
                     for (String str : livingEntityNames) {
+                        if (str.toLowerCase().startsWith(args[2].toLowerCase())) {
+                            suggestions.add(str);
+                        }
+                    }
+                } else if (args[1].equalsIgnoreCase("enter")) {
+                    for (String str : locationNames) {
                         if (str.toLowerCase().startsWith(args[2].toLowerCase())) {
                             suggestions.add(str);
                         }

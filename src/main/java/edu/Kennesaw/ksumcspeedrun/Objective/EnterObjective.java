@@ -1,13 +1,14 @@
 package edu.Kennesaw.ksumcspeedrun.Objective;
 
-import edu.Kennesaw.ksumcspeedrun.Portal;
+import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
+import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
+import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import org.bukkit.block.Biome;
-import org.bukkit.generator.structure.StructureType;
 
 public class EnterObjective extends Objective {
 
     private Biome biomeTarget;
-    private StructureType structureTarget;
+    private SRStructure structureTarget;
     private Portal portalType;
 
     public EnterObjective(Biome biomeTarget, int weight) {
@@ -20,12 +21,12 @@ public class EnterObjective extends Objective {
         this.biomeTarget = biomeTarget;
     }
 
-    public EnterObjective(StructureType structureTarget, int weight) {
+    public EnterObjective(SRStructure structureTarget, int weight) {
         super(ObjectiveType.ENTER, weight);
         this.structureTarget = structureTarget;
     }
 
-    public EnterObjective(StructureType structureTarget) {
+    public EnterObjective(SRStructure structureTarget) {
         super(ObjectiveType.ENTER);
         this.structureTarget = structureTarget;
     }
@@ -39,4 +40,34 @@ public class EnterObjective extends Objective {
         super(ObjectiveType.ENTER);
         this.portalType = portalType;
     }
+
+    public EnterObjective(Object locationType, int weight) throws InvalidTargetLocationException {
+        super(ObjectiveType.ENTER, weight);
+        switch (locationType) {
+            case Biome biome -> this.biomeTarget = biome;
+            case SRStructure structure -> this.structureTarget = structure;
+            case Portal portal -> this.portalType = portal;
+            case null, default ->
+                    throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
+        }
+    }
+
+    public EnterObjective(Object locationType) throws InvalidTargetLocationException {
+        super(ObjectiveType.ENTER);
+        switch (locationType) {
+            case Biome biome -> this.biomeTarget = biome;
+            case SRStructure structure -> this.structureTarget = structure;
+            case Portal portal -> this.portalType = portal;
+            case null, default ->
+                    throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
+        }
+    }
+
+    public Object getTarget() {
+        if (biomeTarget != null) return biomeTarget;
+        else if (structureTarget != null) return structureTarget;
+        else if (portalType != null) return portalType;
+        else return null;
+    }
+
 }

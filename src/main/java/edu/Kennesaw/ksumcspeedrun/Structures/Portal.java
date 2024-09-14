@@ -1,13 +1,29 @@
-package edu.Kennesaw.ksumcspeedrun;
+package edu.Kennesaw.ksumcspeedrun.Structures;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidPortalException;
 import org.bukkit.World;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Portal {
 
     public enum PortalType {
         WORLD_TO_NETHER, NETHER_TO_WORLD, WORLD_TO_END,
         END_TO_END, END_TO_WORLD
+    }
+
+    public static List<PortalType> getPortalTypes() {
+        return new ArrayList<>(Arrays.asList(PortalType.values()));
+    }
+
+    public static List<String> getPortalTypeNames() {
+        List<String> portalNames = new ArrayList<>();
+        for (PortalType p : getPortalTypes()) {
+            portalNames.add(p.name());
+        }
+        return portalNames;
     }
 
     private PortalType portalType;

@@ -23,9 +23,9 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
 
         config = new Config(this);
+        speedrun = new Speedrun(this);
 
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerMove(this), this);
         Bukkit.getPluginManager().registerEvents(new MineBlock(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemObtain(this), this);
 
@@ -35,7 +35,7 @@ public final class Main extends JavaPlugin {
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
         });
 
-        speedrun = new Speedrun(this);
+        new PlayerMove(this);
 
     }
 

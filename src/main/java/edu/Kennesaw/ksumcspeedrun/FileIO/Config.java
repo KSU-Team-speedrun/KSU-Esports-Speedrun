@@ -2,13 +2,13 @@ package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import edu.Kennesaw.ksumcspeedrun.ComponentHelper;
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -43,9 +43,31 @@ public class Config {
         }
     }
 
-    public void set(String line, Component tc) {
+    public List<String> getList(String line) {
+        if (config.isList(line)) {
+            return config.getStringList(line);
+        }
+        return null;
+    }
+
+    public String getString(String line) {
+        return config.getString(line);
+    }
+
+    public Object getObject(String line) {
+        return config.get(line);
+    }
+
+    public int getInt(String line) {
+        return config.getInt(line);
+    }
+
+    public void setComponent(String line, Component tc) {
         config.set(line, ComponentHelper.componentToMM(tc));
-        save();
+    }
+
+    public void set(String line, Object o) {
+        config.set(line, o);
     }
 
     public void load() {
@@ -79,7 +101,31 @@ public class Config {
 
     private void addDefaults() {
         if (!config.contains("prefix")) {
-            set("prefix", Component.text("[KSU-MC-Speedrun]").color(TextColor.color(0xFFFF55)).append(Component.text(" ").color(TextColor.color(0xFFFFFF))));
+            setComponent("prefix", Component.text("[KSU-MC-Speedrun]").color(TextColor.color(0xFFFF55)).append(Component.text(" ").color(TextColor.color(0xFFFFFF))));
+        }
+        if (!config.contains("structureLocations")) {
+            for (String s : SRStructure.getStructureNames()) {
+                if (s.equalsIgnoreCase("ANCIENT_CITY")) {
+                    set("structureLocations." + s + ".averageYCoordinate", -51);
+                } else if (s.equalsIgnoreCase("STRONGHOLD")) {
+                    set("structureLocations." + s + ".averageYCoordinate", 0);
+                } else if (s.equalsIgnoreCase("TRIAL_CHAMBERS")) {
+                    set("structureLocations." + s + ".averageYCoordinate", -30);
+                } else {
+                    set("structureLocations." + s + ".averageYCoordinate", "ground");
+                }
+            }
+            for (String s : SRStructure.getStructureNames()) {
+                if (s.equalsIgnoreCase("ANCIENT_CITY")) {
+                    set("structureLocations." + s + ".radius", 100);
+                } else if (s.equalsIgnoreCase("STRONGHOLD")) {
+                    set("structureLocations." + s + ".radius", 75);
+                } else if (s.equalsIgnoreCase("TRIAL_CHAMBERS")) {
+                    set("structureLocations." + s + ".radius", 100);
+                } else {
+                    set("structureLocations." + s + ".radius", 30);
+                }
+            }
         }
         save();
         pluginPrefix = getComponent("prefix");

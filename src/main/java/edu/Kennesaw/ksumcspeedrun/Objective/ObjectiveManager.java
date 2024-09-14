@@ -19,6 +19,16 @@ public class ObjectiveManager {
         return objectives;
     }
 
+    public List<Objective> getIncompleteObjectives() {
+        List<Objective> incompleteObjectives = new ArrayList<>();
+        for (Objective o : objectives) {
+            if (!o.isComplete()) {
+                incompleteObjectives.add(o);
+            }
+        }
+        return incompleteObjectives;
+    }
+
     public int getLength() {
         return objectives.size();
     }

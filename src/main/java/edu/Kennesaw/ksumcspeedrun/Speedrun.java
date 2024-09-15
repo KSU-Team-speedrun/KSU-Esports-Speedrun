@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+/* Speedrun Object Class, centerpoint of logic for speedrun events
+   Contains various setters & getters for all speedrun attributes */
 public class Speedrun {
 
     Main plugin;
 
+    // Speedrun Attributes
     private long seed;
     private int border;
     private int timeLimit;
@@ -19,12 +22,19 @@ public class Speedrun {
     private int spawnRadius;
     private int playerLimit;
 
+    // "isVerified" meaning objectives can be completed on world seed within world border constraints
     private boolean isVerified;
+
+    // True if the Speedrun has started
     private boolean isStarted;
 
+    // ObjectiveManager contains the list of all Objectives & all incomplete objectives, can be modified
     private final ObjectiveManager objectives;
+
+    // GameRules set by admins will be located in this HashMap
     private final HashMap<GameRule<?>, Boolean> gameRules;
 
+    // Main Constructor with default attributes assigned
     public Speedrun(Main plugin) {
 
         this.plugin = plugin;
@@ -40,6 +50,8 @@ public class Speedrun {
         gameRules = new HashMap<>();
 
     }
+
+    // Setters & Getters below should be quite self-explanatory
 
     public void setSeed(long seed) {
         this.seed = seed;

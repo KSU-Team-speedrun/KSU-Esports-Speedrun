@@ -2,6 +2,10 @@ package edu.Kennesaw.ksumcspeedrun.Objective;
 
 import org.bukkit.Material;
 
+/* Same as other objective subclasses, Material is target
+   For ObtainObjective, there is an additional possible flag: amount
+   The number of items needed to be obtained can be specified */
+
 public class ObtainObjective extends Objective {
 
     private Material item;

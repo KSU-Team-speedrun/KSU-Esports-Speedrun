@@ -4,6 +4,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
@@ -26,11 +27,10 @@ public class PlayTimeTracker implements Listener {
     private final Speedrun speedrun;
 
     private final HashMap<UUID, Long> totalPlayTimes = new HashMap<>();
-    
-    public void PlayerTimeTracker(Main plugin) {
+
+    public PlayTimeTracker(Main plugin) {
         this.plugin = plugin;
         speedrun = plugin.getSpeedrun();
-        ObjectiveManager objectives = speedrun.getObjectives();
     }
 
     @EventHandler
@@ -51,7 +51,7 @@ public class PlayTimeTracker implements Listener {
             long sessionDuration = logoutTime - loginTime; // in milliseconds
 
             // Update the total playtime
-            plugin.addPlayTime(playerId, sessionDuration);
+            this.addPlayTime(playerId, sessionDuration);
         }
     }
 
@@ -65,7 +65,7 @@ public class PlayTimeTracker implements Listener {
     }
 
     public void savePlayTime(UUID playerId) {
-        File file = new File(getDataFolder(), "playtimes.yml");
+        File file = new File(plugin.getDataFolder(), "playtimes.yml");
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
     
         config.set(playerId.toString(), getPlayTime(playerId));
@@ -78,7 +78,7 @@ public class PlayTimeTracker implements Listener {
     }
     
     public void loadPlayTime(UUID playerId) {
-        File file = new File(getDataFolder(), "playtimes.yml");
+        File file = new File(plugin.getDataFolder(), "playtimes.yml");
         if (!file.exists()) {
             return;
         }

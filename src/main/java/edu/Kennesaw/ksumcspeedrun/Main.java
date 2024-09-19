@@ -25,7 +25,6 @@ public final class Main extends JavaPlugin {
     // The following method runs when the plugin is Enabled
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    @EventHandler
     public void onEnable() {
 
         // Config & Speedrun instances are initialized
@@ -38,7 +37,7 @@ public final class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ItemObtain(this), this);
         
         getLogger().info("Playtime tracker enabled");
-        getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
 
         // Speedrun Command is Registered
         LifecycleEventManager<Plugin> manager = this.getLifecycleManager();

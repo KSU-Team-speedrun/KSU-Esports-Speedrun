@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import edu.Kennesaw.ksumcspeedrun.ComponentHelper;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
+import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.InvalidConfigurationException;

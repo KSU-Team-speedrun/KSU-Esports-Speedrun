@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
+import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import org.bukkit.block.Biome;
@@ -14,12 +15,14 @@ public class EnterObjective extends Objective {
     private SRStructure structureTarget;
     private Portal portalType;
 
+    Main plugin;
+
+
     // Constructor that includes weight
-    public EnterObjective(Object locationType, int weight) throws InvalidTargetLocationException {
+    public EnterObjective(Object locationType, int weight, Main plugin) throws InvalidTargetLocationException {
 
         // ObjectiveType.ENTER and weight are passed to abstract Objective class
-        super(ObjectiveType.ENTER, weight);
-
+        super(ObjectiveType.ENTER, weight, plugin);
         /* LocationType attribute is assigned. If locationType object passed is not of type Biome, SRStructure, or
            Portal, then InvalidTargetLocationException is thrown. */
         switch (locationType) {
@@ -30,12 +33,18 @@ public class EnterObjective extends Objective {
                     throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
         }
 
+        String target = biomeTarget != null ? (biomeTarget.name()) : (structureTarget != null ? structureTarget.getName()
+                : portalType.toString());
+
+        setTargetName(target);
+
     }
 
     // Same as above, but weight is default (1) & not included in constructor
-    public EnterObjective(Object locationType) throws InvalidTargetLocationException {
+    public EnterObjective(Object locationType, Main plugin) throws InvalidTargetLocationException {
 
-        super(ObjectiveType.ENTER);
+        super(ObjectiveType.ENTER, plugin);
+
         switch (locationType) {
             case Biome biome -> this.biomeTarget = biome;
             case SRStructure structure -> this.structureTarget = structure;
@@ -43,6 +52,10 @@ public class EnterObjective extends Objective {
             case null, default ->
                     throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
         }
+
+        String target = biomeTarget != null ? (biomeTarget.name()) : (structureTarget != null ? structureTarget.getName() : portalType.toString());
+
+        setTargetName(target);
 
     }
 

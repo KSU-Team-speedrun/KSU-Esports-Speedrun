@@ -1,5 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objective;
 
+import edu.Kennesaw.ksumcspeedrun.Main;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 // Abstract Objective Class, all specific objective classes extend to this class
@@ -15,19 +17,25 @@ public abstract class Objective {
     private ObjectiveType type;
     private int weight;
     private Player completedPlayer;
+    private String targetName;
+
+    Main plugin;
 
     // Constructor where weight is not explicitly defined (assumed 1, default)
-    public Objective(ObjectiveType type) {
+    public Objective(ObjectiveType type, Main plugin) {
         this.type = type;
         this.weight = 1;
         this.completedPlayer = null;
+        this.plugin = plugin;
+        System.out.println("Objective added");
     }
 
     // Constructor where weight is explicitly defined
-    public Objective(ObjectiveType type, int weight) {
+    public Objective(ObjectiveType type, int weight, Main plugin) {
         this.type = type;
         this.weight = weight;
         this.completedPlayer = null;
+        this.plugin = plugin;
     }
 
     // Below are self-explanatory setters & getters
@@ -42,6 +50,8 @@ public abstract class Objective {
 
     public void setComplete(Player p) {
         this.completedPlayer = p;
+        p.sendMessage(plugin.getSpeedrunConfig().getPrefix().append(Component.text("Objective Complete: " + getType() + " " + targetName)));
+
     }
 
     public Player getCompletePlayer() {
@@ -51,4 +61,13 @@ public abstract class Objective {
     public boolean isComplete() {
         return completedPlayer != null;
     }
+
+    public void setTargetName(String target) {
+        this.targetName = target;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
 }

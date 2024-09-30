@@ -1,4 +1,4 @@
-package edu.Kennesaw.ksumcspeedrun;
+package edu.Kennesaw.ksumcspeedrun.Utilities;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

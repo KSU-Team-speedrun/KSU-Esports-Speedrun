@@ -10,6 +10,7 @@ import edu.Kennesaw.ksumcspeedrun.Objective.ObtainObjective;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
+import edu.Kennesaw.ksumcspeedrun.Utilities.SpeedrunSuggestions;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
@@ -42,6 +43,7 @@ public class CommandSpeedrun implements BasicCommand {
 
     // Constructor: Takes instance of "Main" plugin class so that Speedrun & Config instances can be retrieved
     public CommandSpeedrun(Main plugin) {
+
         this.plugin = plugin;
         this.speedRun = plugin.getSpeedrun();
 
@@ -68,7 +70,6 @@ public class CommandSpeedrun implements BasicCommand {
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
 
             CommandSender sender = commandSourceStack.getSender();
-
             // If argument lengths is 0 (i.e. "/speedrun" with no subcommand)
             if (args.length == 0) {
 
@@ -165,7 +166,7 @@ public class CommandSpeedrun implements BasicCommand {
                    exception will be thrown, as non-living entities cannot be killed. */
                 try {
                     sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + e.name() + " (" + w + ")")));
-                    return new KillObjective(e, w);
+                    return new KillObjective(e, w, plugin);
                 } catch (NonLivingEntityException ex) {
                     sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
                     return null;
@@ -175,7 +176,7 @@ public class CommandSpeedrun implements BasicCommand {
                 // Same as above, but the weight flag was not included in the sender's arguments.
                 try {
                     sender.sendMessage(prefix.append(Component.text("Objective Added: KILL " + e.name())));
-                    return new KillObjective(e);
+                    return new KillObjective(e, plugin);
                 } catch (NonLivingEntityException ex) {
                     sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
                     return null;
@@ -238,7 +239,7 @@ public class CommandSpeedrun implements BasicCommand {
             // An exception will be thrown if the finalObject is not of type Biome, SRStructure, or Portal
             try {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: ENTER " + arg2UpperCase + " (" + w + ")")));
-                return new EnterObjective(finalObject, w);
+                return new EnterObjective(finalObject, w, plugin);
             } catch (InvalidTargetLocationException e) {
                 sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + arg2UpperCase + "\" is not a valid biome, structure, or portal type.")));
                 return null;
@@ -246,7 +247,7 @@ public class CommandSpeedrun implements BasicCommand {
         }).orElseGet(() -> {
             try {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: ENTER " + arg2UpperCase)));
-                return new EnterObjective(finalObject);
+                return new EnterObjective(finalObject, plugin);
             } catch (InvalidTargetLocationException e) {
                 sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + arg2UpperCase + "\" is not a valid biome, structure, or portal type.")));
                 return null;
@@ -275,10 +276,10 @@ public class CommandSpeedrun implements BasicCommand {
                 Optional<Integer> weight = parseWeightFlag(args);
                 MineObjective mo = weight.map(w -> {
                     sender.sendMessage(prefix.append(Component.text("Objective Added: MINE " + m.name() + " (" + w + ")")));
-                    return new MineObjective(m, w);
+                    return new MineObjective(m, w, plugin);
                 }).orElseGet(() -> {
                     sender.sendMessage(prefix.append(Component.text("Objective Added: MINE " + m.name())));
-                    return new MineObjective(m);
+                    return new MineObjective(m, plugin);
                 });
 
                 // Add the returned objective to the objective list in Speedrun instance
@@ -316,16 +317,16 @@ public class CommandSpeedrun implements BasicCommand {
 
             ObtainObjective oo = weight.map(w -> amount.map(a -> {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + a + " " + m.name() + " (" + w + ")")));
-                return new ObtainObjective(m, w, a);
+                return new ObtainObjective(m, w, a, plugin);
             }).orElseGet(() -> {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + m.name() + " (" + w + ")")));
-                return new ObtainObjective(m, w);
+                return new ObtainObjective(m, w, plugin);
             })).orElseGet(() -> amount.map(a -> {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + a + " " + m.name())));
-                return new ObtainObjective(m, a);
+                return new ObtainObjective(m, a, plugin);
             }).orElseGet(() ->{
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + m.name())));
-                return new ObtainObjective(m);
+                return new ObtainObjective(m, plugin);
             }));
         }
     }
@@ -455,6 +456,6 @@ public class CommandSpeedrun implements BasicCommand {
        commands */
     @Override
     public @Nullable String permission() {
-        return "ksu.sr.user";
+        return "ksu.speedrun.user";
     }
 }

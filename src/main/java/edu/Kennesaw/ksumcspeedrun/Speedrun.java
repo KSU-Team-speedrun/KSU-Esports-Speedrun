@@ -2,10 +2,15 @@ package edu.Kennesaw.ksumcspeedrun;
 
 import edu.Kennesaw.ksumcspeedrun.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objective.ObjectiveManager;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /* Speedrun Object Class, centerpoint of logic for speedrun events
@@ -34,6 +39,11 @@ public class Speedrun {
     // GameRules set by admins will be located in this HashMap
     private final HashMap<GameRule<?>, Boolean> gameRules;
 
+    public Map<UUID, Player> combatLog;
+    public Map<UUID, ScheduledTask> combatTasks;
+
+    public Map<Location, Player> bedLog;
+
     // Main Constructor with default attributes assigned
     public Speedrun(Main plugin) {
 
@@ -48,6 +58,11 @@ public class Speedrun {
 
         objectives = new ObjectiveManager();
         gameRules = new HashMap<>();
+
+        combatLog = new HashMap<UUID, Player>();
+        combatTasks = new HashMap<UUID, ScheduledTask>();
+
+        bedLog = new HashMap<Location, Player>();
 
     }
 

@@ -4,17 +4,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
-import edu.Kennesaw.ksumcspeedrun.Objective.ObjectiveManager;
 
 import java.util.UUID;
 import java.util.HashMap;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 

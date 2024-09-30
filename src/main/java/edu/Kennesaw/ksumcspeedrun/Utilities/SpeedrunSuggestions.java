@@ -1,6 +1,5 @@
-package edu.Kennesaw.ksumcspeedrun.Commands;
+package edu.Kennesaw.ksumcspeedrun.Utilities;
 
-import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import org.bukkit.Material;

@@ -1,4 +1,6 @@
-package edu.Kennesaw.ksumcspeedrun.Objective;
+package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
+
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +28,10 @@ public class ObjectiveManager {
     }
 
     // Returns the list of incomplete objectives
-    public List<Objective> getIncompleteObjectives() {
+    public List<Objective> getIncompleteObjectives(Team team) {
         List<Objective> incompleteObjectives = new ArrayList<>();
         for (Objective o : objectives) {
-            if (!o.isComplete()) {
+            if (!o.isComplete(team)) {
                 incompleteObjectives.add(o);
             }
         }

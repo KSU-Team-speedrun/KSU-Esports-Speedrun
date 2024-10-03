@@ -1,4 +1,4 @@
-package edu.Kennesaw.ksumcspeedrun.Objective;
+package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import edu.Kennesaw.ksumcspeedrun.Main;

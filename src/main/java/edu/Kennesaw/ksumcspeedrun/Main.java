@@ -26,12 +26,14 @@ public class Main extends JavaPlugin {
         config = new Config(this);
         speedrun = new Speedrun(this);
 
+        speedrun.generateDefaultTeams();
+
         // Events are Registered
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
         Bukkit.getPluginManager().registerEvents(new MineBlock(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemObtain(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerClick(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerClick(this), this);
         Bukkit.getPluginManager().registerEvents(new BedInteract(this), this);
         Bukkit.getPluginManager().registerEvents(new DamageEvent(this), this);
 

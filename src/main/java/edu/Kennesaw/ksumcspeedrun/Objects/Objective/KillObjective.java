@@ -1,4 +1,4 @@
-package edu.Kennesaw.ksumcspeedrun.Objective;
+package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;

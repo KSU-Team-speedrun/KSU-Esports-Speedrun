@@ -1,4 +1,4 @@
-package edu.Kennesaw.ksumcspeedrun.Objective;
+package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Material;

@@ -1,8 +1,9 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objective.KillObjective;
-import edu.Kennesaw.ksumcspeedrun.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.KillObjective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageSource;
@@ -41,73 +42,94 @@ public class EntityDeath implements Listener {
         // Check if the speedrun is started
         //if (speedrun.isStarted()) {
 
-            // Loop through every incomplete objective
-            for (Objective o : speedrun.getObjectives().getIncompleteObjectives()) {
+            Team team = null;
+            DamageSource ds = e.getDamageSource();
+
+            if (ds.getCausingEntity() instanceof Player p) {
+                for (Team teamLoop : speedrun.getTeams().getTeams()) {
+                    if (teamLoop != null) {
+                        if (teamLoop.getPlayers().contains(p)) {
+                            team = teamLoop;
+                        }
+                    }
+                }
+
+            } else {
+
+                UUID uuid = e.getEntity().getUniqueId();
+
+                if (ds.equals(DamageType.BAD_RESPAWN_POINT)) {
+
+                    if (ds.getDamageLocation() != null) {
+                        Location loc = ds.getDamageLocation().toBlockLocation();
+                        loc.setWorld(e.getEntity().getWorld());
+
+                        if (plugin.getSpeedrun().bedLog.containsKey(loc)) {
+
+                            Player op = plugin.getSpeedrun().bedLog.get(loc);
+
+                            if (op.isOnline()) {
+
+                                for (Team teamLoop : speedrun.getTeams().getTeams()) {
+                                    if (teamLoop != null) {
+                                        if (teamLoop.getPlayers().contains(op)) {
+                                            team = teamLoop;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+
+                } else if (plugin.getSpeedrun().combatLog.containsKey(uuid)) {
+
+                    Player op = plugin.getSpeedrun().combatLog.get(uuid);
+
+                    if (op.isOnline()) {
+
+                        for (Team teamLoop : speedrun.getTeams().getTeams()) {
+                            if (teamLoop != null) {
+                                if (teamLoop.getPlayers().contains(op)) {
+                                    team = teamLoop;
+                                }
+                            }
+                        }
+                    }
+
+                    plugin.getSpeedrun().combatTasks.get(uuid).cancel();
+                    plugin.getSpeedrun().combatTasks.remove(uuid);
+                    plugin.getSpeedrun().combatLog.remove(uuid);
+
+                }
+            }
+
+            if (team != null) {
+
+                // Loop through every incomplete objective
+                for (Objective o : speedrun.getObjectives().getIncompleteObjectives(team)) {
 
                 /* If any specific incomplete objective is a KILL objective, then cast
                    KillObjective to Objective */
-                if (o.getType().equals(Objective.ObjectiveType.KILL)) {
+                    if (o.getType().equals(Objective.ObjectiveType.KILL)) {
 
-                    System.out.println("Kill Objective found");
+                        System.out.println("Kill Objective found");
 
-                    KillObjective ko = (KillObjective) o;
+                        KillObjective ko = (KillObjective) o;
 
                     /* If the target of the KillObjective is equal to the entity that was killed,
                        then the objective is complete */
-                    if (ko.getTarget().equals(e.getEntityType())) {
+                        if (ko.getTarget().equals(e.getEntityType())) {
 
-                        System.out.println("Target matched");
+                            ko.setComplete(team);
 
-                        DamageSource ds = e.getDamageSource();
-
-                        if (ds.getCausingEntity() instanceof Player p) {
-
-                            ko.setComplete(p);
-
-                        } else {
-
-                            System.out.println("Causing Entity not Player");
-
-                            UUID uuid = e.getEntity().getUniqueId();
-
-                            if (ds.getDamageType().equals(DamageType.BAD_RESPAWN_POINT)) {
-
-                                if (ds.getDamageLocation() != null) {
-                                    Location loc = ds.getDamageLocation().toBlockLocation();
-                                    loc.setWorld(e.getEntity().getWorld());
-
-                                    if (plugin.getSpeedrun().bedLog.containsKey(loc)) {
-
-                                        Player op = plugin.getSpeedrun().bedLog.get(loc);
-
-                                        if (op.isOnline()) {
-
-                                            ko.setComplete(op);
-
-                                        }
-                                    }
-
-                                }
-
-                            } else if (plugin.getSpeedrun().combatLog.containsKey(uuid)) {
-
-                                Player op = plugin.getSpeedrun().combatLog.get(uuid);
-
-                                if (op.isOnline()) {
-
-                                    ko.setComplete(op);
-
-                                }
-
-                                plugin.getSpeedrun().combatTasks.get(uuid).cancel();
-                                plugin.getSpeedrun().combatTasks.remove(uuid);
-                                plugin.getSpeedrun().combatLog.remove(uuid);
-
-                            }
                         }
                     }
                 }
             }
+
         //}
+
     }
 }

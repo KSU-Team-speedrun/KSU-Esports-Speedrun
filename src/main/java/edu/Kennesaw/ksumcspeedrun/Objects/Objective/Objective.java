@@ -1,8 +1,12 @@
-package edu.Kennesaw.ksumcspeedrun.Objective;
+package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // Abstract Objective Class, all specific objective classes extend to this class
 public abstract class Objective {
@@ -16,7 +20,8 @@ public abstract class Objective {
     // TODO: CHANGE "completedPlayer" to "completedTeam" -> CREATE TEAM OBJECT
     private ObjectiveType type;
     private int weight;
-    private Player completedPlayer;
+
+    private List<Team> completedTeams;
     private String targetName;
 
     Main plugin;
@@ -25,7 +30,7 @@ public abstract class Objective {
     public Objective(ObjectiveType type, Main plugin) {
         this.type = type;
         this.weight = 1;
-        this.completedPlayer = null;
+        this.completedTeams = new ArrayList<>();
         this.plugin = plugin;
         System.out.println("Objective added");
     }
@@ -34,7 +39,7 @@ public abstract class Objective {
     public Objective(ObjectiveType type, int weight, Main plugin) {
         this.type = type;
         this.weight = weight;
-        this.completedPlayer = null;
+        this.completedTeams = new ArrayList<>();
         this.plugin = plugin;
     }
 
@@ -48,18 +53,23 @@ public abstract class Objective {
         return weight;
     }
 
-    public void setComplete(Player p) {
-        this.completedPlayer = p;
-        p.sendMessage(plugin.getSpeedrunConfig().getPrefix().append(Component.text("Objective Complete: " + getType() + " " + targetName)));
+    public void setComplete(Team team) {
+
+        this.completedTeams.add(team);
+        team.addPoints(weight);
+
+        for (Player p : team.getPlayers()) {
+            p.sendMessage(plugin.getSpeedrunConfig().getPrefix().append(Component.text("Objective Complete: " + getType() + " " + targetName)));
+        }
 
     }
 
-    public Player getCompletePlayer() {
-        return completedPlayer;
+    public List<Team> getCompleteTeams() {
+        return completedTeams;
     }
 
-    public boolean isComplete() {
-        return completedPlayer != null;
+    public boolean isComplete(Team team) {
+        return completedTeams.contains(team);
     }
 
     public void setTargetName(String target) {

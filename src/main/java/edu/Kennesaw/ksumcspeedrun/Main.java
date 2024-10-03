@@ -1,23 +1,18 @@
 package edu.Kennesaw.ksumcspeedrun;
 
 import edu.Kennesaw.ksumcspeedrun.Commands.CommandSpeedrun;
-import edu.Kennesaw.ksumcspeedrun.Events.EntityDeath;
-import edu.Kennesaw.ksumcspeedrun.Events.ItemObtain;
-import edu.Kennesaw.ksumcspeedrun.Events.MineBlock;
-import edu.Kennesaw.ksumcspeedrun.Events.PlayTimeTracker;
-import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
+import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /* The Main class will be passed to most instances of any other class, so that the Config and Speedrun instances
    can be accessed from any class */
-public final class Main extends JavaPlugin {
+public class Main extends JavaPlugin {
 
     private Config config;
     private Speedrun speedrun;
@@ -31,11 +26,17 @@ public final class Main extends JavaPlugin {
         config = new Config(this);
         speedrun = new Speedrun(this);
 
+        speedrun.generateDefaultTeams();
+
         // Events are Registered
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
         Bukkit.getPluginManager().registerEvents(new MineBlock(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemObtain(this), this);
-        
+        Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerClick(this), this);
+        Bukkit.getPluginManager().registerEvents(new BedInteract(this), this);
+        Bukkit.getPluginManager().registerEvents(new DamageEvent(this), this);
+
         getLogger().info("Playtime tracker enabled");
         Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
 

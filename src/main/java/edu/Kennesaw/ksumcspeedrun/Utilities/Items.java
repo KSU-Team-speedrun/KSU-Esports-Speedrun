@@ -1,5 +1,9 @@
 package edu.Kennesaw.ksumcspeedrun.Utilities;
 
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -10,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -24,7 +29,7 @@ public class Items {
 
         TextComponent name = Component.text("Team Selector").color(TextColor.fromHexString("#FFFF55")).decoration(TextDecoration.ITALIC, false).decoration(TextDecoration.BOLD, true);
         meta.displayName(name);
-        
+
         List<Component> lore = new ArrayList<>();
         TextComponent lore1 = Component.text("Click me to select your team!").color(TextColor.fromHexString("#AAAAAA")).decoration(TextDecoration.ITALIC, false);
         lore.add(lore1);
@@ -140,4 +145,94 @@ public class Items {
 
     }
 
+    public static BookMeta getObjectiveBook(Team team) {
+
+        ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
+
+        BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
+
+        bookMeta.setAuthor("AuthorName");
+        bookMeta.setTitle("Objectives");
+
+        List<String> pages = new ArrayList<>();
+        StringBuilder currentPage = new StringBuilder();
+
+        int maxLinesPerPage = 14;
+        int maxCharsPerLine = 22;
+        int currentLine = 0;
+        String currentColorCode = "";
+
+        currentPage.append("Incomplete Objectives:").append("\n");
+        currentLine++;
+        currentColorCode = "§c";
+
+        for (Objective objective : team.getIncompleteObjectives()) {
+            String objectiveText = currentColorCode + "- " + objective.getType() + " " + objective.getTargetName();
+
+            List<String> wrappedLines = wrapText(objectiveText, maxCharsPerLine);
+            for (String line : wrappedLines) {
+                if (currentLine >= maxLinesPerPage) {
+
+                    pages.add(currentPage.toString());
+                    currentPage = new StringBuilder();
+                    currentLine = 0;
+
+                    if (!currentColorCode.isEmpty()) {
+                        currentPage.append(currentColorCode);
+                    }
+                }
+                currentPage.append(line).append("\n");
+                currentLine++;
+            }
+        }
+
+        if (currentLine < maxLinesPerPage) {
+            currentPage.append("\n§0Completed Objectives:\n");
+            currentLine += 2;
+        } else {
+
+            pages.add(currentPage.toString());
+            currentPage = new StringBuilder("§0Completed Objectives:\n");
+            currentLine = 1;
+        }
+        currentColorCode = "§a";
+
+        for (Objective objective : team.getCompletedObjectives()) {
+            String objectiveText = currentColorCode + "- " + objective.getType() + " " + objective.getTargetName();
+
+            List<String> wrappedLines = wrapText(objectiveText, maxCharsPerLine);
+            for (String line : wrappedLines) {
+                if (currentLine >= maxLinesPerPage) {
+
+                    pages.add(currentPage.toString());
+                    currentPage = new StringBuilder();
+                    currentLine = 0;
+
+                    if (!currentColorCode.isEmpty()) {
+                        currentPage.append(currentColorCode);
+                    }
+                }
+                currentPage.append(line).append("\n");
+                currentLine++;
+            }
+        }
+
+        if (currentPage.length() > 0) {
+            pages.add(currentPage.toString());
+        }
+
+        bookMeta.setPages(pages);
+
+        return bookMeta;
+    }
+
+    private static List<String> wrapText(String text, int maxCharsPerLine) {
+        List<String> wrappedLines = new ArrayList<>();
+        int index = 0;
+        while (index < text.length()) {
+            wrappedLines.add(text.substring(index, Math.min(index + maxCharsPerLine, text.length())));
+            index += maxCharsPerLine;
+        }
+        return wrappedLines;
+    }
 }

@@ -3,6 +3,8 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -39,15 +41,21 @@ public class PlayerClick implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        Bukkit.broadcastMessage("inventory click");
         if (e.getWhoClicked() instanceof Player p) {
-            p.sendMessage("player");
-            if (e.getCurrentItem() != null) {
-                if (e.getCurrentItem().getType().equals(Material.WHITE_WOOL)) {
-                    p.sendMessage("white wool");
-                    plugin.getSpeedrun().getTeams().getTeam("white").addPlayer(p);
-                    e.setCancelled(true);
-                    p.sendMessage(Component.text("Joined white team"));
+            if (e.getView().title().equals(Component.text("Team Selection").color(TextColor.fromHexString("#FFFF55")).decoration(TextDecoration.BOLD, true))) {
+                e.setCancelled(true);
+                if (e.getCurrentItem() != null) {
+                    if (e.getCurrentItem().getItemMeta().hasDisplayName()) {
+                        System.out.println(e.getCurrentItem().displayName());
+                        String displayName = e.getCurrentItem().getItemMeta().getDisplayName().strip();
+                        String[] displaySplit = displayName.split(" ");
+                        String teamName = displaySplit[0].substring(2).toLowerCase();
+                        System.out.println(teamName);
+                        if (plugin.getSpeedrun().getTeams().getTeam(teamName) != null) {
+                            plugin.getSpeedrun().getTeams().getTeam(teamName).addPlayer(p);
+                            p.sendMessage(Component.text("Joined " + displaySplit[0].toLowerCase() + " team."));
+                        }
+                    }
                 }
             }
         }

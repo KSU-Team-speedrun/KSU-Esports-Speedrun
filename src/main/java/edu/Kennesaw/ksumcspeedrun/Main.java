@@ -1,5 +1,6 @@
 package edu.Kennesaw.ksumcspeedrun;
 
+import edu.Kennesaw.ksumcspeedrun.Commands.CommandObjectives;
 import edu.Kennesaw.ksumcspeedrun.Commands.CommandSpeedrun;
 import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
@@ -45,6 +46,8 @@ public class Main extends JavaPlugin {
         manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
+            commands.register("objectives", "Display a list of objectives", new CommandObjectives(this));
+
         });
 
         // PlayerMove "event" is Registered

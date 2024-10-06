@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -31,6 +32,10 @@ public class Team {
         return players;
     }
 
+    public boolean containsPlayer(Player player) {
+        return players.contains(player);
+    }
+
     public void changePlayer(Player player, Team team) {
         removePlayer(player);
         team.addPlayer(player);
@@ -51,6 +56,20 @@ public class Team {
 
     public void addPoints(int points) {
         this.points += points;
+    }
+
+    public List<Objective> getCompletedObjectives() {
+        List<Objective> completedObjectives = new ArrayList<>();
+        for (Objective o : plugin.getSpeedrun().getObjectives().getObjectives()) {
+            if (o.getCompleteTeams().contains(this)) {
+                completedObjectives.add(o);
+            }
+        }
+        return completedObjectives;
+    }
+
+    public List<Objective> getIncompleteObjectives() {
+        return plugin.getSpeedrun().getObjectives().getIncompleteObjectives(this);
     }
 
 }

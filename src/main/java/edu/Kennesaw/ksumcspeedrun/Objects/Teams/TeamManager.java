@@ -1,5 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,15 @@ public class TeamManager {
     public Team getTeam(String team) {
         for (Team t : teams) {
             if (t.getName().equals(team)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public Team getTeam(Player p) {
+        for (Team t : teams) {
+            if (t.containsPlayer(p)) {
                 return t;
             }
         }

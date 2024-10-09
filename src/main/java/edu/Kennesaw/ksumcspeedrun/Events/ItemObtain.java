@@ -1,7 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -26,7 +26,7 @@ public class ItemObtain implements Listener {
 
         this.plugin = plugin;
         this.speedrun = plugin.getSpeedrun();
-        incompleteObjectives = speedrun.getObjectives().getIncompleteObjectives();
+        //incompleteObjectives = speedrun.getObjectives().getIncompleteObjectives();
 
     }
 

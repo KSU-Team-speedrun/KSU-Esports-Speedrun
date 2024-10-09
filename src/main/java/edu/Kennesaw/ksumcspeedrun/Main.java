@@ -1,10 +1,8 @@
 package edu.Kennesaw.ksumcspeedrun;
 
+import edu.Kennesaw.ksumcspeedrun.Commands.CommandObjectives;
 import edu.Kennesaw.ksumcspeedrun.Commands.CommandSpeedrun;
-import edu.Kennesaw.ksumcspeedrun.Events.EntityDeath;
-import edu.Kennesaw.ksumcspeedrun.Events.ItemObtain;
-import edu.Kennesaw.ksumcspeedrun.Events.MineBlock;
-import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
+import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -15,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /* The Main class will be passed to most instances of any other class, so that the Config and Speedrun instances
    can be accessed from any class */
-public final class Main extends JavaPlugin {
+public class Main extends JavaPlugin {
 
     private Config config;
     private Speedrun speedrun;
@@ -29,16 +27,27 @@ public final class Main extends JavaPlugin {
         config = new Config(this);
         speedrun = new Speedrun(this);
 
+        speedrun.generateDefaultTeams();
+
         // Events are Registered
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
         Bukkit.getPluginManager().registerEvents(new MineBlock(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemObtain(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerClick(this), this);
+        Bukkit.getPluginManager().registerEvents(new BedInteract(this), this);
+        Bukkit.getPluginManager().registerEvents(new DamageEvent(this), this);
+
+        getLogger().info("Playtime tracker enabled");
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
 
         // Speedrun Command is Registered
         LifecycleEventManager<Plugin> manager = this.getLifecycleManager();
         manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
+            commands.register("objectives", "Display a list of objectives", new CommandObjectives(this));
+
         });
 
         // PlayerMove "event" is Registered
@@ -50,6 +59,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic.
+        getLogger().info("PlayTimeTracker has been disabled.");
     }
 
     // Getter for Plugin Config file, can be accessed by any class that passes Main instance in constructor

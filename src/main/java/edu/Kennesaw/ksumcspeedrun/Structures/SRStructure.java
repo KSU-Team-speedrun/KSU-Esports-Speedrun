@@ -122,7 +122,7 @@ public class SRStructure {
             }
             final String finalAvgY = averageY;
             final int finalY = y;
-
+            
             /* Once we have this coordinate value, we go back to the main thread to do a structure search (any
                computation that interacts with players or the world must be on the main thread) */
             Bukkit.getScheduler().runTask(plugin, () -> {

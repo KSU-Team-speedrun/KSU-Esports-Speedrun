@@ -4,6 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.KillObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageSource;
@@ -21,6 +22,7 @@ public class EntityDeath implements Listener {
     Main plugin;
 
     private final Speedrun speedrun;
+    private final TeamManager teamManager;
 
     List<Objective> incompleteObjectives;
 
@@ -30,6 +32,7 @@ public class EntityDeath implements Listener {
 
         this.plugin = plugin;
         speedrun = plugin.getSpeedrun();
+        teamManager = speedrun.getTeams();
     }
 
     // Event is triggered every time an entity dies
@@ -37,22 +40,14 @@ public class EntityDeath implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e) {
 
-        System.out.println("Death logged");
-
-        // Check if the speedrun is started
-        //if (speedrun.isStarted()) {
+        if (speedrun.isStarted()) {
 
             Team team = null;
             DamageSource ds = e.getDamageSource();
 
             if (ds.getCausingEntity() instanceof Player p) {
-                for (Team teamLoop : speedrun.getTeams().getTeams()) {
-                    if (teamLoop != null) {
-                        if (teamLoop.getPlayers().contains(p)) {
-                            team = teamLoop;
-                        }
-                    }
-                }
+
+                team = teamManager.getTeam(p);
 
             } else {
 
@@ -70,13 +65,7 @@ public class EntityDeath implements Listener {
 
                             if (op.isOnline()) {
 
-                                for (Team teamLoop : speedrun.getTeams().getTeams()) {
-                                    if (teamLoop != null) {
-                                        if (teamLoop.getPlayers().contains(op)) {
-                                            team = teamLoop;
-                                        }
-                                    }
-                                }
+                                team = teamManager.getTeam(op);
 
                             }
                         }
@@ -89,13 +78,8 @@ public class EntityDeath implements Listener {
 
                     if (op.isOnline()) {
 
-                        for (Team teamLoop : speedrun.getTeams().getTeams()) {
-                            if (teamLoop != null) {
-                                if (teamLoop.getPlayers().contains(op)) {
-                                    team = teamLoop;
-                                }
-                            }
-                        }
+                        team = teamManager.getTeam(op);
+
                     }
 
                     plugin.getSpeedrun().combatTasks.get(uuid).cancel();
@@ -108,7 +92,7 @@ public class EntityDeath implements Listener {
             if (team != null) {
 
                 // Loop through every incomplete objective
-                for (Objective o : speedrun.getObjectives().getIncompleteObjectives(team)) {
+                for (Objective o : team.getIncompleteObjectives()) {
 
                 /* If any specific incomplete objective is a KILL objective, then cast
                    KillObjective to Objective */
@@ -128,8 +112,6 @@ public class EntityDeath implements Listener {
                     }
                 }
             }
-
-        //}
-
+        }
     }
 }

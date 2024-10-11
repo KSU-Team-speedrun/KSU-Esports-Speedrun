@@ -50,9 +50,6 @@ public class Main extends JavaPlugin {
 
         });
 
-        // PlayerMove "event" is Registered
-        new PlayerMove(this);
-
     }
 
     // Runs when plugin is disabled

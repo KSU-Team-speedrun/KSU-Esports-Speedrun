@@ -12,8 +12,9 @@ public class Team {
     Main plugin;
 
     private final String name;
-    private List<Player> players = new ArrayList<Player>();
     private int points = 0;
+    private final List<Player> players = new ArrayList<>();
+
 
     public Team(Main plugin, String teamName) {
         this.plugin = plugin;
@@ -56,6 +57,9 @@ public class Team {
 
     public void addPoints(int points) {
         this.points += points;
+        if (this.points >= plugin.getSpeedrun().getTotalWeight()) {
+            plugin.getSpeedrun().endGame(this);
+        }
     }
 
     public List<Objective> getCompletedObjectives() {

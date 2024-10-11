@@ -12,6 +12,8 @@ public class ObjectiveManager {
     // An instance of ObjectiveManager holds a list of Objectives
     private final List<Objective> objectives;
 
+    private int totalWeight = 0;
+
     // Class is initialized with an empty constructor, an empty list of Objectives is made
     public ObjectiveManager() {
         this.objectives = new ArrayList<>();
@@ -20,6 +22,7 @@ public class ObjectiveManager {
     // Add an objective to the objective list
     public void addObjective(Objective objective) {
         objectives.add(objective);
+        totalWeight += objective.getWeight();
     }
 
     // Returns the list of objectives
@@ -46,6 +49,14 @@ public class ObjectiveManager {
     // Remove objective by the number that it appears in the list
     public void removeObjective(int number) {
         objectives.remove(number);
+    }
+
+    public int getTotalWeight() {
+        return totalWeight;
+    }
+
+    public void setTotalWeight(int totalWeight) {
+        this.totalWeight = totalWeight;
     }
 
 }

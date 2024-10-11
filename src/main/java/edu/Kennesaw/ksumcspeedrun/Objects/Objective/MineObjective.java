@@ -21,4 +21,9 @@ public class MineObjective extends Objective {
         this.blockTarget = blockTarget;
         setTargetName(blockTarget.name());
     }
+
+    public Material getBlockTarget() {
+        return blockTarget;
+    }
+
 }

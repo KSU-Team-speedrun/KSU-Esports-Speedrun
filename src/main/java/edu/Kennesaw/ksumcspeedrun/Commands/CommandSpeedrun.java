@@ -94,7 +94,13 @@ public class CommandSpeedrun implements BasicCommand {
                     // Call method "addObjectiveHandler" passing sender value, args string array & prefix component
                     addObjectiveHandler(sender, args, prefix);
 
-                } else if (args[0].equalsIgnoreCase("structures")) {
+                } else if (args[0].equalsIgnoreCase("start")) {
+
+                    speedRun.setStarted();
+
+                } else if (args[0].equalsIgnoreCase("stop")) {
+
+                    speedRun.endGame();
 
                 }
             }
@@ -323,11 +329,14 @@ public class CommandSpeedrun implements BasicCommand {
                 return new ObtainObjective(m, w, plugin);
             })).orElseGet(() -> amount.map(a -> {
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + a + " " + m.name())));
-                return new ObtainObjective(m, a, plugin);
+                return new ObtainObjective(m, 1, a, plugin);
             }).orElseGet(() ->{
                 sender.sendMessage(prefix.append(Component.text("Objective Added: OBTAIN " + m.name())));
                 return new ObtainObjective(m, plugin);
             }));
+
+            speedRun.addObjective(oo);
+
         }
     }
 

@@ -2,6 +2,7 @@ package edu.Kennesaw.ksumcspeedrun.Commands;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -12,9 +13,11 @@ import org.jetbrains.annotations.NotNull;
 public class CommandObjectives implements BasicCommand {
 
     Main plugin;
+    TeamManager tm;
 
     public CommandObjectives(Main plugin) {
         this.plugin = plugin;
+        this.tm = plugin.getSpeedrun().getTeams();
     }
 
     @Override
@@ -24,15 +27,7 @@ public class CommandObjectives implements BasicCommand {
 
         if (sender instanceof Player p) {
 
-            Team team = null;
-
-            for (Team teamLoop : plugin.getSpeedrun().getTeams().getTeams()) {
-                if (teamLoop != null) {
-                    if (teamLoop.getPlayers().contains(p)) {
-                        team = teamLoop;
-                    }
-                }
-            }
+            Team team = tm.getTeam(p);
 
             if (team != null) {
                 p.openBook(Items.getObjectiveBook(team));

@@ -1,10 +1,13 @@
 package edu.Kennesaw.ksumcspeedrun;
 
+import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -29,11 +32,15 @@ public class Speedrun {
     private int spawnRadius;
     private int playerLimit;
 
+    private Team winner;
+
     // "isVerified" meaning objectives can be completed on world seed within world border constraints
     private boolean isVerified;
 
     // True if the Speedrun has started
     private boolean isStarted;
+
+    private int totalWeight = 0;
 
     // ObjectiveManager contains the list of all Objectives & all incomplete objectives, can be modified
     private final ObjectiveManager objectives;
@@ -186,7 +193,9 @@ public class Speedrun {
     }
 
     public void setStarted() {
+        new PlayerMove(plugin);
         isStarted = true;
+        Bukkit.broadcast(plugin.getSpeedrunConfig().getPrefix().append(Component.text("The speedrun has started!")));
     }
 
     public boolean isStarted() {
@@ -197,4 +206,16 @@ public class Speedrun {
         isStarted = false;
     }
 
+    public void endGame(Team winner) {
+        this.isStarted = false;
+        this.winner = winner;
+        Bukkit.broadcast(plugin.getSpeedrunConfig().getPrefix().append(Component.text(winner.getName() + " has won the speedrun!")));
+    }
+
+    public int getTotalWeight() {
+        if (this.totalWeight != 0) {
+            return totalWeight;
+        }
+        return objectives.getTotalWeight();
+    }
 }

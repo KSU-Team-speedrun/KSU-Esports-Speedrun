@@ -14,7 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import java.util.List;
 import java.util.UUID;
 
 public class EntityDeath implements Listener {
@@ -23,8 +22,6 @@ public class EntityDeath implements Listener {
 
     private final Speedrun speedrun;
     private final TeamManager teamManager;
-
-    List<Objective> incompleteObjectives;
 
     /* Constructor takes main plugin instance so that config and Speedrun instance can be accessed
        From Speedrun instance, the ObjectiveManager can be accessed, which has a list of all the objectives */
@@ -53,7 +50,7 @@ public class EntityDeath implements Listener {
 
                 UUID uuid = e.getEntity().getUniqueId();
 
-                if (ds.equals(DamageType.BAD_RESPAWN_POINT)) {
+                if (ds.getDamageType().equals(DamageType.BAD_RESPAWN_POINT)) {
 
                     if (ds.getDamageLocation() != null) {
                         Location loc = ds.getDamageLocation().toBlockLocation();

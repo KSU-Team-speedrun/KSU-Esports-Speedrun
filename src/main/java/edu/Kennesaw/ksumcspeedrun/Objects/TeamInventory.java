@@ -1,6 +1,5 @@
 package edu.Kennesaw.ksumcspeedrun.Objects;
 
-import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
@@ -21,7 +20,7 @@ public class TeamInventory {
     TeamManager tm;
 
     private Inventory inv;
-    private Component inventoryName;
+    private final Component inventoryName;
 
     private Map<Team, Integer> inventoryLoc;
 
@@ -90,22 +89,6 @@ public class TeamInventory {
 
     public Inventory getInventory() {
         return inv;
-    }
-
-    public void setInventory(Inventory inv) {
-        this.inv = inv;
-    }
-
-    public void setInventoryName(Component inventoryName) {
-        this.inventoryName = inventoryName;
-    }
-
-    public Component getInventoryName() {
-        return inventoryName;
-    }
-
-    public int getTeamLoc(Team team) {
-        return inventoryLoc.get(team);
     }
 
 }

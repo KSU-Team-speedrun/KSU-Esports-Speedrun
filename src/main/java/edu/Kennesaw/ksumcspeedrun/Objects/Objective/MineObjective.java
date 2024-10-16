@@ -6,9 +6,7 @@ import org.bukkit.Material;
 // Same as other Objective Subclasses, this time a block is a target
 public class MineObjective extends Objective {
 
-    private Material blockTarget;
-
-    Main plugin;
+    private final Material blockTarget;
 
     public MineObjective(Material blockTarget, int weight, Main plugin) {
         super(ObjectiveType.MINE, weight, plugin);

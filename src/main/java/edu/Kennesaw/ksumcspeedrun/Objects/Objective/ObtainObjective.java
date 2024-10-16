@@ -9,10 +9,8 @@ import org.bukkit.Material;
 
 public class ObtainObjective extends Objective {
 
-    private Material item;
-    private int amount;
-
-    Main plugin;
+    private final Material item;
+    private final int amount;
 
     public ObtainObjective(Material item, Main plugin) {
         super(ObjectiveType.OBTAIN, plugin);

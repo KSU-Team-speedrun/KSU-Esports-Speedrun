@@ -3,15 +3,11 @@ package edu.Kennesaw.ksumcspeedrun.Utilities;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -109,7 +105,7 @@ public class Items {
         int maxLinesPerPage = 14;
         int maxCharsPerLine = 22;
         int currentLine = 0;
-        String currentColorCode = "";
+        String currentColorCode;
 
         currentPage.append("Incomplete Objectives:").append("\n");
         currentLine++;
@@ -120,56 +116,8 @@ public class Items {
         double ratio = (double) spaceFull / letterFull;
 
         for (Objective objective : team.getIncompleteObjectives()) {
-
-            StringBuilder objectiveText;
-
-            if (!(objective instanceof EnterObjective)) {
-                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
-            } else {
-                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
-            }
-
-            int i = objectiveText.toString().indexOf(':');
-
-            String left = objectiveText.substring(0, i);
-            String right = objectiveText.substring(i + 1).trim();
-
-            if (objectiveText.length() > 22) {
-
-                objectiveText = new StringBuilder(left + ":");
-
-                int leftSpaces = 0;
-
-                if (objectiveText.toString().split(" ").length == 3) {
-
-                    leftSpaces = (int) ((left.length() - 3) * ratio + 1);
-
-                } else {
-                    leftSpaces = (int) ((left.length() - 4) * ratio + 2);
-
-                }
-
-                int spacesToAdd = spaceFull - leftSpaces - 1;
-
-                objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
-
-            }
-
-            List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
-            for (String line : wrappedLines) {
-                if (currentLine >= maxLinesPerPage) {
-
-                    pages.add(currentPage.toString());
-                    currentPage = new StringBuilder();
-                    currentLine = 0;
-
-                    if (!currentColorCode.isEmpty()) {
-                        currentPage.append(currentColorCode);
-                    }
-                }
-                currentPage.append(line).append("\n");
-                currentLine++;
-            }
+            appendLines(objective, currentLine, currentColorCode, ratio, maxCharsPerLine, maxLinesPerPage, spaceFull,
+                    currentPage, pages);
         }
 
         if (currentLine < maxLinesPerPage) {
@@ -183,63 +131,16 @@ public class Items {
         }
         currentColorCode = "§a";
 
-        for (Objective objective : team.getCompletedObjectives()) {
-
-            StringBuilder objectiveText;
-
-            if (!(objective instanceof EnterObjective)) {
-                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
-            } else {
-                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
-            }
-
-            int i = objectiveText.toString().indexOf(':');
-
-            String left = objectiveText.substring(0, i);
-            String right = objectiveText.substring(i + 1).trim();
-
-            if (objectiveText.length() > 22) {
-
-                objectiveText = new StringBuilder(left + ":");
-
-                int leftSpaces = 0;
-
-                if (objectiveText.toString().split(" ").length == 3) {
-
-                    leftSpaces = (int) ((left.length() - 3) * ratio + 1);
-
-                } else {
-                    leftSpaces = (int) ((left.length() - 4) * ratio + 2);
-
-                }
-
-                int spacesToAdd = spaceFull - leftSpaces - 1;
-
-                objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
-
-            }
-
-            List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
-            for (String line : wrappedLines) {
-                if (currentLine >= maxLinesPerPage) {
-
-                    pages.add(currentPage.toString());
-                    currentPage = new StringBuilder();
-                    currentLine = 0;
-
-                    if (!currentColorCode.isEmpty()) {
-                        currentPage.append(currentColorCode);
-                    }
-                }
-                currentPage.append(line).append("\n");
-                currentLine++;
-            }
+        for (Objective objective : team.getIncompleteObjectives()) {
+            appendLines(objective, currentLine, currentColorCode, ratio, maxCharsPerLine, maxLinesPerPage, spaceFull,
+                    currentPage, pages);
         }
 
-        if (currentPage.length() > 0) {
+        if (!currentPage.isEmpty()) {
             pages.add(currentPage.toString());
         }
 
+        //noinspection deprecation
         bookMeta.setPages(pages);
 
         return bookMeta;
@@ -253,6 +154,58 @@ public class Items {
             index += maxCharsPerLine;
         }
         return wrappedLines;
+    }
+
+    private static void appendLines(Objective objective, int currentLine, String currentColorCode, double ratio,
+                                    int maxCharsPerLine, int maxLinesPerPage, int spaceFull,
+                                    StringBuilder currentPage, List<String> pages) {
+        StringBuilder objectiveText;
+
+        if (!(objective instanceof EnterObjective)) {
+            objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
+        } else {
+            objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
+        }
+
+        int i = objectiveText.toString().indexOf(':');
+
+        String left = objectiveText.substring(0, i);
+        String right = objectiveText.substring(i + 1).trim();
+
+        if (objectiveText.length() > 22) {
+
+            objectiveText = new StringBuilder(left + ":");
+
+            int leftSpaces;
+
+            if (objectiveText.toString().split(" ").length == 3) {
+
+                leftSpaces = (int) ((left.length() - 3) * ratio + 1);
+
+            } else {
+                leftSpaces = (int) ((left.length() - 4) * ratio + 2);
+
+            }
+
+            int spacesToAdd = spaceFull - leftSpaces - 1;
+
+            objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
+
+        }
+
+        List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
+        for (String line : wrappedLines) {
+            if (currentLine >= maxLinesPerPage) {
+
+                pages.add(currentPage.toString());
+                currentPage = new StringBuilder();
+                currentLine = 0;
+
+                currentPage.append(currentColorCode);
+            }
+            currentPage.append(line).append("\n");
+            currentLine++;
+        }
     }
 
 }

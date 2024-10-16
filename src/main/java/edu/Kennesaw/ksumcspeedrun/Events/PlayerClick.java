@@ -4,26 +4,18 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlayerClick implements Listener {
 
     Main plugin;
 
-    private TeamManager tm;
+    private final TeamManager tm;
 
     public PlayerClick(Main plugin) {
         this.plugin = plugin;
@@ -67,13 +59,17 @@ public class PlayerClick implements Listener {
                         Team oldTeam = tm.getTeam(p);
 
                         if (oldTeam != null) {
+
+                            if (oldTeam.equals(team)) {
+                                p.sendMessage(plugin.getMessages().getAlreadyOnTeam());
+                                return;
+                            }
+
                             oldTeam.removePlayer(p);
                             tm.getTeamInventory().updateTeamInventory(oldTeam);
                         }
-
                         team.addPlayer(p);
                         tm.getTeamInventory().updateTeamInventory(team);
-
                     }
                 }
             }

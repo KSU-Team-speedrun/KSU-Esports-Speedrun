@@ -27,6 +27,7 @@ public class ObjectiveManager {
     }
 
     // Returns the list of objectives
+    @SuppressWarnings("unused")
     public List<Objective> getObjectives() {
         return objectives;
     }
@@ -43,6 +44,7 @@ public class ObjectiveManager {
     }
 
     // Returns the length of the list of objectives
+    @SuppressWarnings("unused")
     public int getLength() {
         return objectives.size();
     }
@@ -56,6 +58,7 @@ public class ObjectiveManager {
         return totalWeight;
     }
 
+    @SuppressWarnings("unused")
     public void setTotalWeight(int totalWeight) {
         this.totalWeight = totalWeight;
     }

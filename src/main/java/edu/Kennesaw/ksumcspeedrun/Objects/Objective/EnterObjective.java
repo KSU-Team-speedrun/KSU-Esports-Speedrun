@@ -15,9 +15,6 @@ public class EnterObjective extends Objective {
     private SRStructure structureTarget;
     private Portal portalType;
 
-    Main plugin;
-
-
     // Constructor that includes weight
     public EnterObjective(Object locationType, int weight, Main plugin) throws InvalidTargetLocationException {
 
@@ -34,7 +31,7 @@ public class EnterObjective extends Objective {
         }
 
         String target = biomeTarget != null ? ("BIOME: " + biomeTarget.name()) : (structureTarget != null ? "STRUCTURE: " + structureTarget.getName() :
-                "PORTAL: " + portalType.getPortalType().name());
+                "PORTAL: " + portalType.portalType().name());
 
         setTargetName(target);
 
@@ -54,7 +51,7 @@ public class EnterObjective extends Objective {
         }
 
         String target = biomeTarget != null ? ("BIOME: " + biomeTarget.name()) : (structureTarget != null ? "STRUCTURE: " + structureTarget.getName() :
-                "PORTAL: " + portalType.getPortalType().name());
+                "PORTAL: " + portalType.portalType().name());
 
         setTargetName(target);
 

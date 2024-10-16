@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class Logger {
 
     // This Async method can be used to log severe error messages if necessary in an errorlog folder

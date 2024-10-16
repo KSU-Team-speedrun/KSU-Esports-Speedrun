@@ -6,7 +6,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Speedrun;
 
 import java.util.UUID;
 import java.util.HashMap;
@@ -21,13 +20,10 @@ public class PlayTimeTracker implements Listener {
 
     Main plugin;
 
-    private final Speedrun speedrun;
-
     private final HashMap<UUID, Long> totalPlayTimes = new HashMap<>();
 
     public PlayTimeTracker(Main plugin) {
         this.plugin = plugin;
-        speedrun = plugin.getSpeedrun();
     }
 
     @EventHandler
@@ -70,10 +66,11 @@ public class PlayTimeTracker implements Listener {
         try {
             config.save(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            plugin.getLogger().warning(e.getMessage());
         }
     }
-    
+
+    @SuppressWarnings("unused")
     public void loadPlayTime(UUID playerId) {
         File file = new File(plugin.getDataFolder(), "playtimes.yml");
         if (!file.exists()) {

@@ -31,9 +31,16 @@ public class Team {
     }
 
     public void addPlayer(Player player) {
+        if (players.contains(player)) {
+            player.sendMessage(plugin.getMessages().getAlreadyOnTeam());
+            return;
+        }
+        if (isFull()) {
+            player.sendMessage(plugin.getMessages().getTeamIsFull());
+            return;
+        }
         players.add(player);
-        player.sendMessage(plugin.getSpeedrunConfig()
-                .getPrefix().append(Component.text("Joined team: ")).append(name));
+        player.sendMessage(plugin.getMessages().getTeamJoinMessage(name));
         tm.setPlayerTeam(player, this);
         updateItemLore();
     }
@@ -48,11 +55,12 @@ public class Team {
         return players;
     }
 
+    @SuppressWarnings("unused")
     public boolean containsPlayer(Player player) {
         return players.contains(player);
     }
 
-
+    @SuppressWarnings("unused")
     public void changeLastPlayer(Team team) {
         team.addPlayer(players.getLast());
     }
@@ -72,16 +80,6 @@ public class Team {
         }
     }
 
-    public List<Objective> getCompletedObjectives() {
-        List<Objective> completedObjectives = new ArrayList<>();
-        for (Objective o : plugin.getSpeedrun().getObjectives().getObjectives()) {
-            if (o.getCompleteTeams().contains(this)) {
-                completedObjectives.add(o);
-            }
-        }
-        return completedObjectives;
-    }
-
     public List<Objective> getIncompleteObjectives() {
         return plugin.getSpeedrun().getObjectives().getIncompleteObjectives(this);
     }
@@ -99,12 +97,15 @@ public class Team {
         this.item = item;
     }
 
+    public boolean isFull() {
+        return (players.size() == tm.getSizeLimit());
+    }
+
     private void updateItemLore() {
         ItemMeta im = item.getItemMeta();
         List<Component> lore = im.lore();
         if (lore != null) {
-            int sizeLimit = tm.getSizeLimit();
-            if (getSize() == sizeLimit) {
+            if (isFull()) {
                 lore.set(1, Component.text("This team is FULL!")
                         .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
             } else {

@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("UnstableApiUsage")
 public class CommandObjectives implements BasicCommand {
 
     Main plugin;
@@ -21,7 +22,7 @@ public class CommandObjectives implements BasicCommand {
     }
 
     @Override
-    public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String[] args) {
+    public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String @NotNull [] args) {
 
         CommandSender sender = commandSourceStack.getSender();
 

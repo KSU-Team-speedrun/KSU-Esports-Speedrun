@@ -86,7 +86,7 @@ public class PortalEvent implements Listener {
 
                         if (eo.getTarget() instanceof Portal portal) {
 
-                            if (portal.getPortalType().equals(Portal.PortalType.END_TO_END)
+                            if (portal.portalType().equals(Portal.PortalType.END_TO_END)
                                     && e.getTo().distance(e.getFrom()) >= 800) {
 
                                 eo.setComplete(team);
@@ -119,7 +119,7 @@ public class PortalEvent implements Listener {
 
                         if (eo.getTarget() instanceof Portal portal) {
 
-                            if (portal.getPortalType().equals(Portal.PortalType.END_TO_WORLD)) {
+                            if (portal.portalType().equals(Portal.PortalType.END_TO_WORLD)) {
 
                                 eo.setComplete(team);
                                 break;

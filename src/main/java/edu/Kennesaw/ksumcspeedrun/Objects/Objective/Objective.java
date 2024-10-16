@@ -2,7 +2,6 @@ package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ public abstract class Objective {
 
     // Attributes of Objective: ObjectiveType, Weight, & completedPlayer (if objective is finished)
     // TODO: CHANGE "completedPlayer" to "completedTeam" -> CREATE TEAM OBJECT
-    private ObjectiveType type;
-    private int weight;
+    private final ObjectiveType type;
+    private final int weight;
 
-    private List<Team> completedTeams;
+    private final List<Team> completedTeams;
     private String targetName;
 
     Main plugin;
@@ -58,14 +57,27 @@ public abstract class Objective {
         this.completedTeams.add(team);
         team.addPoints(weight);
 
-        for (Player p : team.getPlayers()) {
-            p.sendMessage(plugin.getSpeedrunConfig().getPrefix().append(Component.text("Objective Complete: " + getType() + " " + targetName)));
+        if (type.equals(ObjectiveType.OBTAIN)) {
+
+            ObtainObjective oo = (ObtainObjective) this;
+
+            int number = oo.getAmount();
+            
+            if (number > 1) {
+
+                for (Player p : team.getPlayers()) {
+                    p.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
+                            targetName, number, weight));
+                }
+                return;
+            }
+
         }
 
-    }
+        for (Player p : team.getPlayers()) {
+            p.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
+        }
 
-    public List<Team> getCompleteTeams() {
-        return completedTeams;
     }
 
     public boolean isComplete(Team team) {

@@ -73,7 +73,7 @@ public class TeamManager {
 
     public void setSizeLimit(int limit) {
         this.teamSizeLimit = limit;
-        plugin.getSpeedrun().createTeams(Optional.empty());
+        plugin.getSpeedrun().createTeams(null);
     }
 
     public int getSizeLimit() {

@@ -1,11 +1,11 @@
 package edu.Kennesaw.ksumcspeedrun;
 
 import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
+import edu.Kennesaw.ksumcspeedrun.Objects.CountdownTimer;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
-import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -16,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -25,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 /* Speedrun Object Class, centerpoint of logic for speedrun events
    Contains various setters & getters for all speedrun attributes */
+@SuppressWarnings({"unstableApiUsage", "unused", "SpellCheckingInspection"})
 public class Speedrun {
 
     Main plugin;
@@ -48,6 +48,8 @@ public class Speedrun {
     // ObjectiveManager contains the list of all Objectives & all incomplete objectives, can be modified
     private final ObjectiveManager objectives;
     private final TeamManager tm;
+
+    private CountdownTimer ct;
 
     // GameRules set by admins will be located in this HashMap
     private final HashMap<GameRule<?>, Boolean> gameRules;
@@ -73,10 +75,10 @@ public class Speedrun {
         tm = new TeamManager(plugin);
         gameRules = new HashMap<>();
 
-        combatLog = new HashMap<UUID, Player>();
-        combatTasks = new HashMap<UUID, ScheduledTask>();
+        combatLog = new HashMap<>();
+        combatTasks = new HashMap<>();
 
-        bedLog = new HashMap<Location, Player>();
+        bedLog = new HashMap<>();
     }
 
     // Setters & Getters below should be quite self-explanatory
@@ -183,10 +185,16 @@ public class Speedrun {
     }
 
     public void setStarted() {
-        new PlayerMove(plugin);
-        isStarted = true;
-        assignPlayers();
-        Bukkit.broadcast(plugin.getSpeedrunConfig().getPrefix().append(Component.text("The speedrun has started!")));
+        if (!this.isStarted) {
+            for (Player p : tm.getAssignedPlayers()) {
+                p.getInventory().clear();
+            }
+            new PlayerMove(plugin);
+            isStarted = true;
+            assignPlayers();
+            ct = new CountdownTimer(plugin, timeLimit);
+            Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
+        }
     }
 
     public boolean isStarted() {
@@ -194,12 +202,36 @@ public class Speedrun {
     }
 
     public void endGame() {
-        isStarted = false;
+        if (this.isStarted) {
+            isStarted = false;
+            ct.stop();
+            Bukkit.broadcast(plugin.getMessages().getForceStop());
+        }
     }
 
     public void endGame(Team winner) {
-        this.isStarted = false;
-        Bukkit.broadcast(plugin.getSpeedrunConfig().getPrefix().append(Component.text(winner.getName() + " has won the speedrun!")));
+        if (this.isStarted) {
+            this.isStarted = false;
+            ct.stop();
+            Bukkit.broadcast(plugin.getMessages().getWinner(winner.getName()));
+        }
+    }
+
+    public void endGameTimeExpired() {
+        if (this.isStarted) {
+            this.isStarted = false;
+            Team winner = null;
+            int points = 0;
+            for (Team team : tm.getTeams()) {
+                if (team.getPoints() > points) {
+                    points = team.getPoints();
+                    winner = team;
+                }
+            }
+            if (winner != null) {
+                Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.getName()));
+            }
+        }
     }
 
     public void setTotalWeight(int totalWeight) {
@@ -213,14 +245,21 @@ public class Speedrun {
         return objectives.getTotalWeight();
     }
 
-    public void createTeams(Optional<Integer> onlinePlayersTest) {
-        int numberOfTeams = onlinePlayersTest.map(integer -> (int) Math.ceil((double) integer / getTeamSizeLimit()))
-                .orElseGet(() -> (int) Math.ceil((double) Bukkit.getServer().getOnlinePlayers().size()
-                        / getTeamSizeLimit()));
+    /**
+     *  @param onlinePlayersTest This function should be called with null as the argument in
+     *                           standard situations, it is currently included for testing purposes
+     *                           and will later be removed.
+     */
+    public void createTeams(Integer onlinePlayersTest) {
+        if (onlinePlayersTest == null) {
+            onlinePlayersTest = Bukkit.getServer().getOnlinePlayers().size();
+        }
+        int numberOfTeams = (int) Math.ceil((double) onlinePlayersTest / getTeamSizeLimit());
+
         ConfigurationSection teamsSection = plugin.getConfig().getConfigurationSection("teams");
 
         if (teamsSection == null) {
-            Bukkit.getLogger().severe("No teams found in the configuration!");
+            plugin.getLogger().severe("No teams found in the configuration!");
             return;
         }
 
@@ -257,8 +296,14 @@ public class Speedrun {
                 ItemMeta itemim = item.getItemMeta();
                 List<Component> lore = itemim.lore();
                 if (lore != null) {
-                    lore.set(1,Component.text( team.getSize() + "/" + tm.getSizeLimit() + " players on this team.")
-                            .color(TextColor.fromHexString("#c4c4c4")));
+                    if (team.isFull()) {
+                        lore.set(1, Component.text("This team is FULL!")
+                                .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
+                    } else {
+                        lore.set(1,Component.text( team.getSize() + "/" + tm.getSizeLimit() + " players on this team.")
+                                .color(TextColor.fromHexString("#c4c4c4")));
+                    }
+
                 }
                 itemim.lore(lore);
                 item.setItemMeta(itemim);
@@ -271,7 +316,7 @@ public class Speedrun {
             String teamItem = plugin.getSpeedrunConfig().getString("teams." + teamKey + ".item");
 
             if (teamName == null || teamItem == null) {
-                Bukkit.getLogger().warning("Team '" + teamKey + "' is missing a name or item in the configuration.");
+                plugin.getLogger().warning("Team '" + teamKey + "' is missing a name or item in the configuration.");
                 continue;
             }
 
@@ -294,7 +339,7 @@ public class Speedrun {
 
         tm.getTeamInventory().createTeamInventory();
 
-        Bukkit.getLogger().info("Total teams created: " + tm.getTeams().size());
+        plugin.getLogger().info("Total teams created: " + tm.getTeams().size());
 
     }
 
@@ -328,6 +373,11 @@ public class Speedrun {
 
         int teamIndex = 0;
 
+        noTeamLoop(noTeamPlayers, teamIndex);
+
+    }
+
+    private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {
         for (Player player : noTeamPlayers) {
             Team team = tm.getTeams().get(teamIndex);
             if (team.getSize() > tm.getSizeLimit()) {
@@ -340,23 +390,11 @@ public class Speedrun {
         }
 
         balanceTeams();
-
     }
 
     private void assignPlayers(List<Player> noTeamPlayers, int teamIndex) {
 
-        for (Player player : noTeamPlayers) {
-            Team team = tm.getTeams().get(teamIndex);
-            if (team.getSize() > tm.getSizeLimit()) {
-                assignPlayers(noTeamPlayers, teamIndex + 1);
-                break;
-            }
-            team.addPlayer(player);
-            teamIndex = (teamIndex + 1) % tm.getTeams().size();
-            noTeamPlayers.remove(player);
-        }
-
-        balanceTeams();
+        noTeamLoop(noTeamPlayers, teamIndex);
 
     }
 

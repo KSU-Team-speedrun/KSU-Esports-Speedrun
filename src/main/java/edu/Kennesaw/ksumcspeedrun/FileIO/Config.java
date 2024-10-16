@@ -2,16 +2,15 @@ package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class Config {
 
     // Main plugin instance
@@ -22,10 +21,6 @@ public class Config {
 
     // YamlConfiguration object allows is to modify, load, and save Config.yml
     private final YamlConfiguration config;
-
-    /* The pluginPrefix Component is used frequently in messages sent to senders in this plugin, so this value is loaded
-       when the plugin is enabled and stored so that it does not need to be retrieved from the Config each time. */
-    private Component pluginPrefix;
 
     // An instance of Config can be created by passing the Main plugin instance through the constructor
     // This instance is created when the plugin is enabled and used until the plugin is disabled.
@@ -68,14 +63,11 @@ public class Config {
         }
     }
 
-    // Gets a string list from the Config.yml given a specified path
-    public List<String> getStringList(String line) {
-
-        if (config.isList(line)) {
-            return config.getStringList(line);
+    public Boolean getBoolean(String line) {
+        if (config.isBoolean(line)) {
+            return config.getBoolean(line);
         }
         return null;
-
     }
 
     /* Gets a string from the Config.yml given a specified path and returns the value as the actual String (rather
@@ -98,14 +90,6 @@ public class Config {
     public int getInt(String line) {
 
         return config.getInt(line);
-
-    }
-
-    // Set a Component at the specified path in the Config.yml
-    public void setComponent(String line, Component tc) {
-
-        // Component is serialized into MiniMessage format before being saved in the Config.yml
-        config.set(line, ComponentHelper.componentToMM(tc));
 
     }
 
@@ -142,12 +126,6 @@ public class Config {
 
     }
 
-    /* Returns the pluginPrefix that was stored when the plugin was enabled, can be retrieved from any class that has a
-       main plugin instance (plugin.getSpeedrunConfig().getPrefix) */
-    public Component getPrefix() {
-        return pluginPrefix;
-    }
-
     // Saves the Config.yml, to be used if the config is updated
     private void save() {
 
@@ -167,41 +145,47 @@ public class Config {
     private void addDefaults() {
 
         // Default layout of plugin prefix, can be updated in the Config.yml
-        if (!config.contains("prefix")) {
+        if (!config.contains("messages")) {
 
-            setComponent("prefix", Component.text("[KSU-MC-Speedrun]").color(TextColor.color(0xFFFF55)).append(Component.text(" ").color(TextColor.color(0xFFFFFF))));
+            set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");
+            set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
+            set("messages.alreadyOnTeam", "<prefix> You are already on this team!");
+            set("messages.teamIsFull", "<prefix> This team is full!");
+            set("messages.start", "<prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time> minutes" +
+                    "</gold></bold> to complete the objectives!<newline><prefix> Please type <click:run_command:" +
+                    "'/objectives'><hover:show_text:'<bold><gold>Click here to view your objectives</gold></bold>'>" +
+                    "<bold><gold>/objectives</gold></bold></hover></click> to view your objectives.");
+            set("messages.forceStop", "<prefix> The game has ended!<newline><prefix> The winner is inconclusive.");
+            set("messages.winner", "<prefix> The game has ended!<newline><prefix> The winner is: <winner>");
+            set("messages.timeUp", "<prefix> The game has ended! Time has run out.<newline><prefix> The team with the" +
+                    " most points is: <winner>");
+            set("messages.objectiveComplete", "<prefix> Objective Complete: <bold><gold><objective_type> <target>" +
+                    "</gold></bold><newline><prefix> Your team has earned <bold><gold><points> points</gold></bold>!");
+            set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
+                    " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
+                    "point(s)</gold></bold>!");
+            set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
+                    "</gold></bold>");
+            set("messages.admin.objectiveAddedPoints", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<target></gold></bold> - <points> points");
+            set("messages.admin.objectiveAddedNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<number> <target></gold></bold>");
+            set("messages.admin.objectiveAddedPointsNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<number> <target></gold></bold> - <points> points");
+            set("messages.admin.timeLimitSet", "<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>");
+            set("messages.admin.teamSizeLimitSet", "<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>");
 
         }
 
-        /* Loops through every structure in the game and adds it to the config by default. Administrators can update
-           these values with the average Y-coordinate of each structure */
-        if (!config.contains("structureLocations")) {
-            for (String s : SRStructure.getStructureNames()) {
+        if (!config.contains("timer")) {
 
-                /* The average Y-coordinate for an Ancient City is y=-51, the radius is set to 100
-                   This is an example of how structures can be configured, as well as the next two
-                   default examples (Stronghold & Trial Chambers) */
+            set("timer.interval", 1);
+            set("timer.disable", false);
 
-                if (s.equalsIgnoreCase("ANCIENT_CITY")) {
-                    set("structureLocations." + s + ".averageYCoordinate", -51);
-                    set("structureLocations." + s + ".radius", 100);
-                } else if (s.equalsIgnoreCase("STRONGHOLD")) {
-                    set("structureLocations." + s + ".averageYCoordinate", 0);
-                    set("structureLocations." + s + ".radius", 75);
-                } else if (s.equalsIgnoreCase("TRIAL_CHAMBERS")) {
-                    set("structureLocations." + s + ".averageYCoordinate", -30);
-                    set("structureLocations." + s + ".radius", 100);
+            set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
+            set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
+            set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
 
-                } else {
-
-                    /* Most structures are set to where their Y-coordinate is ground level by default and the structure
-                       can be detected within a 30 block radius */
-
-                    set("structureLocations." + s + ".averageYCoordinate", "ground");
-                    set("structureLocations." + s + ".radius", 30);
-
-                }
-            }
         }
 
         if (!config.contains("teams")) {
@@ -274,8 +258,39 @@ public class Config {
 
         }
 
+                /* Loops through every structure in the game and adds it to the config by default. Administrators can update
+           these values with the average Y-coordinate of each structure */
+        if (!config.contains("structureLocations")) {
+            for (String s : SRStructure.getStructureNames()) {
+
+                /* The average Y-coordinate for an Ancient City is y=-51, the radius is set to 100
+                   This is an example of how structures can be configured, as well as the next two
+                   default examples (Stronghold & Trial Chambers) */
+
+                if (s.equalsIgnoreCase("ANCIENT_CITY")) {
+                    set("structureLocations." + s + ".averageYCoordinate", -51);
+                    set("structureLocations." + s + ".radius", 100);
+                } else if (s.equalsIgnoreCase("STRONGHOLD")) {
+                    set("structureLocations." + s + ".averageYCoordinate", 0);
+                    set("structureLocations." + s + ".radius", 75);
+                } else if (s.equalsIgnoreCase("TRIAL_CHAMBERS")) {
+                    set("structureLocations." + s + ".averageYCoordinate", -30);
+                    set("structureLocations." + s + ".radius", 100);
+
+                } else {
+
+                    /* Most structures are set to where their Y-coordinate is ground level by default and the structure
+                       can be detected within a 30 block radius */
+
+                    set("structureLocations." + s + ".averageYCoordinate", "ground");
+                    set("structureLocations." + s + ".radius", 30);
+
+                }
+            }
+        }
+
         save();
-        pluginPrefix = getComponent("prefix");
+
     }
 
     // Generates a Config.yml file with defaults if one does not already exist.. Loads the Config.yml file if one exists

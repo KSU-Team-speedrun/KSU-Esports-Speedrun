@@ -22,19 +22,17 @@ public class PlayerJoin implements Listener {
 
         Player p = e.getPlayer();
 
-        if (!p.isOp() && !p.hasPermission("ksu.speedrun.admin")) {
-
-            p.getInventory().setItem(4, Items.getTeamSelector());
-
-        }
-
         Speedrun sr = plugin.getSpeedrun();
 
         if (!sr.isStarted()) {
+
             if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
                     .getTeamInventory().getInventory() == null) {
-                sr.createTeams(java.util.Optional.empty());
+                sr.createTeams(null);
             }
+
+            p.getInventory().setItem(4, Items.getTeamSelector());
+
         }
 
     }

@@ -28,7 +28,7 @@ public class PlayerLeave implements Listener {
         if (!sr.isStarted()) {
             if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
                     .getTeamInventory().getInventory() == null) {
-                sr.createTeams(java.util.Optional.empty());
+                sr.createTeams(null);
             } else {
                 sr.getTeams().getTeamInventory().updateTeamInventory(team);
             }

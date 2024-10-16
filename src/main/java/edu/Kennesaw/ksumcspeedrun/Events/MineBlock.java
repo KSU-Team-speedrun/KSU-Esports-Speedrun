@@ -12,14 +12,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import java.util.List;
-
 public class MineBlock implements Listener {
 
     Main plugin;
     private final Speedrun speedrun;
     private final TeamManager tm;
-    List<Objective> incompleteObjectives;
 
     /* Constructor takes main plugin instance so that config and Speedrun instance can be accessed
        From Speedrun instance, the ObjectiveManager can be accessed, which has a list of all the objectives */

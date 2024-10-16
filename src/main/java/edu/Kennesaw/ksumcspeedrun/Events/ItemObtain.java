@@ -16,8 +16,6 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
-
 public class ItemObtain implements Listener {
 
     Main plugin;
@@ -106,6 +104,9 @@ public class ItemObtain implements Listener {
 
     }
 
+    // TODO: Add event handler for item crafting
+
+    @SuppressWarnings("StatementWithEmptyBody")
     @EventHandler
     public void craftItem(CraftItemEvent e) {
 

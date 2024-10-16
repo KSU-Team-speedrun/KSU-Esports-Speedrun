@@ -107,6 +107,7 @@ public class EntityDeath implements Listener {
                         if (ko.getTarget().equals(e.getEntityType())) {
 
                             ko.setComplete(team);
+                            break;
 
                         }
                     }

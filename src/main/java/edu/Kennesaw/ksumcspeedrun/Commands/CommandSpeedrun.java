@@ -76,24 +76,45 @@ public class CommandSpeedrun implements BasicCommand {
                 // help list
 
             // If argument length is greater than 0
-            } else  {
+            } else {
 
                 // First argument is "help" (i.e. "/speedrun help")
                 if (args[0].equalsIgnoreCase("help")) {
                     // help list
 
-                // First argument is "reload" (i.e. "/speedrun reload")
+                    // First argument is "reload" (i.e. "/speedrun reload")
                 } else if (args[0].equalsIgnoreCase("reload")) {
 
                     // Call method "reloadConfig()" passing sender value & prefix component
                     reloadConfig(sender, prefix);
 
-                 // First argument is "addObjective" (i.e. "/speedrun addObjective")
+                    // First argument is "addObjective" (i.e. "/speedrun addObjective")
                 } else if (args[0].equalsIgnoreCase("addObjective")) {
 
                     // Call method "addObjectiveHandler" passing sender value, args string array & prefix component
                     addObjectiveHandler(sender, args, prefix);
 
+                } else if (args[0].equalsIgnoreCase("setteamsize")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(prefix.append(Component.text("Usage: /speedrun setteamsize [number]")));
+
+                    } else {
+
+                        try {
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                int size = Integer.parseInt(args[1]);
+                                speedRun.setTeamSizeLimit(size);
+                            });
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[1] + "\" is not a valid number.")));
+                        }
+
+                    }
+
+                } else if (args[0].equalsIgnoreCase("getteamsize")) {
+                    sender.sendMessage(Component.text("Size limit per team: " + speedRun.getTeamSizeLimit()));
                 } else if (args[0].equalsIgnoreCase("start")) {
 
                     speedRun.setStarted();
@@ -102,6 +123,10 @@ public class CommandSpeedrun implements BasicCommand {
 
                     speedRun.endGame();
 
+                } else if (args[0].equalsIgnoreCase("test")) {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        speedRun.createTeams(Optional.of(Integer.parseInt(args[1])));
+                    });
                 }
             }
         });
@@ -229,8 +254,8 @@ public class CommandSpeedrun implements BasicCommand {
                    e.g., "/speedrun addObjective enter WORLD_TO_NETHER" */
                 if (Portal.getPortalTypeNames().contains(arg2UpperCase)) {
                     object = new Portal(Portal.PortalType.valueOf(arg2UpperCase));
+                    System.out.println("New Portal: " + ((Portal) object).getPortalType());
                 }
-
             }
         }
 
@@ -384,6 +409,10 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("help");
             suggestions.add("reload");
             suggestions.add("addobjective");
+            suggestions.add("setteamsize");
+            suggestions.add("getteamsize");
+            suggestions.add("start");
+            suggestions.add("stop");
 
         // If arguments have been typed, the following logic runs:
         } else {
@@ -393,7 +422,8 @@ public class CommandSpeedrun implements BasicCommand {
                "addObjective", etc. */
             if (args.length == 1) {
 
-                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective");
+                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective"
+                        , "setteamsize", "getteamsize", "start", "stop");
 
             /* The same continues for the second argument: If the first argument is addobjective, suggestions are made
                for the second argument: kill, enter, obtain, or mine */
@@ -401,6 +431,8 @@ public class CommandSpeedrun implements BasicCommand {
 
                 if (args[0].equalsIgnoreCase("addobjective")) {
                     addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain");
+                } else if (args[0].equalsIgnoreCase("setteamsize")) {
+                    suggestions.add("[number]");
                 }
 
             // Continues w/ third argument, just one step deeper

@@ -84,10 +84,11 @@ public class PlayerMove {
                                 });
 
                                 // Check if the EnterObjective target is a Biome
-                            } else if (eo.getTarget() instanceof Biome) {
+                            } else if (eo.getTarget() instanceof Biome biome) {
 
-                                // Check if the EnterObjective target is a Portal
-                            } else if (eo.getTarget() instanceof Portal) {
+                                if (p.getWorld().getBiome(p.getLocation()).equals(biome)) {
+                                    eo.setComplete(team);
+                                }
 
                             }
 

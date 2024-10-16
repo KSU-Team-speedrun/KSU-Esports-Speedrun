@@ -1,16 +1,15 @@
 package edu.Kennesaw.ksumcspeedrun.Utilities;
 
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import net.kyori.adventure.inventory.Book;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -41,108 +40,58 @@ public class Items {
 
     }
 
-    public static Inventory getTeamInventory(Player p) {
+    public static int determineRows(int itemCount) {
+        int itemsPerRow = itemCount;
+        while (itemsPerRow > 9) {
+            itemsPerRow = (int) Math.ceil(itemsPerRow / 2.0);
+        }
+        return (int) Math.ceil((double) itemCount / itemsPerRow);
+    }
 
-        Inventory inv = Bukkit.createInventory(p, 36, Component.text("Team Selection").color(TextColor.fromHexString("#FFFF55")).decoration(TextDecoration.BOLD, true));
+    public static List<Integer> generateSlots(int itemCount, int rowsNeeded) {
+        List<Integer> slots = new ArrayList<>();
+        int itemsPerRow = (int) Math.ceil((double) itemCount / rowsNeeded);
+        int remainingItems = itemCount;
+        int rowIndex = 0;
 
-        ItemStack white = new ItemStack(Material.WHITE_WOOL);
-        ItemMeta whitemeta = white.getItemMeta();
-        whitemeta.displayName(Component.text("White Team").color(TextColor.fromHexString("#FFFFFF")).decoration(TextDecoration.ITALIC, false));
-        white.setItemMeta(whitemeta);
-        inv.setItem(3, white);
+        while (remainingItems > 0) {
+            int currentRowItems = Math.min(remainingItems, itemsPerRow);
 
-        ItemStack lightGray = new ItemStack(Material.LIGHT_GRAY_WOOL);
-        ItemMeta lightGraymeta = lightGray.getItemMeta();
-        lightGraymeta.displayName(Component.text("Light Gray Team").color(TextColor.fromHexString("#D3D3D3")).decoration(TextDecoration.ITALIC, false));
-        lightGray.setItemMeta(lightGraymeta);
-        inv.setItem(4, lightGray);
+            if (currentRowItems % 2 == 0) {
+                slots.addAll(getEvenSlots(currentRowItems, rowIndex));
+            } else {
+                slots.addAll(getOddSlots(currentRowItems, rowIndex));
+            }
 
-        ItemStack gray = new ItemStack(Material.GRAY_WOOL);
-        ItemMeta graymeta = gray.getItemMeta();
-        graymeta.displayName(Component.text("Gray Team").color(TextColor.fromHexString("#808080")).decoration(TextDecoration.ITALIC, false));
-        gray.setItemMeta(graymeta);
-        inv.setItem(5, gray);
+            rowIndex++;
+            remainingItems -= currentRowItems;
+        }
+        return slots;
+    }
 
-        ItemStack black = new ItemStack(Material.BLACK_WOOL);
-        ItemMeta blackmeta = black.getItemMeta();
-        blackmeta.displayName(Component.text("Black Team").color(TextColor.fromHexString("#000000")).decoration(TextDecoration.ITALIC, false));
-        black.setItemMeta(blackmeta);
-        inv.setItem(11, black);
+    private static List<Integer> getEvenSlots(int currentRowItems, int rowIndex) {
+        List<Integer> slots = new ArrayList<>();
+        int rowStartIndex = rowIndex * 9;
+        int half = currentRowItems / 2;
+        int leftStart = 4 - half;
+        int rightStart = 4 + 1;
 
-        ItemStack brown = new ItemStack(Material.BROWN_WOOL);
-        ItemMeta brownmeta = brown.getItemMeta();
-        brownmeta.displayName(Component.text("Brown Team").color(TextColor.fromHexString("#8B4513")).decoration(TextDecoration.ITALIC, false));
-        brown.setItemMeta(brownmeta);
-        inv.setItem(12, brown);
+        for (int i = 0; i < half; i++) {
+            slots.add(rowStartIndex + leftStart + i);
+            slots.add(rowStartIndex + rightStart + i);
+        }
+        return slots;
+    }
 
-        ItemStack red = new ItemStack(Material.RED_WOOL);
-        ItemMeta redmeta = red.getItemMeta();
-        redmeta.displayName(Component.text("Red Team").color(TextColor.fromHexString("#FF0000")).decoration(TextDecoration.ITALIC, false));
-        red.setItemMeta(redmeta);
-        inv.setItem(13, red);
+    private static List<Integer> getOddSlots(int currentRowItems, int rowIndex) {
+        List<Integer> slots = new ArrayList<>();
+        int startIndex = rowIndex * 9 + (9 - currentRowItems) / 2;
 
-        ItemStack orange = new ItemStack(Material.ORANGE_WOOL);
-        ItemMeta orangemeta = orange.getItemMeta();
-        orangemeta.displayName(Component.text("Orange Team").color(TextColor.fromHexString("#FFA500")).decoration(TextDecoration.ITALIC, false));
-        orange.setItemMeta(orangemeta);
-        inv.setItem(14, orange);
+        for (int i = 0; i < currentRowItems; i++) {
+            slots.add(startIndex + i);
+        }
 
-        ItemStack yellow = new ItemStack(Material.YELLOW_WOOL);
-        ItemMeta yellowmeta = yellow.getItemMeta();
-        yellowmeta.displayName(Component.text("Yellow Team").color(TextColor.fromHexString("#FFFF00")).decoration(TextDecoration.ITALIC, false));
-        yellow.setItemMeta(yellowmeta);
-        inv.setItem(15, yellow);
-
-        ItemStack lime = new ItemStack(Material.LIME_WOOL);
-        ItemMeta limemeta = lime.getItemMeta();
-        limemeta.displayName(Component.text("Lime Team").color(TextColor.fromHexString("#32CD32")).decoration(TextDecoration.ITALIC, false));
-        lime.setItemMeta(limemeta);
-        inv.setItem(20, lime);
-
-        ItemStack green = new ItemStack(Material.GREEN_WOOL);
-        ItemMeta greenmeta = green.getItemMeta();
-        greenmeta.displayName(Component.text("Green Team").color(TextColor.fromHexString("#008000")).decoration(TextDecoration.ITALIC, false));
-        green.setItemMeta(greenmeta);
-        inv.setItem(21, green);
-
-        ItemStack cyan = new ItemStack(Material.CYAN_WOOL);
-        ItemMeta cyanmeta = cyan.getItemMeta();
-        cyanmeta.displayName(Component.text("Cyan Team").color(TextColor.fromHexString("#00FFFF")).decoration(TextDecoration.ITALIC, false));
-        cyan.setItemMeta(cyanmeta);
-        inv.setItem(22, cyan);
-
-        ItemStack lightBlue = new ItemStack(Material.LIGHT_BLUE_WOOL);
-        ItemMeta lightBluemeta = lightBlue.getItemMeta();
-        lightBluemeta.displayName(Component.text("Light Blue Team").color(TextColor.fromHexString("#ADD8E6")).decoration(TextDecoration.ITALIC, false));
-        lightBlue.setItemMeta(lightBluemeta);
-        inv.setItem(23, lightBlue);
-
-        ItemStack blue = new ItemStack(Material.BLUE_WOOL);
-        ItemMeta bluemeta = blue.getItemMeta();
-        bluemeta.displayName(Component.text("Blue Team").color(TextColor.fromHexString("#0000FF")).decoration(TextDecoration.ITALIC, false));
-        blue.setItemMeta(bluemeta);
-        inv.setItem(24, blue);
-
-        ItemStack purple = new ItemStack(Material.PURPLE_WOOL);
-        ItemMeta purplemeta = purple.getItemMeta();
-        purplemeta.displayName(Component.text("Purple Team").color(TextColor.fromHexString("#800080")).decoration(TextDecoration.ITALIC, false));
-        purple.setItemMeta(purplemeta);
-        inv.setItem(30, purple);
-
-        ItemStack magenta = new ItemStack(Material.MAGENTA_WOOL);
-        ItemMeta magentameta = magenta.getItemMeta();
-        magentameta.displayName(Component.text("Magenta Team").color(TextColor.fromHexString("#FF00FF")).decoration(TextDecoration.ITALIC, false));
-        magenta.setItemMeta(magentameta);
-        inv.setItem(31, magenta);
-
-        ItemStack pink = new ItemStack(Material.PINK_WOOL);
-        ItemMeta pinkmeta = pink.getItemMeta();
-        pinkmeta.displayName(Component.text("Pink Team").color(TextColor.fromHexString("#FFC0CB")).decoration(TextDecoration.ITALIC, false));
-        pink.setItemMeta(pinkmeta);
-        inv.setItem(32, pink);
-
-        return inv;
-
+        return slots;
     }
 
     public static BookMeta getObjectiveBook(Team team) {
@@ -166,10 +115,47 @@ public class Items {
         currentLine++;
         currentColorCode = "§c";
 
-        for (Objective objective : team.getIncompleteObjectives()) {
-            String objectiveText = currentColorCode + "- " + objective.getType() + " " + objective.getTargetName();
+        int spaceFull = 28;
+        int letterFull = 19;
+        double ratio = (double) spaceFull / letterFull;
 
-            List<String> wrappedLines = wrapText(objectiveText, maxCharsPerLine);
+        for (Objective objective : team.getIncompleteObjectives()) {
+
+            StringBuilder objectiveText;
+
+            if (!(objective instanceof EnterObjective)) {
+                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
+            } else {
+                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
+            }
+
+            int i = objectiveText.toString().indexOf(':');
+
+            String left = objectiveText.substring(0, i);
+            String right = objectiveText.substring(i + 1).trim();
+
+            if (objectiveText.length() > 22) {
+
+                objectiveText = new StringBuilder(left + ":");
+
+                int leftSpaces = 0;
+
+                if (objectiveText.toString().split(" ").length == 3) {
+
+                    leftSpaces = (int) ((left.length() - 3) * ratio + 1);
+
+                } else {
+                    leftSpaces = (int) ((left.length() - 4) * ratio + 2);
+
+                }
+
+                int spacesToAdd = spaceFull - leftSpaces - 1;
+
+                objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
+
+            }
+
+            List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
             for (String line : wrappedLines) {
                 if (currentLine >= maxLinesPerPage) {
 
@@ -198,9 +184,42 @@ public class Items {
         currentColorCode = "§a";
 
         for (Objective objective : team.getCompletedObjectives()) {
-            String objectiveText = currentColorCode + "- " + objective.getType() + " " + objective.getTargetName();
 
-            List<String> wrappedLines = wrapText(objectiveText, maxCharsPerLine);
+            StringBuilder objectiveText;
+
+            if (!(objective instanceof EnterObjective)) {
+                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
+            } else {
+                objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
+            }
+
+            int i = objectiveText.toString().indexOf(':');
+
+            String left = objectiveText.substring(0, i);
+            String right = objectiveText.substring(i + 1).trim();
+
+            if (objectiveText.length() > 22) {
+
+                objectiveText = new StringBuilder(left + ":");
+
+                int leftSpaces = 0;
+
+                if (objectiveText.toString().split(" ").length == 3) {
+
+                    leftSpaces = (int) ((left.length() - 3) * ratio + 1);
+
+                } else {
+                    leftSpaces = (int) ((left.length() - 4) * ratio + 2);
+
+                }
+
+                int spacesToAdd = spaceFull - leftSpaces - 1;
+
+                objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
+
+            }
+
+            List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
             for (String line : wrappedLines) {
                 if (currentLine >= maxLinesPerPage) {
 
@@ -235,4 +254,5 @@ public class Items {
         }
         return wrappedLines;
     }
+
 }

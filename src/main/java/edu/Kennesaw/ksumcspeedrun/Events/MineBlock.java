@@ -55,6 +55,7 @@ public class MineBlock implements Listener {
                     if (mo.getBlockTarget().equals(b.getType())) {
 
                         mo.setComplete(team);
+                        break;
 
                     }
 

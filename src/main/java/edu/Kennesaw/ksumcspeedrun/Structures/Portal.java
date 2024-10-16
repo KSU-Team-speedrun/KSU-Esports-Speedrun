@@ -83,4 +83,30 @@ public class Portal {
         this.portalType = portalType;
     }
 
+    public World.Environment getFrom() {
+        if (portalType.equals(PortalType.WORLD_TO_NETHER) || portalType.equals(PortalType.WORLD_TO_END)) {
+            return World.Environment.NORMAL;
+        }
+        if (portalType.equals(PortalType.NETHER_TO_WORLD)) {
+            return World.Environment.NETHER;
+        }
+        if (portalType.equals(PortalType.END_TO_WORLD) || portalType.equals(PortalType.END_TO_END)) {
+            return World.Environment.THE_END;
+        }
+        return null;
+    }
+
+    public World.Environment getTo() {
+        if (portalType.equals(PortalType.NETHER_TO_WORLD) || portalType.equals(PortalType.END_TO_WORLD)) {
+            return World.Environment.NORMAL;
+        }
+        if (portalType.equals(PortalType.WORLD_TO_NETHER)) {
+            return World.Environment.NETHER;
+        }
+        if (portalType.equals(PortalType.WORLD_TO_END) || portalType.equals(PortalType.END_TO_END)) {
+            return World.Environment.THE_END;
+        }
+        return null;
+    }
+
 }

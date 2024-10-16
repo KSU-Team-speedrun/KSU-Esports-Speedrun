@@ -12,11 +12,12 @@ public class ObjectiveManager {
     // An instance of ObjectiveManager holds a list of Objectives
     private final List<Objective> objectives;
 
-    private int totalWeight = 0;
+    private int totalWeight;
 
     // Class is initialized with an empty constructor, an empty list of Objectives is made
     public ObjectiveManager() {
         this.objectives = new ArrayList<>();
+        totalWeight = 0;
     }
 
     // Add an objective to the objective list

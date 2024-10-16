@@ -33,8 +33,8 @@ public class EnterObjective extends Objective {
                     throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
         }
 
-        String target = biomeTarget != null ? (biomeTarget.name()) : (structureTarget != null ? structureTarget.getName()
-                : portalType.toString());
+        String target = biomeTarget != null ? ("BIOME: " + biomeTarget.name()) : (structureTarget != null ? "STRUCTURE: " + structureTarget.getName() :
+                "PORTAL: " + portalType.getPortalType().name());
 
         setTargetName(target);
 
@@ -53,7 +53,8 @@ public class EnterObjective extends Objective {
                     throw new InvalidTargetLocationException("Object locationType must be instance of Biome, Structure, or Portal");
         }
 
-        String target = biomeTarget != null ? (biomeTarget.name()) : (structureTarget != null ? structureTarget.getName() : portalType.toString());
+        String target = biomeTarget != null ? ("BIOME: " + biomeTarget.name()) : (structureTarget != null ? "STRUCTURE: " + structureTarget.getName() :
+                "PORTAL: " + portalType.getPortalType().name());
 
         setTargetName(target);
 

@@ -1,43 +1,37 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
-import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerJoin implements Listener {
+public class PlayerLeave implements Listener {
 
     Main plugin;
 
-    public PlayerJoin(Main plugin) {
+    public PlayerLeave(Main plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-
-        Player p = e.getPlayer();
-
-        if (!p.isOp() && !p.hasPermission("ksu.speedrun.admin")) {
-
-            p.getInventory().setItem(4, Items.getTeamSelector());
-
-        }
-
+    public void onPlayerLeave(PlayerQuitEvent e) {
         Speedrun sr = plugin.getSpeedrun();
-
+        Player p = e.getPlayer();
+        Team team = sr.getTeams().getTeam(p);
+        if (team != null) {
+            team.removePlayer(p);
+        }
         if (!sr.isStarted()) {
             if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
                     .getTeamInventory().getInventory() == null) {
                 sr.createTeams(java.util.Optional.empty());
+            } else {
+                sr.getTeams().getTeamInventory().updateTeamInventory(team);
             }
         }
-
     }
-
 }
-

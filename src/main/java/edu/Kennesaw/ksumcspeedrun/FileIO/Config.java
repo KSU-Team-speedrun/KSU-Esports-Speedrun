@@ -203,6 +203,77 @@ public class Config {
                 }
             }
         }
+
+        if (!config.contains("teams")) {
+
+            set("teams.inventory.title", "<bold><yellow>SELECT A TEAM:</yellow></bold>");
+
+            set("teams.white.name", "<!italic><white><bold>WHITE TEAM</bold></white>");
+            set("teams.white.item", "WHITE_WOOL");
+            set("teams.white.lore", "<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>");
+
+            set("teams.orange.name", "<!italic><gold><bold>ORANGE TEAM</bold></gold>");
+            set("teams.orange.item", "ORANGE_WOOL");
+            set("teams.orange.lore", "<!italic><white>Click here to join </white><bold><gold>ORANGE TEAM</gold></bold><white>!</white>");
+
+            set("teams.magenta.name", "<!italic><color:#ff00ff><bold>MAGENTA TEAM</bold></color>");
+            set("teams.magenta.item", "MAGENTA_WOOL");
+            set("teams.magenta.lore", "<!italic><white>Click here to join </white><bold><color:#ff00ff>MAGENTA TEAM</color></bold><white>!</white>");
+
+            set("teams.light_blue.name", "<!italic><color:#00ffff><bold>LIGHT BLUE TEAM</bold></color>");
+            set("teams.light_blue.item", "LIGHT_BLUE_WOOL");
+            set("teams.light_blue.lore", "<!italic><white>Click here to join </white><bold><color:#00ffff>LIGHT BLUE TEAM</color></bold><white>!</white>");
+
+            set("teams.yellow.name", "<!italic><yellow><bold>YELLOW TEAM</bold></yellow>");
+            set("teams.yellow.item", "YELLOW_WOOL");
+            set("teams.yellow.lore", "<!italic><white>Click here to join </white><bold><yellow>YELLOW TEAM</yellow></bold><white>!</white>");
+
+            set("teams.lime.name", "<!italic><green><bold>LIME TEAM</bold></green>");
+            set("teams.lime.item", "LIME_WOOL");
+            set("teams.lime.lore", "<!italic><white>Click here to join </white><bold><green>LIME TEAM</green></bold><white>!</white>");
+
+            set("teams.pink.name", "<!italic><color:#ff85c8><bold>PINK TEAM</bold></color>");
+            set("teams.pink.item", "PINK_WOOL");
+            set("teams.pink.lore", "<!italic><white>Click here to join </white><bold><color:#ff85c8>PINK TEAM</color></bold><white>!</white>");
+
+            set("teams.gray.name", "<!italic><dark_gray><bold>GRAY TEAM</bold></dark_gray>");
+            set("teams.gray.item", "GRAY_WOOL");
+            set("teams.gray.lore", "<!italic><white>Click here to join </white><bold><dark_gray>GRAY TEAM</dark_gray></bold><white>!</white>");
+
+            set("teams.light_gray.name", "<!italic><gray><bold>LIGHT GRAY TEAM</bold></gray>");
+            set("teams.light_gray.item", "LIGHT_GRAY_WOOL");
+            set("teams.light_gray.lore", "<!italic><white>Click here to join </white><bold><gray>LIGHT GRAY TEAM</gray></bold><white>!</white>");
+
+            set("teams.cyan.name", "<!italic><dark_aqua><bold>CYAN TEAM</bold></dark_aqua>");
+            set("teams.cyan.item", "CYAN_WOOL");
+            set("teams.cyan.lore", "<!italic><white>Click here to join </white><bold><dark_aqua>CYAN TEAM</dark_aqua></bold><white>!</white>");
+
+            set("teams.purple.name", "<!italic><dark_purple><bold>PURPLE TEAM</bold></dark_purple>");
+            set("teams.purple.item", "PURPLE_WOOL");
+            set("teams.purple.lore", "<!italic><white>Click here to join </white><bold><dark_purple>PURPLE TEAM</dark_purple></bold><white>!</white>");
+
+            set("teams.blue.name", "<!italic><dark_blue><bold>BLUE TEAM</bold></dark_blue>");
+            set("teams.blue.item", "BLUE_WOOL");
+            set("teams.blue.lore", "<!italic><white>Click here to join </white><bold><dark_blue>BLUE TEAM</dark_blue></bold><white>!</white>");
+
+            set("teams.brown.name", "<!italic><color:#964b00><bold>BROWN TEAM</bold></color>");
+            set("teams.brown.item", "BROWN_WOOL");
+            set("teams.brown.lore", "<!italic><white>Click here to join </white><bold><color:#964b00>BROWN TEAM</color></bold><white>!</white>");
+
+            set("teams.green.name", "<!italic><dark_green><bold>GREEN TEAM</bold></dark_green>");
+            set("teams.green.item", "GREEN_WOOL");
+            set("teams.green.lore", "<!italic><white>Click here to join </white><bold><dark_green>GREEN TEAM</dark_green></bold><white>!</white>");
+
+            set("teams.red.name", "<!italic><dark_red><bold>RED TEAM</bold></dark_red>");
+            set("teams.red.item", "RED_WOOL");
+            set("teams.red.lore", "<!italic><white>Click here to join </white><bold><dark_red>RED TEAM</dark_red></bold><white>!</white>");
+
+            set("teams.black.name", "<!italic><black><bold>BLACK TEAM</bold></black>");
+            set("teams.black.item", "BLACK_WOOL");
+            set("teams.black.lore", "<!italic><white>Click here to join </white><bold><black>BLACK TEAM</black></bold><white>!</white>");
+
+        }
+
         save();
         pluginPrefix = getComponent("prefix");
     }

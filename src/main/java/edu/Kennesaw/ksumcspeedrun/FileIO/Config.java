@@ -2,16 +2,16 @@ package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class Config {
 
     // Main plugin instance
@@ -23,10 +23,6 @@ public class Config {
     // YamlConfiguration object allows is to modify, load, and save Config.yml
     private final YamlConfiguration config;
 
-    /* The pluginPrefix Component is used frequently in messages sent to senders in this plugin, so this value is loaded
-       when the plugin is enabled and stored so that it does not need to be retrieved from the Config each time. */
-    private Component pluginPrefix;
-
     // An instance of Config can be created by passing the Main plugin instance through the constructor
     // This instance is created when the plugin is enabled and used until the plugin is disabled.
     public Config(Main plugin) {
@@ -35,7 +31,7 @@ public class Config {
         this.plugin = plugin;
 
         // Called when a Config instance is created
-        generateConfig();
+        generateDefaultConfig();
 
     }
 
@@ -68,14 +64,11 @@ public class Config {
         }
     }
 
-    // Gets a string list from the Config.yml given a specified path
-    public List<String> getStringList(String line) {
-
-        if (config.isList(line)) {
-            return config.getStringList(line);
+    public Boolean getBoolean(String line) {
+        if (config.isBoolean(line)) {
+            return config.getBoolean(line);
         }
         return null;
-
     }
 
     /* Gets a string from the Config.yml given a specified path and returns the value as the actual String (rather
@@ -98,14 +91,6 @@ public class Config {
     public int getInt(String line) {
 
         return config.getInt(line);
-
-    }
-
-    // Set a Component at the specified path in the Config.yml
-    public void setComponent(String line, Component tc) {
-
-        // Component is serialized into MiniMessage format before being saved in the Config.yml
-        config.set(line, ComponentHelper.componentToMM(tc));
 
     }
 
@@ -142,13 +127,9 @@ public class Config {
 
     }
 
-    /* Returns the pluginPrefix that was stored when the plugin was enabled, can be retrieved from any class that has a
-       main plugin instance (plugin.getSpeedrunConfig().getPrefix) */
-    public Component getPrefix() {
-        return pluginPrefix;
-    }
-
     // Saves the Config.yml, to be used if the config is updated
+    @Deprecated
+    @SuppressWarnings("unused")
     private void save() {
 
         plugin.getLogger().info("Saving config.yml...");
@@ -167,15 +148,141 @@ public class Config {
     private void addDefaults() {
 
         // Default layout of plugin prefix, can be updated in the Config.yml
-        if (!config.contains("prefix")) {
-
-            setComponent("prefix", Component.text("[KSU-MC-Speedrun]").color(TextColor.color(0xFFFF55)).append(Component.text(" ").color(TextColor.color(0xFFFFFF))));
+        if (!config.contains("message")) {
+            set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");
+            config.setComments("messages.teamJoinMessage", Arrays.asList(" ", "# Team-Related Messages"));
+            set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
+            set("messages.teamCooldownMessage", "<prefix> Please wait a few seconds before changing your team.");
+            set("messages.alreadyOnTeam", "<prefix> You are already on this team!");
+            set("messages.teamIsFull", "<prefix> This team is full!");
+            config.setComments("messages.start", Arrays.asList(" ", "# Game Start and End Messages"));
+            set("messages.start", "<prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time> minutes" +
+                    "</gold></bold> to complete the objectives!<newline><prefix> Please type <click:run_command:" +
+                    "'/objectives'><hover:show_text:'<bold><gold>Click here to view your objectives</gold></bold>'>" +
+                    "<bold><gold>/objectives</gold></bold></hover></click> to view your objectives.");
+            set("messages.forceStop", "<prefix> The game has ended!<newline><prefix> The winner is inconclusive.");
+            set("messages.winner", "<prefix> The game has ended!<newline><prefix> The winner is: <winner>");
+            set("messages.timeUp", "<prefix> The game has ended! Time has run out.<newline><prefix> The team with the" +
+                    " most points is: <winner>");
+            config.setComments("messages.objectiveComplete", Arrays.asList(" ", "# Objective Completion Messages"));
+            set("messages.objectiveComplete", "<prefix> Objective Complete: <bold><gold><objective_type> <target>" +
+                    "</gold></bold><newline><prefix> Your team has earned <bold><gold><points> points</gold></bold>!");
+            set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
+                    " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
+                    "point(s)</gold></bold>!");
+            config.setComments("messages.error.invalidArguments", Arrays.asList(" ", "# Error Messages"));
+            set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
+            set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
+            set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
+            config.setComments("messages.admin.objectiveAdded", Arrays.asList(" ", "# Admin Messages"));
+            set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
+                    "</gold></bold>");
+            set("messages.admin.objectiveAddedPoints", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<target></gold></bold> - <points> points");
+            set("messages.admin.objectiveAddedNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<number> <target></gold></bold>");
+            set("messages.admin.objectiveAddedPointsNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                    "<number> <target></gold></bold> - <points> points");
+            set("messages.admin.objectiveRemoved", "<prefix> Objective Removed: <bold><gold><objective_type> <target>" +
+                    "</gold></bold>");
+            set("messages.admin.timeLimitSet", "<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>");
+            set("messages.admin.teamSizeLimitSet", "<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>");
 
         }
 
-        /* Loops through every structure in the game and adds it to the config by default. Administrators can update
+        if (!config.contains("timer")) {
+
+            config.setComments("timer.interval", Arrays.asList(" ", "# Timer Configurations"));
+            set("timer.interval", 1);
+            set("timer.disable", false);
+
+            config.setComments("timer.title", Arrays.asList(" ", "# Timer Messages"));
+            set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
+            set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
+            set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
+
+        }
+
+        if (!config.contains("teams")) {
+
+            config.setComments("teams.inventory.title", Arrays.asList(" ", "# Team GUI Meta"));
+            set("teams.inventory.title", "<bold><yellow>SELECT A TEAM:</yellow></bold>");
+            set("teams.inventory.cooldown", 5);
+
+
+            config.setComments("teams.white.name", Arrays.asList(" ", "# Team Definitions"));
+            set("teams.white.name", "<!italic><white><bold>WHITE TEAM</bold></white>");
+            set("teams.white.item", "WHITE_WOOL");
+            set("teams.white.lore", "<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>");
+
+            set("teams.orange.name", "<!italic><gold><bold>ORANGE TEAM</bold></gold>");
+            set("teams.orange.item", "ORANGE_WOOL");
+            set("teams.orange.lore", "<!italic><white>Click here to join </white><bold><gold>ORANGE TEAM</gold></bold><white>!</white>");
+
+            set("teams.magenta.name", "<!italic><color:#ff00ff><bold>MAGENTA TEAM</bold></color>");
+            set("teams.magenta.item", "MAGENTA_WOOL");
+            set("teams.magenta.lore", "<!italic><white>Click here to join </white><bold><color:#ff00ff>MAGENTA TEAM</color></bold><white>!</white>");
+
+            set("teams.light_blue.name", "<!italic><color:#00ffff><bold>LIGHT BLUE TEAM</bold></color>");
+            set("teams.light_blue.item", "LIGHT_BLUE_WOOL");
+            set("teams.light_blue.lore", "<!italic><white>Click here to join </white><bold><color:#00ffff>LIGHT BLUE TEAM</color></bold><white>!</white>");
+
+            set("teams.yellow.name", "<!italic><yellow><bold>YELLOW TEAM</bold></yellow>");
+            set("teams.yellow.item", "YELLOW_WOOL");
+            set("teams.yellow.lore", "<!italic><white>Click here to join </white><bold><yellow>YELLOW TEAM</yellow></bold><white>!</white>");
+
+            set("teams.lime.name", "<!italic><green><bold>LIME TEAM</bold></green>");
+            set("teams.lime.item", "LIME_WOOL");
+            set("teams.lime.lore", "<!italic><white>Click here to join </white><bold><green>LIME TEAM</green></bold><white>!</white>");
+
+            set("teams.pink.name", "<!italic><color:#ff85c8><bold>PINK TEAM</bold></color>");
+            set("teams.pink.item", "PINK_WOOL");
+            set("teams.pink.lore", "<!italic><white>Click here to join </white><bold><color:#ff85c8>PINK TEAM</color></bold><white>!</white>");
+
+            set("teams.gray.name", "<!italic><dark_gray><bold>GRAY TEAM</bold></dark_gray>");
+            set("teams.gray.item", "GRAY_WOOL");
+            set("teams.gray.lore", "<!italic><white>Click here to join </white><bold><dark_gray>GRAY TEAM</dark_gray></bold><white>!</white>");
+
+            set("teams.light_gray.name", "<!italic><gray><bold>LIGHT GRAY TEAM</bold></gray>");
+            set("teams.light_gray.item", "LIGHT_GRAY_WOOL");
+            set("teams.light_gray.lore", "<!italic><white>Click here to join </white><bold><gray>LIGHT GRAY TEAM</gray></bold><white>!</white>");
+
+            set("teams.cyan.name", "<!italic><dark_aqua><bold>CYAN TEAM</bold></dark_aqua>");
+            set("teams.cyan.item", "CYAN_WOOL");
+            set("teams.cyan.lore", "<!italic><white>Click here to join </white><bold><dark_aqua>CYAN TEAM</dark_aqua></bold><white>!</white>");
+
+            set("teams.purple.name", "<!italic><dark_purple><bold>PURPLE TEAM</bold></dark_purple>");
+            set("teams.purple.item", "PURPLE_WOOL");
+            set("teams.purple.lore", "<!italic><white>Click here to join </white><bold><dark_purple>PURPLE TEAM</dark_purple></bold><white>!</white>");
+
+            set("teams.blue.name", "<!italic><dark_blue><bold>BLUE TEAM</bold></dark_blue>");
+            set("teams.blue.item", "BLUE_WOOL");
+            set("teams.blue.lore", "<!italic><white>Click here to join </white><bold><dark_blue>BLUE TEAM</dark_blue></bold><white>!</white>");
+
+            set("teams.brown.name", "<!italic><color:#964b00><bold>BROWN TEAM</bold></color>");
+            set("teams.brown.item", "BROWN_WOOL");
+            set("teams.brown.lore", "<!italic><white>Click here to join </white><bold><color:#964b00>BROWN TEAM</color></bold><white>!</white>");
+
+            set("teams.green.name", "<!italic><dark_green><bold>GREEN TEAM</bold></dark_green>");
+            set("teams.green.item", "GREEN_WOOL");
+            set("teams.green.lore", "<!italic><white>Click here to join </white><bold><dark_green>GREEN TEAM</dark_green></bold><white>!</white>");
+
+            set("teams.red.name", "<!italic><dark_red><bold>RED TEAM</bold></dark_red>");
+            set("teams.red.item", "RED_WOOL");
+            set("teams.red.lore", "<!italic><white>Click here to join </white><bold><dark_red>RED TEAM</dark_red></bold><white>!</white>");
+
+            set("teams.black.name", "<!italic><black><bold>BLACK TEAM</bold></black>");
+            set("teams.black.item", "BLACK_WOOL");
+            set("teams.black.lore", "<!italic><white>Click here to join </white><bold><black>BLACK TEAM</black></bold><white>!</white>");
+
+        }
+
+                /* Loops through every structure in the game and adds it to the config by default. Administrators can update
            these values with the average Y-coordinate of each structure */
         if (!config.contains("structureLocations")) {
+
+            config.setComments("structureLocations", Arrays.asList(" ", "# Structure Detection Configurations"));
+
             for (String s : SRStructure.getStructureNames()) {
 
                 /* The average Y-coordinate for an Ancient City is y=-51, the radius is set to 100
@@ -203,11 +310,11 @@ public class Config {
                 }
             }
         }
-        save();
-        pluginPrefix = getComponent("prefix");
     }
 
     // Generates a Config.yml file with defaults if one does not already exist.. Loads the Config.yml file if one exists
+    @Deprecated
+    @SuppressWarnings("unused")
     private void generateConfig() {
 
         plugin.getLogger().info("Loading config.yml...");
@@ -230,5 +337,30 @@ public class Config {
             load();
         }
 
+    }
+
+    private void generateDefaultConfig() {
+
+        plugin.getLogger().info("Loading config.yml...");
+        file = new File(plugin.getDataFolder(), "config.yml");
+
+        if (!file.exists()) {
+            plugin.getLogger().info("Config.yml does not exist");
+            if (file.getParentFile().mkdirs()) {
+                plugin.getLogger().info("Creating parent directory \"" + plugin.getName() + "\"");
+            }
+
+            plugin.saveResource("default-config.yml", false);
+
+            File defaultConfig = new File(plugin.getDataFolder(), "default-config.yml");
+            if (defaultConfig.exists() && defaultConfig.renameTo(file)) {
+                plugin.getLogger().info("Generated new config.yml from default-config.yml.");
+            } else {
+                plugin.getLogger().warning("Failed to rename default-config.yml to config.yml.");
+            }
+
+        } else {
+            load();
+        }
     }
 }

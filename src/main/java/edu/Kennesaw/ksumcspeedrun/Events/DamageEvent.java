@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
@@ -15,10 +16,12 @@ import java.util.concurrent.TimeUnit;
 public class DamageEvent implements Listener {
 
     Main plugin;
+    Speedrun speedrun;
 
     public DamageEvent(Main plugin) {
 
         this.plugin = plugin;
+        this.speedrun = plugin.getSpeedrun();
 
     }
 
@@ -26,35 +29,37 @@ public class DamageEvent implements Listener {
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent e) {
 
-        if (e.getEntity() instanceof LivingEntity le) {
+        if (speedrun.isStarted()) {
 
-            if (e.getDamageSource().getCausingEntity() instanceof Player p) {
+            if (e.getEntity() instanceof LivingEntity le) {
 
-                Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+                if (e.getDamageSource().getCausingEntity() instanceof Player p) {
 
-                    System.out.println("Logging player damage");
+                    Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
 
-                    UUID uuid = le.getUniqueId();
+                        System.out.println("Logging player damage");
 
-                    if (plugin.getSpeedrun().combatTasks.containsKey(uuid)) {
-                        plugin.getSpeedrun().combatLog.remove(uuid);
-                        plugin.getSpeedrun().combatTasks.get(uuid).cancel();
-                        System.out.println("Updating combat log");
-                    } else {
-                        System.out.println("Adding combat log...");
-                    }
+                        UUID uuid = le.getUniqueId();
 
-                    plugin.getSpeedrun().combatLog.put(uuid, p);
+                        if (plugin.getSpeedrun().combatTasks.containsKey(uuid)) {
+                            plugin.getSpeedrun().combatLog.remove(uuid);
+                            plugin.getSpeedrun().combatTasks.get(uuid).cancel();
+                            System.out.println("Updating combat log");
+                        } else {
+                            System.out.println("Adding combat log...");
+                        }
 
-                    ScheduledTask task = Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask1 -> {
-                        plugin.getSpeedrun().combatLog.remove(uuid);
-                        plugin.getSpeedrun().combatTasks.remove(uuid);
-                    }, 10, TimeUnit.SECONDS);
+                        plugin.getSpeedrun().combatLog.put(uuid, p);
 
-                    plugin.getSpeedrun().combatTasks.put(uuid, task);
+                        ScheduledTask task = Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask1 -> {
+                            plugin.getSpeedrun().combatLog.remove(uuid);
+                            plugin.getSpeedrun().combatTasks.remove(uuid);
+                        }, 10, TimeUnit.SECONDS);
 
-                });
+                        plugin.getSpeedrun().combatTasks.put(uuid, task);
 
+                    });
+                }
             }
         }
     }

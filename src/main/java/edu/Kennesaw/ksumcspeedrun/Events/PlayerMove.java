@@ -4,8 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import edu.Kennesaw.ksumcspeedrun.Speedrun;
-import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,12 +18,13 @@ public class PlayerMove {
 
     // Main, Speedrun, and ObjectiveManager (incompleteObjectives) instances from plugin instance passed in constructor
     Main plugin;
-    private final Speedrun speedrun;
+    private final TeamManager tm;
 
+    // Registered when the speedrun is started
     public PlayerMove(Main plugin) {
 
         this.plugin = plugin;
-        this.speedrun = plugin.getSpeedrun();
+        this.tm = plugin.getSpeedrun().getTeams();
 
         /* TODO: SOME OF THIS TASK CAN BE MADE ASYNC, WE ONLY HAVE TO BE ON THE MAIN SERVER THREAD WHEN INTERACTING WITH
            TODO (CONT.): THE WORLD */
@@ -36,63 +36,53 @@ public class PlayerMove {
 
                 // TODO: MAYBE A LESS INTENSIVE WAY OF DOING THIS INSTEAD OF A NESTED LOOP?
                 // Loop through each player, and for every player look through each objective
-                for (Player p : Bukkit.getOnlinePlayers()) {
+                for (Player p : tm.getAssignedPlayers()) {
 
-                    Team team = null;
+                    Team team = tm.getTeam(p);
 
-                    for (Team teamLoop : speedrun.getTeams().getTeams()) {
-                        if (teamLoop.getPlayers().contains(p)) {
-                            team = teamLoop;
-                        }
-                    }
+                    for (Objective o : team.getIncompleteObjectives()) {
 
-                    if (team != null) {
+                        // If objective type is enter then we cast EnterObjective to Objective
+                        if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
 
-                        for (Objective o : speedrun.getObjectives().getIncompleteObjectives(team)) {
+                            EnterObjective eo = (EnterObjective) o;
 
-                            // If objective type is enter then we cast EnterObjective to Objective
-                            if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
+                            // Check if the EnterObjective target is a structure
+                            if (eo.getTarget() instanceof SRStructure target) {
 
-                                EnterObjective eo = (EnterObjective) o;
+                                // Get the player's location
+                                Location playerLoc = p.getLocation();
+                                final Team finalTeam = team;
 
-                                // Check if the EnterObjective target is a structure
-                                if (eo.getTarget() instanceof SRStructure target) {
+                                // Check how far the player is from target structure
+                                SRStructure.getNearestStructureToLocation(plugin, target, playerLoc, loc -> {
 
-                                    System.out.println(target.getName());
-
-                                    // Get the player's location
-                                    Location playerLoc = p.getLocation();
-                                    final Team finalTeam = team;
-
-                                    // Check how far the player is from target structure
-                                    SRStructure.getNearestStructureToLocation(plugin, target, playerLoc, loc -> {
-
-                                        if (loc != null) {
+                                    if (loc != null) {
 
                                         /* If player is within specified radius (from config) of structure, then
                                            objective is complete */
-                                            SRStructure.getStructureRadius(plugin, target, radius -> {
-                                                if (playerLoc.distance(loc) <= radius) {
-                                                    eo.setComplete(finalTeam);
-                                                }
+                                        SRStructure.getStructureRadius(plugin, target, radius -> {
+                                            if (playerLoc.distance(loc) <= radius) {
+                                                eo.setComplete(finalTeam);
+                                            }
 
-                                            });
+                                        });
 
-                                        }
+                                    }
 
-                                    });
+                                });
 
-                                    // Check if the EnterObjective target is a Biome
-                                } else if (eo.getTarget() instanceof Biome) {
+                                // Check if the EnterObjective target is a Biome
+                            } else if (eo.getTarget() instanceof Biome biome) {
 
-                                    // Check if the EnterObjective target is a Portal
-                                } else if (eo.getTarget() instanceof Portal) {
-
+                                if (p.getWorld().getBiome(p.getLocation()).equals(biome)) {
+                                    eo.setComplete(team);
                                 }
 
                             }
 
                         }
+
                     }
 
                 }

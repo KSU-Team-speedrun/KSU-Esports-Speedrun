@@ -50,12 +50,13 @@ public class SRStructure {
     }
 
     // Async method that returns a list of all Structures objects in the game using a callback
+    @SuppressWarnings("unused")
     public static void getStructures(Main plugin, StructureListResultCallback structList) {
 
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
             List<Structure> structures = new ArrayList<>();
             for (Field f : Structure.class.getFields()) {
-                Object value = null;
+                Object value;
                 try {
                     value = f.get(null);
                 } catch (IllegalAccessException e) {
@@ -86,7 +87,7 @@ public class SRStructure {
     public static Structure getStructureFromString(String structure) {
         HashMap<String, Structure> structureTypes = new HashMap<>();
         for (Field f : Structure.class.getFields()) {
-            Object value = null;
+            Object value;
             try {
                 value = f.get(null);
             } catch (IllegalAccessException e) {
@@ -157,17 +158,12 @@ public class SRStructure {
     }
 
     public static void getStructureRadius(Main plugin, SRStructure target, RadiusResultCallback callback) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-            callback.onResult(plugin.getSpeedrunConfig().getInt("structureLocations." + target.getName() + ".radius"));
-        });
+        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> callback.onResult(plugin.getSpeedrunConfig()
+                .getInt("structureLocations." + target.getName() + ".radius")));
     }
 
     public interface LocationResultCallback {
         void onResult(Location loc);
-    }
-
-    public interface StructureResultCallback {
-        void onResult(Structure struct);
     }
 
     public interface StructureListResultCallback {

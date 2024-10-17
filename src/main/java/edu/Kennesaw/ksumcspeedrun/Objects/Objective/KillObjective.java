@@ -10,8 +10,6 @@ public class KillObjective extends Objective {
     // Only specific attribute is target (EntityType), on top of superclass Objective attributes
     private final EntityType target;
 
-    Main plugin;
-
     // KillObjective is initialized with an EntityType target
     public KillObjective(EntityType target, Main plugin) throws NonLivingEntityException {
 

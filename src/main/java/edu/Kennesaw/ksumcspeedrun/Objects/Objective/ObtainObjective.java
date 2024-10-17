@@ -9,20 +9,20 @@ import org.bukkit.Material;
 
 public class ObtainObjective extends Objective {
 
-    private Material item;
-    private int amount;
-
-    Main plugin;
+    private final Material item;
+    private final int amount;
 
     public ObtainObjective(Material item, Main plugin) {
         super(ObjectiveType.OBTAIN, plugin);
         this.item = item;
+        this.amount = 1;
         setTargetName(item.name());
     }
 
     public ObtainObjective(Material item, int weight, Main plugin) {
         super(ObjectiveType.OBTAIN, weight, plugin);
         this.item = item;
+        this.amount = 1;
         setTargetName(item.name());
     }
 
@@ -32,4 +32,13 @@ public class ObtainObjective extends Objective {
         this.amount = amount;
         setTargetName(item.name());
     }
+
+    public Material getItem() {
+        return item;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
 }

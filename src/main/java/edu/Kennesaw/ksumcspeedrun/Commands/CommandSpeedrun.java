@@ -3,17 +3,13 @@ package edu.Kennesaw.ksumcspeedrun.Commands;
 import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.KillObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.MineObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObtainObjective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.*;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.SpeedrunSuggestions;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -63,14 +59,11 @@ public class CommandSpeedrun implements BasicCommand {
     @Override
     public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String @NotNull [] args) {
 
-        /* The "prefix" component is assigned in the config and the value is filled when the command is executed
-           any response message will start with the plugin prefix */
-        Component prefix = plugin.getMessages().getPrefix();
+        final CommandSender sender = commandSourceStack.getSender();
 
         // Move to a different thread for the following logic
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
 
-            CommandSender sender = commandSourceStack.getSender();
             // If argument lengths is 0 (i.e. "/speedrun" with no subcommand)
             if (args.length == 0) {
 
@@ -84,46 +77,79 @@ public class CommandSpeedrun implements BasicCommand {
                     // help list
 
                     // First argument is "reload" (i.e. "/speedrun reload")
-                } else if (args[0].equalsIgnoreCase("reload")) {
-
-                    // Call method "reloadConfig()" passing sender value & prefix component
-                    reloadConfig(sender, prefix);
-
-                    // First argument is "addObjective" (i.e. "/speedrun addObjective")
                 } else if (args[0].equalsIgnoreCase("addObjective")) {
 
-                    // Call method "addObjectiveHandler" passing sender value, args string array & prefix component
-                    addObjectiveHandler(sender, args, prefix);
+                    // Call method "addObjectiveHandler" passing sender value, args string array
+                    addObjectiveHandler(sender, args);
 
-                } else if (args[0].equalsIgnoreCase("setteamsize")) {
+                } else if (args[0].equalsIgnoreCase("remobjective")) {
 
                     if (args.length != 2) {
 
-                        sender.sendMessage(prefix.append(Component.text("Usage: /speedrun setteamsize [number]")));
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun remobjective [index]"));
 
                     } else {
 
                         try {
 
                             Bukkit.getScheduler().runTask(plugin, () -> {
-                                int size = Integer.parseInt(args[1]);
-                                speedRun.setTeamSizeLimit(size);
-                                sender.sendMessage(plugin.getMessages().getTeamSizeLimitSet(args[1]));
+
+                                int objectiveNum = Integer.parseInt(args[1]) - 1;
+                                ObjectiveManager om = speedRun.getObjectives();
+
+                                if (objectiveNum > om.getLength()) {
+                                    sender.sendMessage(plugin.getMessages().getOutOfBounds(args[1], "the objective list"));
+                                    return;
+                                }
+                                Objective objective = om.getObjectives().get(objectiveNum);
+                                String objectiveType = objective.getType().name();
+                                String target = objective.getTargetName();
+                                om.removeObjective(objectiveNum);
+                                sender.sendMessage(plugin.getMessages().getObjectiveRemoved(objectiveType, target));
+
                             });
 
                         } catch (NumberFormatException e) {
-                            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[1] + "\" is not a valid number.")));
+                            sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "number"));
                         }
 
                     }
 
+                } else if (args[0].equalsIgnoreCase("setteamsize")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setteamsize [number]"));
+
+                    } else {
+
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            final String arguments = args[1];
+
+                            try {
+                                int size = Integer.parseInt(arguments);
+                                speedRun.setTeamSizeLimit(size);
+                                sender.sendMessage(plugin.getMessages().getTeamSizeLimitSet(arguments));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
+                            }
+
+                        });
+
+                    }
+
                 } else if (args[0].equalsIgnoreCase("getteamsize")) {
-                    sender.sendMessage(Component.text("Size limit per team: " + speedRun.getTeamSizeLimit()));
+
+           //         sender.sendMessage(Component.text("Size limit per team: " + speedRun.getTeamSizeLimit()));
+
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {
 
                     if (args.length != 2) {
-                        sender.sendMessage(prefix.append(Component.text(
-                                "Usage: /speedrun settimelimit [timeInMinutes]")));
+
+                        sender.sendMessage(plugin.getMessages()
+                                .getInvalidArguments("/speedrun settimelimit [timeInMinutes]"));
+
                     } else {
 
                         try {
@@ -133,10 +159,9 @@ public class CommandSpeedrun implements BasicCommand {
 
                         } catch (NumberFormatException e) {
 
-                            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[1] + "\" is not a valid number.")));
+                            sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "number"));
 
                         }
-
                     }
 
                 } else if (args[0].equalsIgnoreCase("start")) {
@@ -154,19 +179,8 @@ public class CommandSpeedrun implements BasicCommand {
         });
     }
 
-    // Method called upon subcommand "/speedrun reload"
-    private void reloadConfig(CommandSender sender, Component prefix) {
-
-        // Reload config file
-        plugin.getSpeedrunConfig().load();
-
-        // Send the sender a message w/ prefix appended to start (e.g., "[Prefix] <message>")
-        sender.sendMessage(prefix.append(Component.text("Plugin config has been reloaded.")));
-
-    }
-
     // Method called upon subcommand "/speedrun addObjective"
-    private void addObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+    private void addObjectiveHandler(CommandSender sender, String[] args) {
 
         // Argument length must be 3 (no flags), 5 (1 flag), or 7 (2 flags)
         if (args.length == 3 || args.length == 5 || args.length == 7) {
@@ -179,28 +193,28 @@ public class CommandSpeedrun implements BasicCommand {
 
                 // Individual methods called based on case of args[1] (the second argument)
                 case "kill":
-                    killObjectiveHandler(sender, args, prefix);
+                    killObjectiveHandler(sender, args);
                     break;
                 case "enter":
-                    enterObjectiveHandler(sender, args, prefix);
+                    enterObjectiveHandler(sender, args);
                     break;
                 case "mine":
-                    mineObjectiveHandler(sender, args, prefix);
+                    mineObjectiveHandler(sender, args);
                     break;
                 case "obtain":
                     obtainObjectiveHandler(sender, args);
                     break;
                 default:
-                    sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[1] + "\" is not a valid event.")));
+                    sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "valid event"));
                     break;
             }
         } else {
-            sender.sendMessage(prefix.append(Component.text("Usage: /speedrun addObjective [event] [specifiction] <-flag(s)>")));
+            sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun addObjective [event] [specifiction] <-flag(s)>"));
         }
     }
 
     // Method called upon subcommand "/speedrun addObjective kill"
-    private void killObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+    private void killObjectiveHandler(CommandSender sender, String[] args) {
 
         try {
 
@@ -218,20 +232,22 @@ public class CommandSpeedrun implements BasicCommand {
                    the preassigned EntityType as a target. If the EntityType is not-living (e.g., EXPERIENCE_ORB), an
                    exception will be thrown, as non-living entities cannot be killed. */
                 try {
+                    KillObjective newKo = new KillObjective(e, w, plugin);
                     sender.sendMessage(plugin.getMessages().getObjectiveAddedPoints("KILL", e.name(), w));
-                    return new KillObjective(e, w, plugin);
+                    return newKo;
                 } catch (NonLivingEntityException ex) {
-                    sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
+                    sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
                     return null;
                 }
             }).orElseGet(() -> {
 
                 // Same as above, but the weight flag was not included in the sender's arguments.
                 try {
+                    KillObjective newKo = new KillObjective(e, plugin);
                     sender.sendMessage(plugin.getMessages().getObjectiveAdded("KILL", e.name()));
-                    return new KillObjective(e, plugin);
+                    return newKo;
                 } catch (NonLivingEntityException ex) {
-                    sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a living entity.")));
+                    sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
                     return null;
                 }
             });
@@ -241,12 +257,12 @@ public class CommandSpeedrun implements BasicCommand {
 
         // Catch Illegal Argument if args[2] (third argument) is not an EntityType
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid entity type.")));
+            sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "valid entity type"));
         }
     }
 
     // Method called upon subcommand "/speedrun addObjective enter"
-    private void enterObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+    private void enterObjectiveHandler(CommandSender sender, String[] args) {
 
         // Target initially defined as Object type because it can be either a Biome, an SRStructure, or a Portal
         Object object = null;
@@ -291,18 +307,22 @@ public class CommandSpeedrun implements BasicCommand {
 
             // An exception will be thrown if the finalObject is not of type Biome, SRStructure, or Portal
             try {
+                EnterObjective newEo = new EnterObjective(finalObject, w, plugin);
                 sender.sendMessage(plugin.getMessages().getObjectiveAddedPoints("ENTER", arg2UpperCase, w));
-                return new EnterObjective(finalObject, w, plugin);
+                return newEo;
             } catch (InvalidTargetLocationException e) {
-                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + arg2UpperCase + "\" is not a valid biome, structure, or portal type.")));
+                sender.sendMessage(plugin.getMessages().getIllegalArguments(arg2UpperCase, "valid biome," +
+                        " structure, or portal type"));
                 return null;
             }
         }).orElseGet(() -> {
             try {
+                EnterObjective newEo = new EnterObjective(finalObject, plugin);
                 sender.sendMessage(plugin.getMessages().getObjectiveAdded("ENTER", arg2UpperCase));
-                return new EnterObjective(finalObject, plugin);
+                return newEo;
             } catch (InvalidTargetLocationException e) {
-                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + arg2UpperCase + "\" is not a valid biome, structure, or portal type.")));
+                sender.sendMessage(plugin.getMessages().getIllegalArguments(arg2UpperCase, "valid biome," +
+                        " structure, or portal type"));
                 return null;
             }
         });
@@ -312,7 +332,7 @@ public class CommandSpeedrun implements BasicCommand {
     }
 
     // Method called upon subcommand "/speedrun addObjective mine"
-    private void mineObjectiveHandler(CommandSender sender, String[] args, Component prefix) {
+    private void mineObjectiveHandler(CommandSender sender, String[] args) {
 
         /* Try to assign material from third argument String value
            e.g., "/speedrun addObjective mine SANDSTONE" */
@@ -341,13 +361,13 @@ public class CommandSpeedrun implements BasicCommand {
             } else {
 
                 // If material is not a block:
-                sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid block.")));
+                sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2].toUpperCase(), "valid block"));
 
             }
         } else {
 
             // If string is not a valid material:
-            sender.sendMessage(prefix.append(Component.text("Illegal Argument: \"" + args[2] + "\" is not a valid material.")));
+            sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2].toUpperCase(), "valid material"));
 
         }
     }
@@ -387,6 +407,11 @@ public class CommandSpeedrun implements BasicCommand {
             }));
 
             speedRun.addObjective(oo);
+
+        } else {
+
+            sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2].toUpperCase(), "valid material"));
+
         }
     }
 

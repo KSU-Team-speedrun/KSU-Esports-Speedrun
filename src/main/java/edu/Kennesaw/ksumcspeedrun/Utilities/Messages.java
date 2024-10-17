@@ -16,6 +16,7 @@ public class Messages {
     private Component prefix;
     private TagResolver.Single prefixPlaceholder;
     private String teamJoinMessage;
+    private String teamCooldownMessage;
     private String alreadyOnTeam;
     private String teamIsFull;
     private String start;
@@ -24,10 +25,14 @@ public class Messages {
     private String timeUp;
     private String objectiveComplete;
     private String objectiveCompleteNumber;
+    private String invalidArguments;
+    private String illegalArguments;
+    private String outOfBounds;
     private String objectiveAdded;
     private String objectiveAddedPoints;
     private String objectiveAddedNumber;
     private String objectiveAddedPointsNumber;
+    private String objectiveRemoved;
     private String timeLimitSet;
     private String teamSizeLimitSet;
 
@@ -47,6 +52,7 @@ public class Messages {
             prefix = config.getComponent("messages.prefix");
             prefixPlaceholder = Placeholder.component("prefix", prefix);
             teamJoinMessage = config.getString("messages.teamJoinMessage");
+            teamCooldownMessage = config.getString("messages.teamCooldownMessage");
             alreadyOnTeam = config.getString("messages.alreadyOnTeam");
             teamIsFull = config.getString("messages.teamIsFull");
             start = config.getString("messages.start");
@@ -55,10 +61,14 @@ public class Messages {
             timeUp = config.getString("messages.timeUp");
             objectiveComplete = config.getString("messages.objectiveComplete");
             objectiveCompleteNumber = config.getString("messages.objectiveCompleteNumber");
+            invalidArguments = config.getString("messages.error.invalidArguments");
+            illegalArguments = config.getString("messages.error.illegalArgument");
+            outOfBounds = config.getString("messages.error.outOfBounds");
             objectiveAdded = config.getString("messages.admin.objectiveAdded");
             objectiveAddedNumber = config.getString("messages.admin.objectiveAddedNumber");
             objectiveAddedPoints = config.getString("messages.admin.objectiveAddedPoints");
             objectiveAddedPointsNumber = config.getString("messages.admin.objectiveAddedPointsNumber");
+            objectiveRemoved = config.getString("messages.admin.objectiveRemoved");
             timeLimitSet = config.getString("messages.admin.timeLimitSet");
             teamSizeLimitSet = config.getString("messages.admin.teamSizeLimitSet");
 
@@ -75,8 +85,12 @@ public class Messages {
     }
 
     public Component getTeamJoinMessage(Component teamName) {
-        return ComponentHelper.mmStringToComponent(teamJoinMessage, prefixPlaceholder,
-                Placeholder.component("team_name", teamName));
+            return ComponentHelper.mmStringToComponent(teamJoinMessage, prefixPlaceholder,
+                    Placeholder.component("team_name", teamName));
+    }
+
+    public Component getTeamCooldownMessage() {
+        return ComponentHelper.mmStringToComponent(teamCooldownMessage, prefixPlaceholder);
     }
 
     public Component getAlreadyOnTeam() {
@@ -120,6 +134,23 @@ public class Messages {
                 Placeholder.parsed("points", points + ""));
     }
 
+    public Component getInvalidArguments(String usage) {
+        return ComponentHelper.mmStringToComponent(invalidArguments, prefixPlaceholder,
+                Placeholder.parsed("usage", usage));
+    }
+
+    public Component getIllegalArguments(String illegalArg, String expectedType) {
+        return ComponentHelper.mmStringToComponent(illegalArguments, prefixPlaceholder,
+                Placeholder.parsed("illegal_arg", illegalArg),
+                Placeholder.parsed("expected_type", expectedType));
+    }
+
+    public Component getOutOfBounds(String illegalArg, String object) {
+        return ComponentHelper.mmStringToComponent(outOfBounds, prefixPlaceholder,
+                Placeholder.parsed("illegal_arg", illegalArg),
+                Placeholder.parsed("object", object));
+    }
+
     public Component getObjectiveAdded(String objectiveType, String target) {
         return ComponentHelper.mmStringToComponent(objectiveAdded, prefixPlaceholder,
                 Placeholder.parsed("objective_type", objectiveType),
@@ -146,6 +177,12 @@ public class Messages {
                 Placeholder.parsed("target", target),
                 Placeholder.parsed("number", number + ""),
                 Placeholder.parsed("points", points + ""));
+    }
+
+    public Component getObjectiveRemoved(String objectiveType, String target) {
+        return ComponentHelper.mmStringToComponent(objectiveRemoved, prefixPlaceholder,
+                Placeholder.parsed("objective_type", objectiveType),
+                Placeholder.parsed("target", target));
     }
 
     public Component getTimeLimitSet(String timeInMinutes) {

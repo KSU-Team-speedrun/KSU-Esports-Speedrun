@@ -4,12 +4,15 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.concurrent.TimeUnit;
 
 public class PlayerClick implements Listener {
 
@@ -44,9 +47,14 @@ public class PlayerClick implements Listener {
 
         if (e.getWhoClicked() instanceof Player p) {
 
-            if (e.getInventory().equals(tm.getTeamInventory().getInventory())) {
+            if (!plugin.getSpeedrun().isStarted()  && !p.isOp()) e.setCancelled(true);
 
-                e.setCancelled(true);
+            if (plugin.getSpeedrun().teamCooldown.contains(p)) {
+                p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
+                return;
+            }
+
+            if (e.getInventory().equals(tm.getTeamInventory().getInventory())) {
 
                 ItemStack currentItem = e.getCurrentItem();
 
@@ -68,8 +76,15 @@ public class PlayerClick implements Listener {
                             oldTeam.removePlayer(p);
                             tm.getTeamInventory().updateTeamInventory(oldTeam);
                         }
+
                         team.addPlayer(p);
                         tm.getTeamInventory().updateTeamInventory(team);
+
+                        plugin.getSpeedrun().teamCooldown.add(p);
+
+                        Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask ->
+                                        plugin.getSpeedrun().teamCooldown.remove(p),
+                                plugin.getConfig().getInt("teams.inventory.cooldown"), TimeUnit.SECONDS);
                     }
                 }
             }

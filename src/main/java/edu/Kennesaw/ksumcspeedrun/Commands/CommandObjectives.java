@@ -32,6 +32,10 @@ public class CommandObjectives implements BasicCommand {
 
             if (team != null) {
                 p.openBook(Items.getObjectiveBook(team));
+            } else {
+                if (p.isOp()) {
+                    p.openBook(Items.getAdminBook(plugin.getSpeedrun()));
+                }
             }
         }
     }

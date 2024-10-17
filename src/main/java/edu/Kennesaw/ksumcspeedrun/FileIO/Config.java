@@ -2,11 +2,13 @@ package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -145,12 +147,14 @@ public class Config {
     private void addDefaults() {
 
         // Default layout of plugin prefix, can be updated in the Config.yml
-        if (!config.contains("messages")) {
-
+        if (!config.contains("message")) {
             set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");
+            config.setComments("messages.teamJoinMessage", Arrays.asList(" ", "# Team-Related Messages"));
             set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
+            set("messages.teamCooldownMessage", "<prefix> Please wait a few seconds before changing your team.");
             set("messages.alreadyOnTeam", "<prefix> You are already on this team!");
             set("messages.teamIsFull", "<prefix> This team is full!");
+            config.setComments("messages.start", Arrays.asList(" ", "# Game Start and End Messages"));
             set("messages.start", "<prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time> minutes" +
                     "</gold></bold> to complete the objectives!<newline><prefix> Please type <click:run_command:" +
                     "'/objectives'><hover:show_text:'<bold><gold>Click here to view your objectives</gold></bold>'>" +
@@ -159,11 +163,17 @@ public class Config {
             set("messages.winner", "<prefix> The game has ended!<newline><prefix> The winner is: <winner>");
             set("messages.timeUp", "<prefix> The game has ended! Time has run out.<newline><prefix> The team with the" +
                     " most points is: <winner>");
+            config.setComments("messages.objectiveComplete", Arrays.asList(" ", "# Objective Completion Messages"));
             set("messages.objectiveComplete", "<prefix> Objective Complete: <bold><gold><objective_type> <target>" +
                     "</gold></bold><newline><prefix> Your team has earned <bold><gold><points> points</gold></bold>!");
             set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
                     " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
                     "point(s)</gold></bold>!");
+            config.setComments("messages.error.invalidArguments", Arrays.asList(" ", "# Error Messages"));
+            set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
+            set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
+            set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
+            config.setComments("messages.admin.objectiveAdded", Arrays.asList(" ", "# Admin Messages"));
             set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
                     "</gold></bold>");
             set("messages.admin.objectiveAddedPoints", "<prefix> Objective Added: <bold><gold><objective_type> " +
@@ -172,6 +182,8 @@ public class Config {
                     "<number> <target></gold></bold>");
             set("messages.admin.objectiveAddedPointsNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
                     "<number> <target></gold></bold> - <points> points");
+            set("messages.admin.objectiveRemoved", "<prefix> Objective Removed: <bold><gold><objective_type> <target>" +
+                    "</gold></bold>");
             set("messages.admin.timeLimitSet", "<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>");
             set("messages.admin.teamSizeLimitSet", "<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>");
 
@@ -179,9 +191,11 @@ public class Config {
 
         if (!config.contains("timer")) {
 
+            config.setComments("timer.interval", Arrays.asList(" ", "# Timer Configurations"));
             set("timer.interval", 1);
             set("timer.disable", false);
 
+            config.setComments("timer.title", Arrays.asList(" ", "# Timer Messages"));
             set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
             set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
             set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
@@ -190,8 +204,12 @@ public class Config {
 
         if (!config.contains("teams")) {
 
+            config.setComments("teams.inventory.title", Arrays.asList(" ", "# Team GUI Meta"));
             set("teams.inventory.title", "<bold><yellow>SELECT A TEAM:</yellow></bold>");
+            set("teams.inventory.cooldown", 5);
 
+
+            config.setComments("teams.white.name", Arrays.asList(" ", "# Team Definitions"));
             set("teams.white.name", "<!italic><white><bold>WHITE TEAM</bold></white>");
             set("teams.white.item", "WHITE_WOOL");
             set("teams.white.lore", "<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>");
@@ -261,6 +279,9 @@ public class Config {
                 /* Loops through every structure in the game and adds it to the config by default. Administrators can update
            these values with the average Y-coordinate of each structure */
         if (!config.contains("structureLocations")) {
+
+            config.setComments("structureLocations", Arrays.asList(" ", "# Structure Detection Configurations"));
+
             for (String s : SRStructure.getStructureNames()) {
 
                 /* The average Y-coordinate for an Ancient City is y=-51, the radius is set to 100
@@ -290,6 +311,12 @@ public class Config {
         }
 
         save();
+
+        ConfigurationSection cs = config.getConfigurationSection("messages");
+
+        if (cs != null) {
+            cs.setComments("", Arrays.asList(" ", "# Global Plugin Prefix"));
+        }
 
     }
 

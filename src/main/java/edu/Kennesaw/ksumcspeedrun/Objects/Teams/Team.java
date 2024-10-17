@@ -21,6 +21,7 @@ public class Team {
     private final List<Player> players = new ArrayList<>();
     private ItemStack item;
     private final TeamManager tm;
+    private final List<Objective> completedObjectives = new ArrayList<>();
 
 
     public Team(Main plugin, Component teamName, ItemStack item) {
@@ -82,6 +83,14 @@ public class Team {
 
     public List<Objective> getIncompleteObjectives() {
         return plugin.getSpeedrun().getObjectives().getIncompleteObjectives(this);
+    }
+
+    public List<Objective> getCompleteObjectives() {
+        return completedObjectives;
+    }
+
+    public void addCompleteObjective(Objective o) {
+        completedObjectives.add(o);
     }
 
     public int getSize() {

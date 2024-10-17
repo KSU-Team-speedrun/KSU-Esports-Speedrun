@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Utilities;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -90,13 +91,76 @@ public class Items {
         return slots;
     }
 
+    public static BookMeta getAdminBook(Speedrun speedrun) {
+
+        ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
+
+        BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
+
+        bookMeta.setAuthor("KSU Minecraft Esports");
+        bookMeta.setTitle("Objectives");
+
+        int maxCharsPerLine = 20;
+        int maxLines = 14;
+
+        List<Objective> objectives = speedrun.getObjectives().getObjectives();
+
+        List<String> pages = new ArrayList<>();
+
+        StringBuilder currentPage = new StringBuilder();
+
+        int pageLine = 1;
+        int totalPageChars = 0;
+
+        for (int i = 0; i < objectives.size(); i++) {
+
+            if (pageLine >= maxLines || totalPageChars >= maxCharsPerLine * maxLines) {
+                pages.add(currentPage.toString());
+                currentPage = new StringBuilder();
+                pageLine = 1;
+                totalPageChars = 0;
+            }
+
+            Objective o = objectives.get(i);
+            if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
+
+            }
+            String line = (i + 1) + ": " + o.getType().name() + " " + o.getTargetName();
+
+            if (line.length() > maxCharsPerLine) {
+                while (line.length() > maxCharsPerLine) {
+                    String part = line.substring(0, maxCharsPerLine);
+                    currentPage.append(part).append("\n");
+                    line = line.substring(maxCharsPerLine);
+                    pageLine++;
+                    totalPageChars += maxCharsPerLine;
+                }
+                currentPage.append(line).append("\n");
+                pageLine++;
+                totalPageChars += line.length();
+            } else {
+                currentPage.append(line).append("\n");
+                pageLine++;
+                totalPageChars += line.length();
+            }
+        }
+
+        if (currentPage.length() > 0) {
+            pages.add(currentPage.toString());
+        }
+
+        bookMeta.setPages(pages);
+        return bookMeta;
+    }
+
+
     public static BookMeta getObjectiveBook(Team team) {
 
         ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
 
         BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
 
-        bookMeta.setAuthor("AuthorName");
+        bookMeta.setAuthor("KSU Minecraft Esports");
         bookMeta.setTitle("Objectives");
 
         List<String> pages = new ArrayList<>();
@@ -131,7 +195,7 @@ public class Items {
         }
         currentColorCode = "§a";
 
-        for (Objective objective : team.getIncompleteObjectives()) {
+        for (Objective objective : team.getCompleteObjectives()) {
             appendLines(objective, currentLine, currentColorCode, ratio, maxCharsPerLine, maxLinesPerPage, spaceFull,
                     currentPage, pages);
         }
@@ -161,11 +225,7 @@ public class Items {
                                     StringBuilder currentPage, List<String> pages) {
         StringBuilder objectiveText;
 
-        if (!(objective instanceof EnterObjective)) {
-            objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
-        } else {
-            objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + " " + objective.getTargetName());
-        }
+        objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
 
         int i = objectiveText.toString().indexOf(':');
 

@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /* Speedrun Object Class, centerpoint of logic for speedrun events
@@ -52,12 +53,14 @@ public class Speedrun {
     private CountdownTimer ct;
 
     // GameRules set by admins will be located in this HashMap
-    private final HashMap<GameRule<?>, Boolean> gameRules;
+    private final Map<GameRule<?>, Boolean> gameRules;
 
     public Map<UUID, Player> combatLog;
     public Map<UUID, ScheduledTask> combatTasks;
 
     public Map<Location, Player> bedLog;
+
+    public Set<Player> teamCooldown;
 
     // Main Constructor with default attributes assigned
     public Speedrun(Main plugin) {
@@ -73,12 +76,15 @@ public class Speedrun {
 
         objectives = new ObjectiveManager();
         tm = new TeamManager(plugin);
-        gameRules = new HashMap<>();
 
-        combatLog = new HashMap<>();
-        combatTasks = new HashMap<>();
+        gameRules = new ConcurrentHashMap<>();
 
-        bedLog = new HashMap<>();
+        combatLog = new ConcurrentHashMap<>();
+        combatTasks = new ConcurrentHashMap<>();
+
+        bedLog = new ConcurrentHashMap<>();
+
+        teamCooldown = ConcurrentHashMap.newKeySet();
     }
 
     // Setters & Getters below should be quite self-explanatory

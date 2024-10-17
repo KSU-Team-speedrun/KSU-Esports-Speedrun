@@ -41,6 +41,9 @@ public class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new DamageEvent(this), this);
         Bukkit.getPluginManager().registerEvents(new PortalEvent(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerLeave(this), this);
+        Bukkit.getPluginManager().registerEvents(new ItemDrop(this), this);
+        Bukkit.getPluginManager().registerEvents(new ItemPickup(this), this);
+
 
         getLogger().info("Playtime tracker enabled");
         Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);

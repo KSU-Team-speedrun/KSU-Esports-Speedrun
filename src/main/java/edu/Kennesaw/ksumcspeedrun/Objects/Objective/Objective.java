@@ -56,6 +56,7 @@ public abstract class Objective {
 
         this.completedTeams.add(team);
         team.addPoints(weight);
+        team.addCompleteObjective(this);
 
         if (type.equals(ObjectiveType.OBTAIN)) {
 

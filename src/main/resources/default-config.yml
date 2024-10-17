@@ -1,0 +1,260 @@
+# ====================
+# Messages Configuration
+# ====================
+
+messages:
+
+  # Set a global prefix for all messages
+  prefix: '<bold><gold>[SPEEDRUN]</gold></bold>'
+
+  # Team Messages
+  teamJoinMessage: '<prefix> You joined: <team_name>'
+  teamCooldownMessage: '<prefix> Please wait a few seconds before changing your team.'
+  alreadyOnTeam: '<prefix> You are already on this team!'
+  teamIsFull: '<prefix> This team is full!'
+
+  # Speedrun Start/Stop Messages
+  start: <prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time>
+    minutes</gold></bold> to complete the objectives!<newline><prefix> Please type
+    <click:run_command:'/objectives'><hover:show_text:'<bold><gold>Click here to view
+    your objectives</gold></bold>'><bold><gold>/objectives</gold></bold></hover></click>
+    to view your objectives.
+  forceStop: '<prefix> The game has ended!<newline><prefix> The winner is inconclusive.'
+  winner: '<prefix> The game has ended!<newline><prefix> The winner is: <winner>'
+  timeUp: '<prefix> The game has ended! Time has run out.<newline><prefix> The team
+    with the most points is: <winner>'
+
+  # Objective Messages
+  objectiveComplete: '<prefix> Objective Complete: <bold><gold><objective_type> <target></gold></bold><newline><prefix>
+    Your team has earned <bold><gold><points> points</gold></bold>!'
+  objectiveCompleteNumber: '<prefix> Objective Complete: <bold><gold><objective_type>
+    <number> <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points>
+    point(s)</gold></bold>!'
+
+  # Error Messages
+  error:
+    invalidArguments: '<prefix> Invalid Arguments! Usage: <usage>'
+    illegalArgument: '<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.'
+    outOfBounds: '<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.'
+
+
+  # Admin Messages
+  admin:
+    objectiveAdded: '<prefix> Objective Added: <bold><gold><objective_type> <target></gold></bold>'
+    objectiveAddedPoints: '<prefix> Objective Added: <bold><gold><objective_type>
+      <target></gold></bold> - <points> points'
+    objectiveAddedNumber: '<prefix> Objective Added: <bold><gold><objective_type>
+      <number> <target></gold></bold>'
+    objectiveAddedPointsNumber: '<prefix> Objective Added: <bold><gold><objective_type>
+      <number> <target></gold></bold> - <points> points'
+    objectiveRemoved: '<prefix> Objective Removed: <bold><gold><objective_type> <target></gold></bold>'
+    timeLimitSet: '<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>'
+    teamSizeLimitSet: '<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>'
+
+# ====================
+# Timer Configuration
+# ====================
+
+timer:
+
+  # Timer Settings
+  interval: 1
+  disable: false
+
+  # Timer Messages
+  title: '<bold><gold>KSU SPEEDRUN</gold></bold>'
+  timeLeft: '<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>'
+  gameOverMessage: '<white><bold>GAME OVER!</bold></white>'
+
+# ====================
+# Team Configuration
+# ====================
+
+teams:
+
+  # Team Inventory Settings
+  inventory:
+    title: <bold><yellow>SELECT A TEAM:</yellow></bold>
+    cooldown: 5
+
+  # Team Definitions - Add and Remove Teams Here
+  white:
+    name: '<!italic><white><bold>WHITE TEAM</bold></white>'
+    item: WHITE_WOOL
+    lore: '<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>'
+  orange:
+    name: '<!italic><gold><bold>ORANGE TEAM</bold></gold>'
+    item: ORANGE_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><gold>ORANGE TEAM</gold></bold><white>!</white>'
+  magenta:
+    name: '<!italic><color:#ff00ff><bold>MAGENTA TEAM</bold></color>'
+    item: MAGENTA_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><color:#ff00ff>MAGENTA
+      TEAM</color></bold><white>!</white>'
+  light_blue:
+    name: '<!italic><color:#00ffff><bold>LIGHT BLUE TEAM</bold></color>'
+    item: LIGHT_BLUE_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><color:#00ffff>LIGHT BLUE
+      TEAM</color></bold><white>!</white>'
+  yellow:
+    name: '<!italic><yellow><bold>YELLOW TEAM</bold></yellow>'
+    item: YELLOW_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><yellow>YELLOW TEAM</yellow></bold><white>!</white>'
+  lime:
+    name: '<!italic><green><bold>LIME TEAM</bold></green>'
+    item: LIME_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><green>LIME TEAM</green></bold><white>!</white>'
+  pink:
+    name: '<!italic><color:#ff85c8><bold>PINK TEAM</bold></color>'
+    item: PINK_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><color:#ff85c8>PINK TEAM</color></bold><white>!</white>'
+  gray:
+    name: '<!italic><dark_gray><bold>GRAY TEAM</bold></dark_gray>'
+    item: GRAY_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_gray>GRAY TEAM</dark_gray></bold><white>!</white>'
+  light_gray:
+    name: '<!italic><gray><bold>LIGHT GRAY TEAM</bold></gray>'
+    item: LIGHT_GRAY_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><gray>LIGHT GRAY TEAM</gray></bold><white>!</white>'
+  cyan:
+    name: '<!italic><dark_aqua><bold>CYAN TEAM</bold></dark_aqua>'
+    item: CYAN_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_aqua>CYAN TEAM</dark_aqua></bold><white>!</white>'
+  purple:
+    name: '<!italic><dark_purple><bold>PURPLE TEAM</bold></dark_purple>'
+    item: PURPLE_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_purple>PURPLE TEAM</dark_purple></bold><white>!</white>'
+  blue:
+    name: '<!italic><dark_blue><bold>BLUE TEAM</bold></dark_blue>'
+    item: BLUE_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_blue>BLUE TEAM</dark_blue></bold><white>!</white>'
+  brown:
+    name: '<!italic><color:#964b00><bold>BROWN TEAM</bold></color>'
+    item: BROWN_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><color:#964b00>BROWN TEAM</color></bold><white>!</white>'
+  green:
+    name: '<!italic><dark_green><bold>GREEN TEAM</bold></dark_green>'
+    item: GREEN_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_green>GREEN TEAM</dark_green></bold><white>!</white>'
+  red:
+    name: '<!italic><dark_red><bold>RED TEAM</bold></dark_red>'
+    item: RED_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><dark_red>RED TEAM</dark_red></bold><white>!</white>'
+  black:
+    name: '<!italic><black><bold>BLACK TEAM</bold></black>'
+    item: BLACK_WOOL
+    lore: '<!italic><white>Click here to join </white><bold><black>BLACK TEAM</black></bold><white>!</white>'
+
+
+# ====================
+# Structure Configuration
+# ====================
+
+structureLocations:
+
+  # Define Average Y-Coordinate for each Structure or Set Detection Radius
+  # For future updates, you may manually add structures according to their
+  # official org.Bukkit.generator.structure.Structure name
+
+  PILLAGER_OUTPOST:
+    averageYCoordinate: ground
+    radius: 30
+  MINESHAFT:
+    averageYCoordinate: ground
+    radius: 30
+  MINESHAFT_MESA:
+    averageYCoordinate: ground
+    radius: 30
+  MANSION:
+    averageYCoordinate: ground
+    radius: 30
+  JUNGLE_PYRAMID:
+    averageYCoordinate: ground
+    radius: 30
+  DESERT_PYRAMID:
+    averageYCoordinate: ground
+    radius: 30
+  IGLOO:
+    averageYCoordinate: ground
+    radius: 30
+  SHIPWRECK:
+    averageYCoordinate: ground
+    radius: 30
+  SHIPWRECK_BEACHED:
+    averageYCoordinate: ground
+    radius: 30
+  SWAMP_HUT:
+    averageYCoordinate: ground
+    radius: 30
+  STRONGHOLD:
+    averageYCoordinate: 0
+    radius: 75
+  MONUMENT:
+    averageYCoordinate: ground
+    radius: 30
+  OCEAN_RUIN_COLD:
+    averageYCoordinate: ground
+    radius: 30
+  OCEAN_RUIN_WARM:
+    averageYCoordinate: ground
+    radius: 30
+  FORTRESS:
+    averageYCoordinate: ground
+    radius: 30
+  NETHER_FOSSIL:
+    averageYCoordinate: ground
+    radius: 30
+  END_CITY:
+    averageYCoordinate: ground
+    radius: 30
+  BURIED_TREASURE:
+    averageYCoordinate: ground
+    radius: 30
+  BASTION_REMNANT:
+    averageYCoordinate: ground
+    radius: 30
+  VILLAGE_PLAINS:
+    averageYCoordinate: ground
+    radius: 30
+  VILLAGE_DESERT:
+    averageYCoordinate: ground
+    radius: 30
+  VILLAGE_SAVANNA:
+    averageYCoordinate: ground
+    radius: 30
+  VILLAGE_SNOWY:
+    averageYCoordinate: ground
+    radius: 30
+  VILLAGE_TAIGA:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_DESERT:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_JUNGLE:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_SWAMP:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_MOUNTAIN:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_OCEAN:
+    averageYCoordinate: ground
+    radius: 30
+  RUINED_PORTAL_NETHER:
+    averageYCoordinate: ground
+    radius: 30
+  ANCIENT_CITY:
+    averageYCoordinate: -51
+    radius: 100
+  TRAIL_RUINS:
+    averageYCoordinate: ground
+    radius: 30
+  TRIAL_CHAMBERS:
+    averageYCoordinate: -30
+    radius: 100

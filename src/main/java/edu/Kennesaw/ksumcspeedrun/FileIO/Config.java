@@ -8,7 +8,6 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -32,7 +31,7 @@ public class Config {
         this.plugin = plugin;
 
         // Called when a Config instance is created
-        generateConfig();
+        generateDefaultConfig();
 
     }
 
@@ -129,6 +128,8 @@ public class Config {
     }
 
     // Saves the Config.yml, to be used if the config is updated
+    @Deprecated
+    @SuppressWarnings("unused")
     private void save() {
 
         plugin.getLogger().info("Saving config.yml...");
@@ -309,18 +310,11 @@ public class Config {
                 }
             }
         }
-
-        save();
-
-        ConfigurationSection cs = config.getConfigurationSection("messages");
-
-        if (cs != null) {
-            cs.setComments("", Arrays.asList(" ", "# Global Plugin Prefix"));
-        }
-
     }
 
     // Generates a Config.yml file with defaults if one does not already exist.. Loads the Config.yml file if one exists
+    @Deprecated
+    @SuppressWarnings("unused")
     private void generateConfig() {
 
         plugin.getLogger().info("Loading config.yml...");
@@ -343,5 +337,30 @@ public class Config {
             load();
         }
 
+    }
+
+    private void generateDefaultConfig() {
+
+        plugin.getLogger().info("Loading config.yml...");
+        file = new File(plugin.getDataFolder(), "config.yml");
+
+        if (!file.exists()) {
+            plugin.getLogger().info("Config.yml does not exist");
+            if (file.getParentFile().mkdirs()) {
+                plugin.getLogger().info("Creating parent directory \"" + plugin.getName() + "\"");
+            }
+
+            plugin.saveResource("default-config.yml", false);
+
+            File defaultConfig = new File(plugin.getDataFolder(), "default-config.yml");
+            if (defaultConfig.exists() && defaultConfig.renameTo(file)) {
+                plugin.getLogger().info("Generated new config.yml from default-config.yml.");
+            } else {
+                plugin.getLogger().warning("Failed to rename default-config.yml to config.yml.");
+            }
+
+        } else {
+            load();
+        }
     }
 }

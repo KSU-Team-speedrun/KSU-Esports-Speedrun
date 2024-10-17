@@ -29,7 +29,6 @@ public class Main extends JavaPlugin {
         // Config & Speedrun instances are initialized
         config = new Config(this);
         speedrun = new Speedrun(this);
-        messages = new Messages(this);
 
         // Events are Registered
         Bukkit.getPluginManager().registerEvents(new EntityDeath(this), this);
@@ -47,6 +46,8 @@ public class Main extends JavaPlugin {
 
         getLogger().info("Playtime tracker enabled");
         Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
+
+        messages = new Messages(this);
 
         // Speedrun Command is Registered
         LifecycleEventManager<@NotNull Plugin> manager = this.getLifecycleManager();

@@ -33,7 +33,7 @@ public class TeamSpawner {
                 player.sendMessage("Your team has been spawned at " + teamSpawnLocation);
             }
 
-            // Manually broadcast message to all online players
+            // Manually broadcast message to all online players ***Strickly for debug***
             String broadcastMessage = "Team " + (i + 1) + " has been spawned at " + teamSpawnLocation;
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.sendMessage(broadcastMessage);
@@ -41,3 +41,5 @@ public class TeamSpawner {
         }
     }
 }
+
+

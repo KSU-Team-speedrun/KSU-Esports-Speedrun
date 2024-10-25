@@ -18,7 +18,9 @@ public class TeamSpawner {
             double x = radius * Math.cos(angle);
             double z = radius * Math.sin(angle);
 
-            Location teamSpawnLocation = new Location(world, x, 0, z);
+            // Get the highest block at this (x, z) position to spawn on the surface
+            int highestY = world.getHighestBlockYAt((int) x, (int) z);
+            Location teamSpawnLocation = new Location(world, x, highestY + 1, z); // Add 1 to avoid spawning inside the block
 
             // Teleport each player to the team's spawn location and set their respawn point
             for (Player player : teams.get(i)) {
@@ -39,4 +41,5 @@ public class TeamSpawner {
         }
     }
 }
+
 

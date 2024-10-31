@@ -12,14 +12,14 @@ public class TeamManager {
 
     private final Main plugin;
 
-    private final List<Team> teams;
+    private List<Team> teams;
     private int teamSizeLimit;
 
-    private final TeamInventory teamInventory;
+    private TeamInventory teamInventory;
 
-    private final Map<Player, Team> playerTeam;
-    private final Map<Component, Team> teamName;
-    final private Map<ItemStack, Team> teamItem;
+    private Map<Player, Team> playerTeam;
+    private Map<Component, Team> teamName;
+    private Map<ItemStack, Team> teamItem;
 
 
     public TeamManager(Main plugin) {
@@ -98,6 +98,16 @@ public class TeamManager {
 
     public void addTeamItem(Team team, ItemStack item) {
         teamItem.put(item, team);
+    }
+
+    public void reset() {
+        teams = new ArrayList<>();
+        teamSizeLimit = 4;
+        playerTeam = new HashMap<>();
+        teamName = new HashMap<>();
+        teamItem = new HashMap<>();
+        teamInventory = new TeamInventory(this, plugin.getSpeedrunConfig()
+                .getComponent("teams.inventory.title"));
     }
 
 }

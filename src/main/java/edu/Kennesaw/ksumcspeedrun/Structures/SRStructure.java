@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Structures;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.util.StructureSearchResult;
 
@@ -105,7 +106,7 @@ public class SRStructure {
 
     // Locate the nearest specified structure to a given location, return the location of the structure using callback
     public static void getNearestStructureToLocation(Main plugin, SRStructure structureToFind, Location locFrom, LocationResultCallback callback) {
-
+        
         // We use an Async thread to access the config:
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
 

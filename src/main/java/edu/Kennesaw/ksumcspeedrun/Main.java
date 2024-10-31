@@ -26,8 +26,9 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        // Config & Speedrun instances are initialized
+        // Config instance is initialized
         config = new Config(this);
+
         speedrun = new Speedrun(this);
 
         // Events are Registered

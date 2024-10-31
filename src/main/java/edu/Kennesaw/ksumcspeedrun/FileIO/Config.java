@@ -2,7 +2,6 @@ package edu.Kennesaw.ksumcspeedrun.FileIO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
@@ -149,54 +148,68 @@ public class Config {
 
         // Default layout of plugin prefix, can be updated in the Config.yml
         if (!config.contains("message")) {
-            set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");
-            config.setComments("messages.teamJoinMessage", Arrays.asList(" ", "# Team-Related Messages"));
-            set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
-            set("messages.teamCooldownMessage", "<prefix> Please wait a few seconds before changing your team.");
-            set("messages.alreadyOnTeam", "<prefix> You are already on this team!");
-            set("messages.teamIsFull", "<prefix> This team is full!");
-            config.setComments("messages.start", Arrays.asList(" ", "# Game Start and End Messages"));
-            set("messages.start", "<prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time> minutes" +
-                    "</gold></bold> to complete the objectives!<newline><prefix> Please type <click:run_command:" +
-                    "'/objectives'><hover:show_text:'<bold><gold>Click here to view your objectives</gold></bold>'>" +
-                    "<bold><gold>/objectives</gold></bold></hover></click> to view your objectives.");
-            set("messages.forceStop", "<prefix> The game has ended!<newline><prefix> The winner is inconclusive.");
-            set("messages.winner", "<prefix> The game has ended!<newline><prefix> The winner is: <winner>");
-            set("messages.timeUp", "<prefix> The game has ended! Time has run out.<newline><prefix> The team with the" +
-                    " most points is: <winner>");
-            config.setComments("messages.objectiveComplete", Arrays.asList(" ", "# Objective Completion Messages"));
-            set("messages.objectiveComplete", "<prefix> Objective Complete: <bold><gold><objective_type> <target>" +
-                    "</gold></bold><newline><prefix> Your team has earned <bold><gold><points> points</gold></bold>!");
-            set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
-                    " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
-                    "point(s)</gold></bold>!");
-            config.setComments("messages.error.invalidArguments", Arrays.asList(" ", "# Error Messages"));
-            set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
-            set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
-            set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
-            config.setComments("messages.admin.objectiveAdded", Arrays.asList(" ", "# Admin Messages"));
-            set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
-                    "</gold></bold>");
-            set("messages.admin.objectiveAddedPoints", "<prefix> Objective Added: <bold><gold><objective_type> " +
-                    "<target></gold></bold> - <points> points");
-            set("messages.admin.objectiveAddedNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
-                    "<number> <target></gold></bold>");
-            set("messages.admin.objectiveAddedPointsNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
-                    "<number> <target></gold></bold> - <points> points");
-            set("messages.admin.objectiveRemoved", "<prefix> Objective Removed: <bold><gold><objective_type> <target>" +
-                    "</gold></bold>");
-            set("messages.admin.timeLimitSet", "<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>");
-            set("messages.admin.teamSizeLimitSet", "<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>");
+            if (!config.contains("message")) {
 
+                set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");
+                set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
+                set("messages.teamCooldownMessage", "<prefix> Please wait a few seconds before changing your team.");
+                set("messages.alreadyOnTeam", "<prefix> You are already on this team!");
+                set("messages.teamIsFull", "<prefix> This team is full!");
+
+                set("messages.start", "<prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time> minutes" +
+                        "</gold></bold> to complete the objectives!<newline><prefix> Please type <click:run_command:" +
+                        "'/objectives'><hover:show_text:'<bold><gold>Click here to view your objectives</gold></bold>'>" +
+                        "<bold><gold>/objectives</gold></bold></hover></click> to view your objectives.");
+                set("messages.forceStop", "<prefix> The game has ended!<newline><prefix> The winner is inconclusive.");
+                set("messages.winner", "<prefix> The game has ended!<newline><prefix> The winner is: <winner>");
+                set("messages.timeUp", "<prefix> The game has ended! Time has run out.<newline><prefix> The team with the" +
+                        " most points is: <winner>");
+
+                set("messages.objectiveComplete", "<prefix> Objective Complete: <bold><gold><objective_type> <target>" +
+                        "</gold></bold><newline><prefix> Your team has earned <bold><gold><points> points</gold></bold>!");
+                set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
+                        " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
+                        "point(s)</gold></bold>!");
+
+                set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
+                set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
+                set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
+
+                set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
+                        "</gold></bold>");
+                set("messages.admin.objectiveAddedPoints", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                        "<target></gold></bold> - <points> points");
+                set("messages.admin.objectiveAddedNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                        "<number> <target></gold></bold>");
+                set("messages.admin.objectiveAddedPointsNumber", "<prefix> Objective Added: <bold><gold><objective_type> " +
+                        "<number> <target></gold></bold> - <points> points");
+                set("messages.admin.objectiveRemoved", "<prefix> Objective Removed: <bold><gold><objective_type> <target>" +
+                        "</gold></bold>");
+                set("messages.admin.timeLimitSet", "<prefix> Time limit set to: <bold><gold><time_limit> Minute(s)</gold></bold>");
+                set("messages.admin.teamSizeLimitSet", "<prefix> Team size limit set to: <bold><gold><size_limit></gold></bold>");
+                set("messages.admin.timeLimit", "<prefix> Time Limit: <bold><gold><time_limit> Minute(s)</gold></bold>");
+                set("messages.admin.teamSizeLimit", "<prefix> Team Size Limit: <bold><gold><size_limit></gold></bold>");
+                set("messages.admin.seedSet", "<prefix> World seed has been set to: <bold><gold><seed></gold></bold>");
+                set("messages.admin.seed", "<prefix> Seed: <bold><gold><seed></gold></bold>");
+                set("messages.admin.worldBorderSet", "<prefix> World border has been set to: <bold><gold><world_border></gold></bold>");
+                set("messages.admin.worldBorder", "<prefix> World Border: <bold><gold><world_border></gold></bold>");
+                set("messages.admin.spawnRadiusSet", "<prefix> Spawn radius has been set to: <bold><gold><spawn_radius></gold></bold>");
+                set("messages.admin.spawnRadius", "<prefix> Spawn Radius: <bold><gold><spawn_radius></gold></bold>");
+                set("messages.admin.pointLimitSet", "<prefix> Point limit set to: <bold><gold><point_limit></gold></bold>");
+                set("messages.admin.pointLimit", "<prefix> Point Limit: <bold><gold><point_limit></gold></bold>");
+                set("messages.admin.gameAlreadyStarted", "<prefix> The game has already started!");
+                set("messages.admin.gameStarted", "<prefix> You have started the speedrun!");
+                set("messages.admin.worldGenerating", "<prefix> Generating world... Please wait.");
+                set("messages.admin.worldGenerated", "<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to start the game.");
+                set("messages.admin.resetAttributes", "<prefix> All attributes have been reset.");
+            }
         }
 
         if (!config.contains("timer")) {
 
-            config.setComments("timer.interval", Arrays.asList(" ", "# Timer Configurations"));
             set("timer.interval", 1);
             set("timer.disable", false);
 
-            config.setComments("timer.title", Arrays.asList(" ", "# Timer Messages"));
             set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
             set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
             set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
@@ -205,12 +218,9 @@ public class Config {
 
         if (!config.contains("teams")) {
 
-            config.setComments("teams.inventory.title", Arrays.asList(" ", "# Team GUI Meta"));
             set("teams.inventory.title", "<bold><yellow>SELECT A TEAM:</yellow></bold>");
             set("teams.inventory.cooldown", 5);
 
-
-            config.setComments("teams.white.name", Arrays.asList(" ", "# Team Definitions"));
             set("teams.white.name", "<!italic><white><bold>WHITE TEAM</bold></white>");
             set("teams.white.item", "WHITE_WOOL");
             set("teams.white.lore", "<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>");
@@ -277,11 +287,13 @@ public class Config {
 
         }
 
+        if (!config.contains("world")) {
+            set("world.deleteOnStart", true);
+        }
+
                 /* Loops through every structure in the game and adds it to the config by default. Administrators can update
            these values with the average Y-coordinate of each structure */
         if (!config.contains("structureLocations")) {
-
-            config.setComments("structureLocations", Arrays.asList(" ", "# Structure Detection Configurations"));
 
             for (String s : SRStructure.getStructureNames()) {
 

@@ -34,7 +34,22 @@ public class Messages {
     private String objectiveAddedPointsNumber;
     private String objectiveRemoved;
     private String timeLimitSet;
+    private String timeLimit;
     private String teamSizeLimitSet;
+    private String teamSizeLimit;
+    private String seedSet;
+    private String seed;
+    private String worldBorderSet;
+    private String worldBorder;
+    private String spawnRadiusSet;
+    private String spawnRadius;
+    private String pointLimitSet;
+    private String pointLimit;
+    private String gameAlreadyStarted;
+    private String gameStarted;
+    private String worldGenerating;
+    private String worldGenerated;
+    private String resetAttributes;
 
     // Timer
     private String timerTitle;
@@ -70,7 +85,22 @@ public class Messages {
             objectiveAddedPointsNumber = config.getString("messages.admin.objectiveAddedPointsNumber");
             objectiveRemoved = config.getString("messages.admin.objectiveRemoved");
             timeLimitSet = config.getString("messages.admin.timeLimitSet");
+            timeLimit = config.getString("messages.admin.timeLimit");
             teamSizeLimitSet = config.getString("messages.admin.teamSizeLimitSet");
+            teamSizeLimit = config.getString("messages.admin.teamSizeLimit");
+            seedSet = config.getString("messages.admin.seedSet");
+            seed = config.getString("messages.admin.seed");
+            worldBorderSet = config.getString("messages.admin.worldBorderSet");
+            worldBorder = config.getString("messages.admin.worldBorder");
+            spawnRadiusSet = config.getString("messages.admin.spawnRadiusSet");
+            spawnRadius = config.getString("messages.admin.spawnRadius");
+            pointLimitSet = config.getString("messages.admin.pointLimitSet");
+            pointLimit = config.getString("messages.admin.pointLimit");
+            gameAlreadyStarted = config.getString("messages.admin.gameAlreadyStarted");
+            gameStarted = config.getString("messages.admin.gameStarted");
+            worldGenerating = config.getString("messages.admin.worldGenerating");
+            worldGenerated = config.getString("messages.admin.worldGenerated");
+            resetAttributes = config.getString("messages.admin.resetAttributes");
 
             timerTitle = config.getString("timer.title");
             timeRemaining = config.getString("timer.timeLeft");
@@ -190,9 +220,79 @@ public class Messages {
                 timeInMinutes));
     }
 
+    public Component getTimeLimit(String timeInMinutes) {
+        return ComponentHelper.mmStringToComponent(timeLimit, prefixPlaceholder, Placeholder.parsed("time_limit",
+                timeInMinutes));
+    }
+
     public Component getTeamSizeLimitSet(String sizeLimit) {
         return ComponentHelper.mmStringToComponent(teamSizeLimitSet, prefixPlaceholder, Placeholder.parsed("size_limit",
                 sizeLimit));
+    }
+
+    public Component getTeamSizeLimit(String sizeLimit) {
+        return ComponentHelper.mmStringToComponent(teamSizeLimit, prefixPlaceholder, Placeholder.parsed("size_limit",
+                sizeLimit));
+    }
+
+    public Component getSeedSet(String seed) {
+        return ComponentHelper.mmStringToComponent(seedSet, prefixPlaceholder, Placeholder.parsed("seed",
+                seed));
+    }
+
+    public Component getSeed(String seed) {
+        return ComponentHelper.mmStringToComponent(this.seed, prefixPlaceholder, Placeholder.parsed("seed",
+                seed));
+    }
+
+    public Component getWorldBorderSet(String worldBorder) {
+        return ComponentHelper.mmStringToComponent(worldBorderSet, prefixPlaceholder, Placeholder.parsed("world_border",
+                worldBorder));
+    }
+
+    public Component getWorldBorder(String worldBorder) {
+        return ComponentHelper.mmStringToComponent(this.worldBorder, prefixPlaceholder, Placeholder.parsed("world_border",
+                worldBorder));
+    }
+
+    public Component getSpawnRadiusSet(String spawnRadius) {
+        return ComponentHelper.mmStringToComponent(spawnRadiusSet, prefixPlaceholder, Placeholder.parsed("spawn_radius",
+                spawnRadius));
+    }
+
+    public Component getSpawnRadius(String spawnRadius) {
+        return ComponentHelper.mmStringToComponent(this.spawnRadius, prefixPlaceholder, Placeholder.parsed("spawn_radius",
+                spawnRadius));
+    }
+
+    public Component getPointLimitSet(String pointLimit) {
+        return ComponentHelper.mmStringToComponent(pointLimitSet, prefixPlaceholder, Placeholder.parsed("point_limit",
+                pointLimit));
+    }
+
+    public Component getPointLimit(String pointLimit) {
+        return ComponentHelper.mmStringToComponent(this.pointLimit, prefixPlaceholder, Placeholder.parsed("point_limit",
+                pointLimit));
+    }
+
+    public Component getGameAlreadyStarted() {
+        return ComponentHelper.mmStringToComponent(this.gameAlreadyStarted, prefixPlaceholder);
+    }
+
+    public Component getGameStarted() {
+        return ComponentHelper.mmStringToComponent(this.gameStarted, prefixPlaceholder);
+    }
+
+    public Component getWorldGenerating() {
+        return ComponentHelper.mmStringToComponent(this.worldGenerating, prefixPlaceholder);
+    }
+
+    public Component getWorldGenerated() {
+        return ComponentHelper.mmStringToComponent(this.worldGenerated, prefixPlaceholder);
+    }
+
+    public Component getResetAttributes() {
+        return ComponentHelper.mmStringToComponent(this.resetAttributes, prefixPlaceholder);
     }
 
     public Component getTimerTitle() {

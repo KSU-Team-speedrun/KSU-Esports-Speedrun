@@ -6,19 +6,19 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
+import edu.Kennesaw.ksumcspeedrun.Utilities.WorldGenerator;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -31,12 +31,13 @@ public class Speedrun {
     Main plugin;
 
     // Speedrun Attributes
-    private long seed;
+    private String seed;
     private int border;
     private int timeLimit;
     private TimeUnit timeUnit;
     private int spawnRadius;
     private int playerLimit;
+    private World speedrunWorld;
 
     // "isVerified" meaning objectives can be completed on world seed within world border constraints
     private boolean isVerified;
@@ -53,7 +54,7 @@ public class Speedrun {
     private CountdownTimer ct;
 
     // GameRules set by admins will be located in this HashMap
-    private final Map<GameRule<?>, Boolean> gameRules;
+    private Map<GameRule<?>, Boolean> gameRules;
 
     public Map<UUID, Player> combatLog;
     public Map<UUID, ScheduledTask> combatTasks;
@@ -62,13 +63,15 @@ public class Speedrun {
 
     public Set<Player> teamCooldown;
 
+    final File worldFolder = new File(Bukkit.getWorldContainer(), "speedrunworld");
+
     // Main Constructor with default attributes assigned
     public Speedrun(Main plugin) {
 
         this.plugin = plugin;
 
         Random rand = new Random();
-        this.seed = rand.nextInt();
+        this.seed = rand.nextInt() + "";
         this.border = 5000;
         this.timeLimit = 60;
         this.timeUnit = TimeUnit.MINUTES;
@@ -85,15 +88,23 @@ public class Speedrun {
         bedLog = new ConcurrentHashMap<>();
 
         teamCooldown = ConcurrentHashMap.newKeySet();
+
+        if (plugin.getConfig().getBoolean("world.deleteOnStart")) {
+            plugin.getLogger().info("Deleting old speedrun world...");
+            deleteWorldFolder(worldFolder);
+        }
+
+        speedrunWorld = null;
+
     }
 
     // Setters & Getters below should be quite self-explanatory
 
-    public void setSeed(long seed) {
+    public void setSeed(String seed) {
         this.seed = seed;
     }
 
-    public long getSeed() {
+    public String getSeed() {
         return seed;
     }
 
@@ -190,17 +201,55 @@ public class Speedrun {
         return isVerified;
     }
 
-    public void setStarted() {
+    public Boolean setStarted() {
         if (!this.isStarted) {
+            if (speedrunWorld == null) {
+                WorldGenerator wg = new WorldGenerator();
+                try {
+                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(Long.parseLong(seed)));
+                } catch (NumberFormatException e) {
+                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(seed.hashCode()));
+                }
+                return false;
+            }
+            assignPlayers();
             for (Player p : tm.getAssignedPlayers()) {
                 p.getInventory().clear();
             }
             new PlayerMove(plugin);
             isStarted = true;
-            assignPlayers();
             ct = new CountdownTimer(plugin, timeLimit);
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
+            return true;
         }
+        return null;
+    }
+
+    public Boolean setStarted(CommandSender sender) {
+        if (!this.isStarted) {
+            if (speedrunWorld == null) {
+                Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+                    sender.sendMessage(plugin.getMessages().getWorldGenerating());
+                });
+                WorldGenerator wg = new WorldGenerator();
+                try {
+                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(Long.parseLong(seed)));
+                } catch (NumberFormatException e) {
+                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(seed.hashCode()));
+                }
+                return false;
+            }
+            assignPlayers();
+            for (Player p : tm.getAssignedPlayers()) {
+                p.getInventory().clear();
+            }
+            new PlayerMove(plugin);
+            isStarted = true;
+            ct = new CountdownTimer(plugin, timeLimit);
+            Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
+            return true;
+        }
+        return null;
     }
 
     public boolean isStarted() {
@@ -257,6 +306,7 @@ public class Speedrun {
      *                           and will later be removed.
      */
     public void createTeams(Integer onlinePlayersTest) {
+
         if (onlinePlayersTest == null) {
             onlinePlayersTest = Bukkit.getServer().getOnlinePlayers().size();
         }
@@ -383,8 +433,45 @@ public class Speedrun {
 
     }
 
+    public void resetAttributes() {
+        if (!isStarted) {
+            Random rand = new Random();
+            this.seed = rand.nextInt() + "";
+            this.border = 5000;
+            this.timeLimit = 60;
+            this.timeUnit = TimeUnit.MINUTES;
+            this.spawnRadius = 300;
+
+            objectives.clearObjectives();
+            tm.reset();
+            createTeams(null);
+
+            gameRules = new ConcurrentHashMap<>();
+
+            combatLog = new ConcurrentHashMap<>();
+            combatTasks = new ConcurrentHashMap<>();
+
+            bedLog = new ConcurrentHashMap<>();
+
+            teamCooldown = ConcurrentHashMap.newKeySet();
+
+            if (speedrunWorld != null) {
+                Bukkit.unloadWorld(speedrunWorld, false);
+            }
+
+            Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+                deleteWorldFolder(worldFolder);
+            });
+
+            speedrunWorld = null;
+
+        }
+    }
+
     private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {
-        for (Player player : noTeamPlayers) {
+        Iterator<Player> iterator = noTeamPlayers.iterator();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
             Team team = tm.getTeams().get(teamIndex);
             if (team.getSize() > tm.getSizeLimit()) {
                 assignPlayers(noTeamPlayers, teamIndex + 1);
@@ -392,11 +479,11 @@ public class Speedrun {
             }
             team.addPlayer(player);
             teamIndex = (teamIndex + 1) % tm.getTeams().size();
-            noTeamPlayers.remove(player);
+            iterator.remove();
         }
-
         balanceTeams();
     }
+
 
     private void assignPlayers(List<Player> noTeamPlayers, int teamIndex) {
 
@@ -412,6 +499,19 @@ public class Speedrun {
             tm.getTeams().getFirst().addPlayer(playerToMove);
 
             tm.getTeams().sort(Comparator.comparingInt(Team::getSize));
+        }
+    }
+
+    private void deleteWorldFolder(File path) {
+        if (path.exists()) {
+            if (path.isDirectory()) {
+                plugin.getLogger().info("Deleting directory: " + path.getName());
+                for (File file : path.listFiles()) {
+                    deleteWorldFolder(file);
+                }
+            }
+            path.delete();
+            plugin.getLogger().info("Deleting file: " + path.getName());
         }
     }
 }

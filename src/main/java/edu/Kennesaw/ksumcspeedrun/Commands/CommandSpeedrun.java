@@ -114,6 +114,48 @@ public class CommandSpeedrun implements BasicCommand {
                         }
 
                     }
+                } else if (args[0].equalsIgnoreCase("setseed")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setseed [seed]"));
+
+                    } else {
+                        speedRun.setSeed(args[1]);
+                        sender.sendMessage(plugin.getMessages().getSeedSet(args[1]));
+                    }
+
+                } else if (args[0].equalsIgnoreCase("getseed")) {
+
+                    sender.sendMessage(plugin.getMessages().getSeed(speedRun.getSeed()));
+
+                } else if (args[0].equalsIgnoreCase("setborder")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setborder [border]"));
+
+                    } else {
+
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            final String arguments = args[1];
+
+                            try {
+                                int size = Integer.parseInt(arguments);
+                                speedRun.setBorder(size);
+                                sender.sendMessage(plugin.getMessages().getWorldBorderSet(arguments));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
+                            }
+
+                        });
+
+                    }
+
+                } else if (args[0].equalsIgnoreCase("getborder")) {
+
+                    sender.sendMessage(plugin.getMessages().getWorldBorder(speedRun.getBorder() + ""));
 
                 } else if (args[0].equalsIgnoreCase("setteamsize")) {
 
@@ -141,7 +183,7 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("getteamsize")) {
 
-           //         sender.sendMessage(Component.text("Size limit per team: " + speedRun.getTeamSizeLimit()));
+                    sender.sendMessage(plugin.getMessages().getTeamSizeLimit(speedRun.getTeamSizeLimit() + ""));
 
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {
 
@@ -164,9 +206,86 @@ public class CommandSpeedrun implements BasicCommand {
                         }
                     }
 
+                } else if (args[0].equalsIgnoreCase("gettimelimit")) {
+
+                    sender.sendMessage(plugin.getMessages().getTimeLimit(speedRun.getTimeLimit() + ""));
+
+                } else if (args[0].equalsIgnoreCase("setspawnradius")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setspawnradius [number]"));
+
+                    } else {
+
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            final String arguments = args[1];
+
+                            try {
+                                int size = Integer.parseInt(arguments);
+                                speedRun.setSpawnRadius(size);
+                                sender.sendMessage(plugin.getMessages().getSpawnRadiusSet(arguments));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
+                            }
+
+                        });
+
+                    }
+
+                } else if (args[0].equalsIgnoreCase("getspawnradius")) {
+
+                    sender.sendMessage(plugin.getMessages().getSpawnRadius(speedRun.getSpawnRadius() + ""));
+
+                } else if (args[0].equalsIgnoreCase("setpointlimit")) {
+
+                    if (args.length != 2) {
+
+                        sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setpointlimit [number]"));
+
+                    } else {
+
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            final String arguments = args[1];
+
+                            try {
+                                int size = Integer.parseInt(arguments);
+                                speedRun.setTotalWeight(size);
+                                sender.sendMessage(plugin.getMessages().getPointLimitSet(arguments));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
+                            }
+
+                        });
+
+                    }
+
+                } else if (args[0].equalsIgnoreCase("getpointlimit")) {
+
+                    sender.sendMessage(plugin.getMessages().getPointLimit(speedRun.getTotalWeight() + ""));
+
+                } else if (args[0].equalsIgnoreCase("resetattributes")) {
+
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        speedRun.resetAttributes();
+                    });
+
+                    sender.sendMessage(plugin.getMessages().getResetAttributes());
+
                 } else if (args[0].equalsIgnoreCase("start")) {
 
-                    speedRun.setStarted();
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        Boolean isStarted = speedRun.setStarted(sender);
+                        if (isStarted == null) {
+                            sender.sendMessage(plugin.getMessages().getGameAlreadyStarted());
+                        } else if (isStarted) {
+                            sender.sendMessage(plugin.getMessages().getGameStarted());
+                        } else {
+                            sender.sendMessage(plugin.getMessages().getWorldGenerated());
+                        }
+                    });
 
                 } else if (args[0].equalsIgnoreCase("stop")) {
 
@@ -456,14 +575,25 @@ public class CommandSpeedrun implements BasicCommand {
         // If no arguments have been typed, main subcommands are suggested.
         if (args.length == 0) {
 
+            suggestions.add("addobjective");
+            suggestions.add("getborder");
+            suggestions.add("getpointlimit");
+            suggestions.add("getseed");
+            suggestions.add("getspawnradius");
+            suggestions.add("getteamsize");
+            suggestions.add("gettimelimit");
             suggestions.add("help");
             suggestions.add("reload");
-            suggestions.add("addobjective");
+            suggestions.add("remobjective");
+            suggestions.add("resetattributes");
+            suggestions.add("setborder");
+            suggestions.add("setpointlimit");
+            suggestions.add("setseed");
+            suggestions.add("setspawnradius");
             suggestions.add("setteamsize");
-            suggestions.add("getteamsize");
+            suggestions.add("settimelimit");
             suggestions.add("start");
             suggestions.add("stop");
-            suggestions.add("settimelimit");
 
         // If arguments have been typed, the following logic runs:
         } else {
@@ -473,8 +603,12 @@ public class CommandSpeedrun implements BasicCommand {
                "addObjective", etc. */
             if (args.length == 1) {
 
-                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective"
-                        , "setteamsize", "getteamsize", "start", "stop", "settimelimit");
+                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective",
+                        "remobjective", "setteamsize", "getteamsize", "start", "stop",
+                        "settimelimit", "gettimelimit", "setborder", "getborder",
+                        "setseed", "getseed", "resetattributes", "setspawnradius", "getspawnradius",
+                        "setpointlimit", "getpointlimit");
+
 
             /* The same continues for the second argument: If the first argument is addobjective, suggestions are made
                for the second argument: kill, enter, obtain, or mine */
@@ -482,10 +616,20 @@ public class CommandSpeedrun implements BasicCommand {
 
                 if (args[0].equalsIgnoreCase("addobjective")) {
                     addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain");
+                } else if (args[0].equalsIgnoreCase("remobjective")) {
+                    suggestions.add("[number");
                 } else if (args[0].equalsIgnoreCase("setteamsize")) {
                     suggestions.add("[number]");
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {
                     suggestions.add("[numberInMinutes]");
+                } else if (args[0].equalsIgnoreCase("setborder")) {
+                    suggestions.add("[radius]");
+                } else if (args[0].equalsIgnoreCase("setseed")) {
+                    suggestions.add("[seed]");
+                } else if (args[0].equalsIgnoreCase("setspawnradius")) {
+                    suggestions.add("[radius]");
+                }  else if (args[0].equalsIgnoreCase("setpointlimit")) {
+                    suggestions.add("[number]");
                 }
 
             // Continues w/ third argument, just one step deeper

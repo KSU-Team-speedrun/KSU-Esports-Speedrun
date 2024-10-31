@@ -10,7 +10,7 @@ import java.util.List;
 public class ObjectiveManager {
 
     // An instance of ObjectiveManager holds a list of Objectives
-    private final List<Objective> objectives;
+    private List<Objective> objectives;
 
     private int totalWeight;
 
@@ -63,4 +63,7 @@ public class ObjectiveManager {
         this.totalWeight = totalWeight;
     }
 
+    public void clearObjectives() {
+        this.objectives = new ArrayList<>();
+    }
 }

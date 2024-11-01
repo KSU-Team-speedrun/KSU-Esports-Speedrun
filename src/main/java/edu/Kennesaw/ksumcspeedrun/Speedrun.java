@@ -6,6 +6,7 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamSpawner;
 import edu.Kennesaw.ksumcspeedrun.Utilities.WorldGenerator;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
@@ -219,6 +220,7 @@ public class Speedrun {
             new PlayerMove(plugin);
             isStarted = true;
             ct = new CountdownTimer(plugin, timeLimit);
+            TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
             return true;
         }
@@ -246,6 +248,7 @@ public class Speedrun {
             new PlayerMove(plugin);
             isStarted = true;
             ct = new CountdownTimer(plugin, timeLimit);
+            TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
             return true;
         }

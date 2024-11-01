@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Structures;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.util.StructureSearchResult;
 
@@ -50,12 +51,13 @@ public class SRStructure {
     }
 
     // Async method that returns a list of all Structures objects in the game using a callback
+    @SuppressWarnings("unused")
     public static void getStructures(Main plugin, StructureListResultCallback structList) {
 
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
             List<Structure> structures = new ArrayList<>();
             for (Field f : Structure.class.getFields()) {
-                Object value = null;
+                Object value;
                 try {
                     value = f.get(null);
                 } catch (IllegalAccessException e) {
@@ -86,7 +88,7 @@ public class SRStructure {
     public static Structure getStructureFromString(String structure) {
         HashMap<String, Structure> structureTypes = new HashMap<>();
         for (Field f : Structure.class.getFields()) {
-            Object value = null;
+            Object value;
             try {
                 value = f.get(null);
             } catch (IllegalAccessException e) {
@@ -104,7 +106,7 @@ public class SRStructure {
 
     // Locate the nearest specified structure to a given location, return the location of the structure using callback
     public static void getNearestStructureToLocation(Main plugin, SRStructure structureToFind, Location locFrom, LocationResultCallback callback) {
-
+        
         // We use an Async thread to access the config:
         Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
 
@@ -122,7 +124,7 @@ public class SRStructure {
             }
             final String finalAvgY = averageY;
             final int finalY = y;
-
+            
             /* Once we have this coordinate value, we go back to the main thread to do a structure search (any
                computation that interacts with players or the world must be on the main thread) */
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -157,17 +159,12 @@ public class SRStructure {
     }
 
     public static void getStructureRadius(Main plugin, SRStructure target, RadiusResultCallback callback) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-            callback.onResult(plugin.getSpeedrunConfig().getInt("structureLocations." + target.getName() + ".radius"));
-        });
+        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> callback.onResult(plugin.getSpeedrunConfig()
+                .getInt("structureLocations." + target.getName() + ".radius")));
     }
 
     public interface LocationResultCallback {
         void onResult(Location loc);
-    }
-
-    public interface StructureResultCallback {
-        void onResult(Structure struct);
     }
 
     public interface StructureListResultCallback {

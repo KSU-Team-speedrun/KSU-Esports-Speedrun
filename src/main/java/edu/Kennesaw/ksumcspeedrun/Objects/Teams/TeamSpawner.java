@@ -1,4 +1,4 @@
-﻿package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
+package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,16 +10,17 @@ import java.util.List;
 
 public class TeamSpawner {
 
-    public static void spawnTeamsInCircle(World world, List<List<Player>> teams, double radius) {
+    public static void spawnTeamsInCircle(World world, TeamManager tm, double radius) {
         // Calculate angle step based on the number of teams
-        double angleStep = 2 * Math.PI / teams.size();
+        double angleStep = 2 * Math.PI / tm.getTeams().size();
 
-        for (int i = 0; i < teams.size(); i++) {
+        for (int i = 0; i < tm.getTeams().size(); i++) {
             double angle = i * angleStep;
             Location teamSpawnLocation = findSafeLocation(world, angle, radius);
 
             // Teleport each player to the team's spawn location and set their respawn point
-            for (Player player : teams.get(i)) {
+            for (Player player : tm.getTeams().get(i).getPlayers()) {
+
                 player.teleport(teamSpawnLocation);
 
                 // Set the player's respawn location

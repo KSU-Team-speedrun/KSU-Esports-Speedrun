@@ -270,6 +270,7 @@ public class Config {
             set("messages.admin.worldGenerating", "<prefix> Generating world... Please wait.");
             set("messages.admin.worldGenerated", "<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to start the game.");
             set("messages.admin.resetAttributes", "<prefix> All attributes have been reset.");
+            set("messages.admin.toggleTeams", "<prefix> Teams have been: <toggle_option>");
         }
 
         if (!config.contains("timer")) {

@@ -342,6 +342,12 @@ public class CommandSpeedrun implements BasicCommand {
 
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.createTeams(Integer.parseInt(args[1])));
 
+                } else if (args[0].equalsIgnoreCase("toggleTeams")) {
+
+                    sender.sendMessage(plugin.getMessages().getToggleTeams(!speedRun.getTeamsEnabled()));
+
+                    Bukkit.getScheduler().runTask(plugin, () -> speedRun.setTeamsEnabled(!speedRun.getTeamsEnabled()));
+
                 } else {
 
                     sender.sendMessage(plugin.getMessages().getUnknownCommand(args[0]));

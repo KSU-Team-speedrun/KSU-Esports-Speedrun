@@ -60,6 +60,7 @@ public class Messages {
     private String worldGenerating;
     private String worldGenerated;
     private String resetAttributes;
+    private String toggleTeams;
 
     // Timer
     private String timerTitle;
@@ -117,6 +118,7 @@ public class Messages {
             worldGenerating = config.getString("messages.admin.worldGenerating");
             worldGenerated = config.getString("messages.admin.worldGenerated");
             resetAttributes = config.getString("messages.admin.resetAttributes");
+            toggleTeams = config.getString("messages.admin.toggleTeams");
 
             timerTitle = config.getString("timer.title");
             timeRemaining = config.getString("timer.timeLeft");
@@ -336,6 +338,11 @@ public class Messages {
 
     public Component getResetAttributes() {
         return ComponentHelper.mmStringToComponent(this.resetAttributes, prefixPlaceholder);
+    }
+
+    public Component getToggleTeams(boolean toggleOption) {
+        return ComponentHelper.mmStringToComponent(this.toggleTeams, prefixPlaceholder,
+                Placeholder.parsed("toggle_option", toggleOption ? "ENABLED" : "DISABLED"));
     }
 
     public Component getTimerTitle() {

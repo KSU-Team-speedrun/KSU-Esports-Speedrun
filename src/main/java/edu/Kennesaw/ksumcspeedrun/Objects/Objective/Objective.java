@@ -89,6 +89,7 @@ public abstract class Objective {
         this.completedPlayers.add(player);
         player.addPoints(weight);
         player.addCompleteObjective(this);
+
         if (type.equals(ObjectiveType.OBTAIN)) {
 
             ObtainObjective oo = (ObtainObjective) this;
@@ -99,9 +100,10 @@ public abstract class Objective {
 
                 player.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
                         targetName, number, weight));
-
             }
         }
+        player.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
+
     }
 
     public boolean isComplete(Team team) {

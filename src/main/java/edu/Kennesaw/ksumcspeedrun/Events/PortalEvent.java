@@ -6,6 +6,7 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
+import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -18,10 +19,12 @@ public class PortalEvent implements Listener {
 
     Main plugin;
     private final TeamManager tm;
+    private final Speedrun speedrun;
 
     public PortalEvent(Main plugin) {
         this.plugin = plugin;
-        this.tm = plugin.getSpeedrun().getTeams();
+        this.speedrun = plugin.getSpeedrun();
+        this.tm = speedrun.getTeams();
     }
 
     @EventHandler
@@ -39,9 +42,11 @@ public class PortalEvent implements Listener {
 
         if (team == null) {
 
-            if (!plugin.getSpeedrun().getTeamsEnabled()) {
+            if (!speedrun.getTeamsEnabled()) {
 
-                if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+                if (speedrun.soloPlayersContain(p)) {
+
+                    SoloTeam soloPlayer = speedrun.getSoloPlayer(p);
 
                     for (Objective o : soloPlayer.getIncompleteObjectives()) {
 
@@ -113,11 +118,11 @@ public class PortalEvent implements Listener {
 
                 if (team == null) {
 
-                    if (!plugin.getSpeedrun().getTeamsEnabled()) {
+                    if (!speedrun.getTeamsEnabled()) {
 
-                        if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+                        if (speedrun.soloPlayersContain(p)) {
 
-                            st = soloPlayer;
+                            st = speedrun.getSoloPlayer(p);
 
                             for (Objective o : st.getIncompleteObjectives()) {
 
@@ -187,9 +192,11 @@ public class PortalEvent implements Listener {
 
                 if (team == null) {
 
-                    if (!plugin.getSpeedrun().getTeamsEnabled()) {
+                    if (!speedrun.getTeamsEnabled()) {
 
-                        if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+                        if (speedrun.soloPlayersContain(p)) {
+
+                            SoloTeam soloPlayer = speedrun.getSoloPlayer(p);
 
                             for (Objective o : soloPlayer.getIncompleteObjectives()) {
 

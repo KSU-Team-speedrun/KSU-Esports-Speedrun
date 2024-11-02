@@ -23,8 +23,8 @@ public class PlayerLeave implements Listener {
         Speedrun sr = plugin.getSpeedrun();
         Player p = e.getPlayer();
         if (!sr.getTeamsEnabled()) {
-            if (sr.getSoloPlayers().contains((SoloTeam) p)) {
-                sr.removeSoloPlayer((SoloTeam) p);
+            if (sr.soloPlayersContain(p)) {
+                sr.removeSoloPlayer(p);
             }
         }
         Team team = sr.getTeams().getTeam(p);

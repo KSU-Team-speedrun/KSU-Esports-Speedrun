@@ -155,6 +155,7 @@ messages:
     worldGenerated: '<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to 
       start the game.'
     resetAttributes: '<prefix> All attributes have been reset.'
+    toggleTeams: '<prefix> Teams have been: <toggle_option>'
 
 
 # ====================

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TeamSpawner {
 
@@ -31,13 +32,15 @@ public class TeamSpawner {
         }
     }
 
-    public static void spawnPlayersInCircle(World world, List<SoloTeam> participatingPlayers, double radius) {
+    public static void spawnPlayersInCircle(World world, Map<Player, SoloTeam> participatingPlayers, double radius) {
 
+        List<Player> playersList = new ArrayList<>(participatingPlayers.keySet());
         // Calculate angle step based on the number of teams
         double angleStep = 2 * Math.PI / participatingPlayers.size();
 
-        for (Player p : participatingPlayers) {
-            double angle = participatingPlayers.indexOf(p) * angleStep;
+        for (int i = 0; i < playersList.size(); i++) {
+            Player p = playersList.get(i);
+            double angle = i * angleStep;
             Location teamSpawnLocation = findSafeLocation(world, angle, radius);
 
             // Teleport each player to the team's spawn location and set their respawn point
@@ -46,6 +49,7 @@ public class TeamSpawner {
             // Set the player's respawn location
             p.setRespawnLocation(teamSpawnLocation);
         }
+
     }
 
     private static Location findSafeLocation(World world, double initialAngle, double radius) {

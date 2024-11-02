@@ -39,7 +39,7 @@ public class PlayerJoin implements Listener {
 
             } else {
 
-                sr.addSoloPlayer((SoloTeam) p);
+                sr.addSoloPlayer(p);
 
             }
 

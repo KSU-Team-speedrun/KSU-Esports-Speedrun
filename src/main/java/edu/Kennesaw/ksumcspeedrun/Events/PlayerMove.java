@@ -93,9 +93,9 @@ public class PlayerMove {
 
             } else {
 
-                for (SoloTeam p : speedrun.getSoloPlayers()) {
+                for (SoloTeam soloTeam : speedrun.getSoloPlayers()) {
 
-                    for (Objective o : p.getIncompleteObjectives()) {
+                    for (Objective o : soloTeam.getIncompleteObjectives()) {
 
                         // If objective type is enter then we cast EnterObjective to Objective
                         if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
@@ -106,8 +106,7 @@ public class PlayerMove {
                             if (eo.getTarget() instanceof SRStructure target) {
 
                                 // Get the player's location
-                                Location playerLoc = p.getLocation();
-                                final SoloTeam finalTeam = p;
+                                Location playerLoc = soloTeam.getLocation();
 
                                 // Check how far the player is from target structure
                                 SRStructure.getNearestStructureToLocation(plugin, target, playerLoc, loc -> {
@@ -121,7 +120,7 @@ public class PlayerMove {
                                             if (distance(playerLoc, loc) <= radius) {
                                                 SRStructure.getStructureHeight(plugin, target, height -> {
                                                     if (Math.abs(loc.getBlockY() - playerLoc.getBlockY()) <= height) {
-                                                        eo.setComplete(finalTeam);
+                                                        eo.setComplete(soloTeam);
                                                     }
                                                 });
                                             }
@@ -132,8 +131,8 @@ public class PlayerMove {
                                 // Check if the EnterObjective target is a Biome
                             } else if (eo.getTarget() instanceof Biome biome) {
 
-                                if (p.getWorld().getBiome(p.getLocation()).equals(biome)) {
-                                    eo.setComplete(p);
+                                if (soloTeam.getWorld().getBiome(soloTeam.getLocation()).equals(biome)) {
+                                    eo.setComplete(soloTeam);
                                 }
 
                             }

@@ -46,8 +46,8 @@ public class EntityDeath implements Listener {
 
             if (ds.getCausingEntity() instanceof Player p) {
 
-                if (!speedrun.getTeamsEnabled() && p instanceof SoloTeam st && speedrun.getSoloPlayers().contains(st)) {
-                    soloTeam = st;
+                if (!speedrun.getTeamsEnabled() && speedrun.soloPlayersContain(p)) {
+                    soloTeam = speedrun.getSoloPlayer(p);
                 } else {
                     team = teamManager.getTeam(p);
                 }
@@ -88,7 +88,9 @@ public class EntityDeath implements Listener {
                         if (speedrun.getTeamsEnabled()) {
                             team = teamManager.getTeam(op)  ;
                         } else {
-                            soloTeam = (SoloTeam) op;
+                            if (speedrun.soloPlayersContain(op)) {
+                                soloTeam = speedrun.getSoloPlayer(op);
+                            }
                         }
                     }
 

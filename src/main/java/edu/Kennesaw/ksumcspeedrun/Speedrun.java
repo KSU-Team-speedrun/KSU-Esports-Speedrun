@@ -54,7 +54,8 @@ public class Speedrun {
     private final ObjectiveManager objectives;
     private final TeamManager tm;
 
-    private List<SoloTeam> soloPlayers;
+    private Map<Player, SoloTeam> soloPlayers;
+    private List<SoloTeam> soloPlayersList;
 
     private CountdownTimer ct;
 
@@ -235,10 +236,8 @@ public class Speedrun {
                 }
                 TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
             } else {
-                for (SoloTeam p : soloPlayers) {
-                    if (!p.hasPermission("ksu.speedrun.admin")) {
-                        p.getInventory().clear();
-                    }
+                for (SoloTeam soloPlayer : soloPlayersList) {
+                    soloPlayer.getInventory().clear();
                 }
                 TeamSpawner.spawnPlayersInCircle(speedrunWorld, soloPlayers, spawnRadius);
             }
@@ -272,7 +271,7 @@ public class Speedrun {
         if (this.isStarted) {
             this.isStarted = false;
             ct.stop();
-            Bukkit.broadcast(plugin.getMessages().getWinner(Component.text(winner.getName())));
+            Bukkit.broadcast(plugin.getMessages().getWinner(winner.displayName()));
         }
     }
 
@@ -294,14 +293,15 @@ public class Speedrun {
             } else {
                 SoloTeam winner = null;
                 int points = 0;
-                for (SoloTeam player : soloPlayers) {
-                    if (player.getPoints() > points) {
-                        points = player.getPoints();
-                        winner = player;
+                for (Map.Entry<Player, SoloTeam> entry : soloPlayers.entrySet()) {
+                    SoloTeam soloTeam = entry.getValue();
+                    if (soloTeam.getPoints() > points) {
+                        points = soloTeam.getPoints();
+                        winner = soloTeam;
                     }
                 }
                 if (winner != null) {
-                    Bukkit.broadcast(plugin.getMessages().getTimeUp(Component.text(winner.getName())));
+                    Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.displayName()));
                 }
             }
         }
@@ -461,6 +461,7 @@ public class Speedrun {
             this.spawnRadius = 300;
             this.teamsEnabled = true;
             this.soloPlayers = null;
+            this.soloPlayersList = null;
 
             objectives.clearObjectives();
             tm.reset();
@@ -495,32 +496,47 @@ public class Speedrun {
     public void setTeamsEnabled(boolean teamsEnabled) {
         if (!isStarted) {
             this.teamsEnabled = teamsEnabled;
+            tm.reset();
             if (!teamsEnabled) {
-                this.soloPlayers = new ArrayList<>();
+                this.soloPlayers = new HashMap<>();
+                this.soloPlayersList = new ArrayList<>();
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.getInventory().clear();
-                    soloPlayers.add((SoloTeam) p);
+                    SoloTeam soloTeam = new SoloTeam(plugin, p);
+                    soloPlayers.put(p, soloTeam);
+                    soloPlayersList.add(soloTeam);
                 }
             } else {
                 this.soloPlayers = null;
+                this.soloPlayersList = null;
+                createTeams(null);
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.getInventory().setItem(4, Items.getTeamSelector());
                 }
             }
-            tm.reset();
         }
     }
 
     public List<SoloTeam> getSoloPlayers() {
-        return soloPlayers;
+        return soloPlayersList;
     }
 
-    public void addSoloPlayer(SoloTeam player) {
-        soloPlayers.add(player);
+    public void addSoloPlayer(Player player) {
+        soloPlayers.put(player, new SoloTeam(plugin, player));
+        soloPlayersList.add(soloPlayers.get(player));
     }
 
-    public void removeSoloPlayer(SoloTeam player) {
+    public SoloTeam getSoloPlayer(Player player) {
+        return soloPlayers.get(player);
+    }
+
+    public void removeSoloPlayer(Player player) {
+        soloPlayersList.remove(soloPlayers.get(player));
         soloPlayers.remove(player);
+    }
+
+    public boolean soloPlayersContain(Player p) {
+        return soloPlayers.containsKey(p);
     }
 
     private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {

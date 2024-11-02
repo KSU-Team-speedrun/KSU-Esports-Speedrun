@@ -49,7 +49,9 @@ public class ItemObtain implements Listener {
 
                 if (!speedrun.getTeamsEnabled()) {
 
-                    if (p instanceof SoloTeam soloPlayer && speedrun.getSoloPlayers().contains(p)) {
+                    if (speedrun.soloPlayersContain(p)) {
+
+                        SoloTeam soloPlayer = speedrun.getSoloPlayer(p);
 
                         for (Objective o : soloPlayer.getIncompleteObjectives()) {
 

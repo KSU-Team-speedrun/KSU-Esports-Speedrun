@@ -6,6 +6,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TeamSpawner {
@@ -25,16 +27,24 @@ public class TeamSpawner {
 
                 // Set the player's respawn location
                 player.setRespawnLocation(teamSpawnLocation);
-
-                // Notify each player individually about their spawn point
-                player.sendMessage("Your team has been spawned at " + teamSpawnLocation);
             }
+        }
+    }
 
-            // Manually broadcast message to all online players
-            String broadcastMessage = "Team " + (i + 1) + " has been spawned at " + teamSpawnLocation;
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendMessage(broadcastMessage);
-            }
+    public static void spawnPlayersInCircle(World world, List<SoloTeam> participatingPlayers, double radius) {
+
+        // Calculate angle step based on the number of teams
+        double angleStep = 2 * Math.PI / participatingPlayers.size();
+
+        for (Player p : participatingPlayers) {
+            double angle = participatingPlayers.indexOf(p) * angleStep;
+            Location teamSpawnLocation = findSafeLocation(world, angle, radius);
+
+            // Teleport each player to the team's spawn location and set their respawn point
+            p.teleport(teamSpawnLocation);
+
+            // Set the player's respawn location
+            p.setRespawnLocation(teamSpawnLocation);
         }
     }
 

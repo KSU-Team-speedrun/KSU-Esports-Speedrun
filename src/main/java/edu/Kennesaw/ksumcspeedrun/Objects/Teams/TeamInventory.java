@@ -1,7 +1,5 @@
-package edu.Kennesaw.ksumcspeedrun.Objects;
+package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -79,7 +77,7 @@ public class TeamInventory {
     }
 
     public void updateTeamInventory(Team teamToUpdate) {
-
+        inv.setItem(inventoryLoc.get(teamToUpdate), teamToUpdate.getItem());
         for (HumanEntity viewer : inv.getViewers()) {
             if (viewer instanceof Player player) {
                 player.getOpenInventory().getTopInventory().setItem(inventoryLoc.get(teamToUpdate), teamToUpdate.getItem());

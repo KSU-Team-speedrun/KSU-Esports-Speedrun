@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.KillObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
@@ -40,11 +41,16 @@ public class EntityDeath implements Listener {
         if (speedrun.isStarted()) {
 
             Team team = null;
+            SoloTeam soloTeam = null;
             DamageSource ds = e.getDamageSource();
 
             if (ds.getCausingEntity() instanceof Player p) {
 
-                team = teamManager.getTeam(p);
+                if (!speedrun.getTeamsEnabled() && p instanceof SoloTeam st && speedrun.getSoloPlayers().contains(st)) {
+                    soloTeam = st;
+                } else {
+                    team = teamManager.getTeam(p);
+                }
 
             } else {
 
@@ -62,7 +68,11 @@ public class EntityDeath implements Listener {
 
                             if (op.isOnline()) {
 
-                                team = teamManager.getTeam(op);
+                                if (speedrun.getTeamsEnabled()) {
+                                    team = teamManager.getTeam(op)  ;
+                                } else {
+                                    soloTeam = (SoloTeam) op;
+                                }
 
                             }
                         }
@@ -75,8 +85,11 @@ public class EntityDeath implements Listener {
 
                     if (op.isOnline()) {
 
-                        team = teamManager.getTeam(op);
-
+                        if (speedrun.getTeamsEnabled()) {
+                            team = teamManager.getTeam(op)  ;
+                        } else {
+                            soloTeam = (SoloTeam) op;
+                        }
                     }
 
                     plugin.getSpeedrun().combatTasks.get(uuid).cancel();
@@ -104,6 +117,27 @@ public class EntityDeath implements Listener {
                         if (ko.getTarget().equals(e.getEntityType())) {
 
                             ko.setComplete(team);
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            } else if (soloTeam != null) {
+
+                for (Objective o : soloTeam.getIncompleteObjectives()) {
+
+                    if (o.getType().equals(Objective.ObjectiveType.KILL)) {
+
+                        System.out.println("Kill Objective found");
+
+                        KillObjective ko = (KillObjective) o;
+
+                        if (ko.getTarget().equals(e.getEntityType())) {
+
+                            ko.setComplete(soloTeam);
                             break;
 
                         }

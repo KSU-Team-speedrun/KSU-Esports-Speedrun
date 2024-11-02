@@ -9,6 +9,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CommandObjectives implements BasicCommand {
@@ -38,5 +39,10 @@ public class CommandObjectives implements BasicCommand {
                 }
             }
         }
+    }
+
+    @Override
+    public @Nullable String permission() {
+        return "ksu.speedrun.user";
     }
 }

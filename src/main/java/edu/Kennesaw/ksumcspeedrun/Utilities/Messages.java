@@ -7,6 +7,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Messages {
 
@@ -15,8 +19,12 @@ public class Messages {
     // Messages
     private Component prefix;
     private TagResolver.Single prefixPlaceholder;
+
+    private List<String> playerHelpMessage;
     private String teamJoinMessage;
     private String teamCooldownMessage;
+    private String teamHelp;
+    private String teamNotFound;
     private String alreadyOnTeam;
     private String teamIsFull;
     private String start;
@@ -28,6 +36,8 @@ public class Messages {
     private String invalidArguments;
     private String illegalArguments;
     private String outOfBounds;
+    private String unknownCommand;
+    private ConfigurationSection adminHelpMessage;
     private String objectiveAdded;
     private String objectiveAddedPoints;
     private String objectiveAddedNumber;
@@ -66,8 +76,12 @@ public class Messages {
 
             prefix = config.getComponent("messages.prefix");
             prefixPlaceholder = Placeholder.component("prefix", prefix);
+
+            playerHelpMessage = config.getStringList("messages.helpMessage");
             teamJoinMessage = config.getString("messages.teamJoinMessage");
             teamCooldownMessage = config.getString("messages.teamCooldownMessage");
+            teamHelp = config.getString("messages.teamHelp");
+            teamNotFound = config.getString("messages.teamNotFound");
             alreadyOnTeam = config.getString("messages.alreadyOnTeam");
             teamIsFull = config.getString("messages.teamIsFull");
             start = config.getString("messages.start");
@@ -79,6 +93,8 @@ public class Messages {
             invalidArguments = config.getString("messages.error.invalidArguments");
             illegalArguments = config.getString("messages.error.illegalArgument");
             outOfBounds = config.getString("messages.error.outOfBounds");
+            unknownCommand = config.getString("messages.error.unknownCommand");
+            adminHelpMessage = config.getConfigurationSection("messages.admin.helpMessage");
             objectiveAdded = config.getString("messages.admin.objectiveAdded");
             objectiveAddedNumber = config.getString("messages.admin.objectiveAddedNumber");
             objectiveAddedPoints = config.getString("messages.admin.objectiveAddedPoints");
@@ -110,8 +126,12 @@ public class Messages {
 
     }
 
-    public Component getPrefix() {
-        return prefix;
+    public List<Component> getPlayerHelpMessage() {
+        List<Component> helpMessage = new ArrayList<>();
+        for (String line : playerHelpMessage) {
+            helpMessage.add(ComponentHelper.mmStringToComponent(line));
+        }
+        return helpMessage;
     }
 
     public Component getTeamJoinMessage(Component teamName) {
@@ -123,12 +143,21 @@ public class Messages {
         return ComponentHelper.mmStringToComponent(teamCooldownMessage, prefixPlaceholder);
     }
 
+    public Component getTeamHelp() {
+        return ComponentHelper.mmStringToComponent(teamHelp, prefixPlaceholder);
+    }
+
     public Component getAlreadyOnTeam() {
         return ComponentHelper.mmStringToComponent(alreadyOnTeam, prefixPlaceholder);
     }
 
     public Component getTeamIsFull() {
         return ComponentHelper.mmStringToComponent(teamIsFull, prefixPlaceholder);
+    }
+
+    public Component getTeamNotFound(String teamName) {
+        return ComponentHelper.mmStringToComponent(teamNotFound, prefixPlaceholder, Placeholder.parsed("team_name",
+                teamName));
     }
 
     public Component getStart(int gameTimeInMinutes) {
@@ -179,6 +208,20 @@ public class Messages {
         return ComponentHelper.mmStringToComponent(outOfBounds, prefixPlaceholder,
                 Placeholder.parsed("illegal_arg", illegalArg),
                 Placeholder.parsed("object", object));
+    }
+
+    public Component getUnknownCommand(String subcommand) {
+        return ComponentHelper.mmStringToComponent(unknownCommand, prefixPlaceholder,
+                Placeholder.parsed("unknown_command", subcommand));
+    }
+
+    public List<Component> getAdminHelpMessage(int pageNumber) {
+        List<Component> helpMessage = new ArrayList<>();
+        List<String> adminHelpPage = adminHelpMessage.getStringList("p" + pageNumber);
+        for (String line : adminHelpPage) {
+            helpMessage.add(ComponentHelper.mmStringToComponent(line));
+        }
+        return helpMessage;
     }
 
     public Component getObjectiveAdded(String objectiveType, String target) {

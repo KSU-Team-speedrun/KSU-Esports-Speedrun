@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
@@ -34,8 +35,41 @@ public class PortalEvent implements Listener {
         World.Environment to = e.getTo().getWorld().getEnvironment();
 
         Team team = tm.getTeam(p);
+        SoloTeam st = null;
 
-        if (team == null) return;
+        if (team == null) {
+
+            if (!plugin.getSpeedrun().getTeamsEnabled()) {
+
+                if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+
+                    for (Objective o : soloPlayer.getIncompleteObjectives()) {
+
+                        if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
+
+                            EnterObjective eo = (EnterObjective) o;
+
+                            System.out.println("Enter objective matched!");
+
+                            if (eo.getTarget() instanceof Portal portal) {
+
+                                if (from.equals(portal.getFrom()) && to.equals(portal.getTo())) {
+
+                                    eo.setComplete(soloPlayer);
+                                    return;
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            }
+            return;
+        }
 
         for (Objective o : team.getIncompleteObjectives()) {
 
@@ -75,8 +109,49 @@ public class PortalEvent implements Listener {
             if (from.equals(World.Environment.THE_END) && to.equals(World.Environment.THE_END)) {
 
                 Team team = tm.getTeam(p);
+                SoloTeam st = null;
 
-                if (team == null) return;
+                if (team == null) {
+
+                    if (!plugin.getSpeedrun().getTeamsEnabled()) {
+
+                        if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+
+                            st = soloPlayer;
+
+                            for (Objective o : st.getIncompleteObjectives()) {
+
+                                if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
+
+                                    EnterObjective eo = (EnterObjective) o;
+
+                                    if (eo.getTarget() instanceof Portal portal) {
+
+                                        if (portal.portalType().equals(Portal.PortalType.END_TO_END)
+                                                && e.getTo().distance(e.getFrom()) >= 800) {
+
+                                            eo.setComplete(st);
+                                            return;
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                            return;
+
+                        }
+
+                        return;
+
+                    }
+
+                    return;
+
+                }
 
                 for (Objective o : team.getIncompleteObjectives()) {
 
@@ -90,7 +165,7 @@ public class PortalEvent implements Listener {
                                     && e.getTo().distance(e.getFrom()) >= 800) {
 
                                 eo.setComplete(team);
-                                break;
+                                return;
 
                             }
 
@@ -106,10 +181,44 @@ public class PortalEvent implements Listener {
                     || e.getCause().equals(PlayerTeleportEvent.TeleportCause.END_PORTAL)) {
 
             Team team = tm.getTeam(p);
-
-            if (team == null) return;
+            SoloTeam st = null;
 
             if (from.equals(World.Environment.THE_END) && to.equals(World.Environment.NORMAL)) {
+
+                if (team == null) {
+
+                    if (!plugin.getSpeedrun().getTeamsEnabled()) {
+
+                        if (p instanceof SoloTeam soloPlayer && plugin.getSpeedrun().getSoloPlayers().contains(soloPlayer)) {
+
+                            for (Objective o : soloPlayer.getIncompleteObjectives()) {
+
+                                if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
+
+                                    EnterObjective eo = (EnterObjective) o;
+
+                                    if (eo.getTarget() instanceof Portal portal) {
+
+                                        if (portal.portalType().equals(Portal.PortalType.END_TO_WORLD)) {
+
+                                            eo.setComplete(team);
+                                            return;
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                    return;
+
+                }
 
                 for (Objective o : team.getIncompleteObjectives()) {
 

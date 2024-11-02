@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.Bukkit;
@@ -21,6 +22,11 @@ public class PlayerLeave implements Listener {
     public void onPlayerLeave(PlayerQuitEvent e) {
         Speedrun sr = plugin.getSpeedrun();
         Player p = e.getPlayer();
+        if (!sr.getTeamsEnabled()) {
+            if (sr.getSoloPlayers().contains((SoloTeam) p)) {
+                sr.removeSoloPlayer((SoloTeam) p);
+            }
+        }
         Team team = sr.getTeams().getTeam(p);
         if (team != null) {
             team.removePlayer(p);
@@ -28,7 +34,7 @@ public class PlayerLeave implements Listener {
         if (!sr.isStarted()) {
             if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
                     .getTeamInventory().getInventory() == null) {
-                sr.createTeams(null);
+                if (sr.getTeamsEnabled()) sr.createTeams(null);
             } else {
                 sr.getTeams().getTeamInventory().updateTeamInventory(team);
             }

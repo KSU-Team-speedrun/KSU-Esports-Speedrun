@@ -1,7 +1,6 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.TeamInventory;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -48,6 +47,18 @@ public class TeamManager {
 
     public List<Team> getTeams() {
         return teams;
+    }
+
+    /**
+     * @param replaceSpace - Return stripped names including spaces or replacing spaces with underscores?
+     */
+    public List<String> getStrippedTeamNames(boolean replaceSpace) {
+        List<String> strippedTeamNames = new ArrayList<>();
+        for (Team team : teams) {
+            strippedTeamNames.add(replaceSpace ? team.getStrippedName().replace(' ', '_') :
+                    team.getStrippedName());
+        }
+        return strippedTeamNames;
     }
 
     public Team getTeam(Component team) {

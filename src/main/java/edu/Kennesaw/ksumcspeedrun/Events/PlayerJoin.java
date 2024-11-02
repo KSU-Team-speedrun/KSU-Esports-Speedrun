@@ -1,9 +1,11 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,12 +28,22 @@ public class PlayerJoin implements Listener {
 
         if (!sr.isStarted()) {
 
-            if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
-                    .getTeamInventory().getInventory() == null) {
-                sr.createTeams(null);
+            if (sr.getTeamsEnabled()) {
+
+                p.getInventory().setItem(4, Items.getTeamSelector());
+
+                if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
+                        .getTeamInventory().getInventory() == null) {
+                    sr.createTeams(null);
+                }
+
+            } else {
+
+                sr.addSoloPlayer((SoloTeam) p);
+
             }
 
-            p.getInventory().setItem(4, Items.getTeamSelector());
+            p.teleport(plugin.getSpawnPoint());
 
         }
 

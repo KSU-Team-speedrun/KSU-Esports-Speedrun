@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import org.bukkit.entity.Player;
 
@@ -21,6 +22,7 @@ public abstract class Objective {
     private final int weight;
 
     private final List<Team> completedTeams;
+    private final List<SoloTeam> completedPlayers;
     private String targetName;
 
     Main plugin;
@@ -30,6 +32,7 @@ public abstract class Objective {
         this.type = type;
         this.weight = 1;
         this.completedTeams = new ArrayList<>();
+        this.completedPlayers = new ArrayList<>();
         this.plugin = plugin;
         System.out.println("Objective added");
     }
@@ -39,6 +42,7 @@ public abstract class Objective {
         this.type = type;
         this.weight = weight;
         this.completedTeams = new ArrayList<>();
+        this.completedPlayers = new ArrayList<>();
         this.plugin = plugin;
     }
 
@@ -81,8 +85,31 @@ public abstract class Objective {
 
     }
 
+    public void setComplete(SoloTeam player) {
+        this.completedPlayers.add(player);
+        player.addPoints(weight);
+        player.addCompleteObjective(this);
+        if (type.equals(ObjectiveType.OBTAIN)) {
+
+            ObtainObjective oo = (ObtainObjective) this;
+
+            int number = oo.getAmount();
+
+            if (number > 1) {
+
+                player.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
+                        targetName, number, weight));
+
+            }
+        }
+    }
+
     public boolean isComplete(Team team) {
         return completedTeams.contains(team);
+    }
+
+    public boolean isComplete(SoloTeam player) {
+        return completedPlayers.contains(player);
     }
 
     public void setTargetName(String target) {

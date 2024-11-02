@@ -1,7 +1,9 @@
 package edu.Kennesaw.ksumcspeedrun;
 
+import edu.Kennesaw.ksumcspeedrun.Commands.CommandHelp;
 import edu.Kennesaw.ksumcspeedrun.Commands.CommandObjectives;
 import edu.Kennesaw.ksumcspeedrun.Commands.CommandSpeedrun;
+import edu.Kennesaw.ksumcspeedrun.Commands.CommandTeam;
 import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Messages;
@@ -9,6 +11,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +23,7 @@ public class Main extends JavaPlugin {
     private Config config;
     private Speedrun speedrun;
     private Messages messages;
+    private Location spawnPoint;
 
     // The following method runs when the plugin is Enabled
     @SuppressWarnings("UnstableApiUsage")
@@ -55,12 +59,17 @@ public class Main extends JavaPlugin {
         manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
             commands.register("speedrun", "Main command for KSU-MC-Speedrun", new CommandSpeedrun(this));
-            commands.register("objectives", "Display a list of objectives", new CommandObjectives(this));
-
+            commands.register("objectives", "Display a list of objectives to players", new CommandObjectives(this));
+            commands.register("team", "Alternative to using Team GUI to join a team.", new CommandTeam(this));
+            commands.register("help", "Default help message for KSU-MC-Speedrun", new CommandHelp(this));
         });
 
-    }
+        spawnPoint = new Location(Bukkit.getWorld(config.getString("world.spawnPoint.world")),
+                config.getDouble("world.spawnPoint.x"), config.getDouble("world.spawnPoint.y"),
+                config.getDouble("world.spawnPoint.z"), config.getDouble("world.spawnPoint.pitch").floatValue(),
+                config.getDouble("world.spawnPoint.yaw").floatValue());
 
+    }
     // Runs when plugin is disabled
     @Override
     public void onDisable() {
@@ -79,5 +88,9 @@ public class Main extends JavaPlugin {
     }
 
     public Messages getMessages() { return messages; }
+
+    public Location getSpawnPoint() {
+        return spawnPoint;
+    }
 }
 

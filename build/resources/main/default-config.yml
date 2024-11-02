@@ -7,11 +7,20 @@ messages:
   # Set a global prefix for all messages
   prefix: '<bold><gold>[SPEEDRUN]</gold></bold>'
 
+  # Help message for non-administrative players
+  helpMessage:
+    - '<gold><st>                            </st></gold><white><bold> SPEEDRUN HELP </bold></white><gold><st>                           </st></gold>'
+    - '<gold><click:suggest_command:/objectives>/objectives</click></gold> <black>-</black> View all speedrun objectives'
+    - '<gold><click:suggest_command:/team>/team [teamName]</click></gold> <black>-</black> Join a specific team.'
+    - '<gold><st>                                                                                </st></gold>'
+
   # Team Messages
   teamJoinMessage: '<prefix> You joined: <team_name>'
   teamCooldownMessage: '<prefix> Please wait a few seconds before changing your team.'
+  teamHelp: '<prefix> Please use /team [teamName] to join a team.'
   alreadyOnTeam: '<prefix> You are already on this team!'
   teamIsFull: '<prefix> This team is full!'
+  teamNotFound: '<prefix> Cannot find team: <team_name>'
 
   # Speedrun Start/Stop Messages
   start: <prefix> The speedrun has started!<newline><prefix> You have <bold><gold><time>
@@ -40,6 +49,86 @@ messages:
 
   # Admin Messages
   admin:
+
+    # Help message for administrative players
+    helpMessage:
+      p1:
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - '<gold><st>                             </st></gold><white><bold> ADMIN HELP 1/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 2><hover:show_text:''<bold>NEXT PAGE</bold>''>></hover></click></bold>'
+        - '<gold><click:suggest_command:/speedrun addObjective>/speedrun addObjective [objectiveType] [target] <-flag(s)></click></gold> <black>-</black> Add an objective.'
+        - '<gold><click:suggest_command:/speedrun objectives>/speedrun objectives</click></gold> <black>-</black> List all objectives.'
+        - '<gold><click:suggest_command:/speedrun remObjective>/speedrun remObjective [number]</click></gold> <black>-</black> Remove an objective according to number on objective list.'
+        - '<gold><click:suggest_command:/speedrun setSeed>/speedrun setSeed [seed]</click></gold> <black>-</black> Set the map seed.'
+        - '<gold><click:suggest_command:/speedrun getSeed>/speedrun getSeed</click></gold> <black>-</black> Get the map seed.'
+        - '<gold><click:suggest_command:/speedrun setBorder>/speedrun setBorder [radius]</click></gold> <black>-</black> Set the map border.'
+        - '<gold><st>                                                                                </st></gold>'
+      p2:
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - '<bold><click:run_command:/help 1><hover:show_text:''<bold>PREVIOUS PAGE</bold>''><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 2/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 3><hover:show_text:''<bold>NEXT PAGE</bold>''>></hover></click></bold>'
+        - '<gold><click:suggest_command:/speedrun getBorder>/speedrun getBorder</click></gold> <black>-</black> Get the map border.'
+        - '<gold><click:suggest_command:/speedrun setTimeLimit>/speedrun setTimeLimit [minutes]</click></gold> <black>-</black> Set the game time limit.'
+        - '<gold><click:suggest_command:/speedrun getTimeLimit>/speedrun getTimeLimit</click></gold> <black>-</black> Get the game time limit.'
+        - '<gold><click:suggest_command:/speedrun setSpawnRadius>/speedrun setSpawnRadius [number]</click></gold> <black>-</black> Set team spawn radius from (0, 0).'
+        - '<gold><click:suggest_command:/speedrun getSpawnRadius>/speedrun getSpawnRadius</click></gold> <black>-</black> Get team spawn radius from (0, 0).'
+        - '<gold><st>                                                                                </st></gold>'
+        - ''
+      p3:
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - '<bold><click:run_command:/help 2><hover:show_text:''<bold>PREVIOUS PAGE</bold>''><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 3/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 4><hover:show_text:''<bold>NEXT PAGE</bold>''>></hover></click></bold>'
+        - '<gold><click:suggest_command:/speedrun setTeamSize>/speedrun setTeamSize [number]</click></gold> <black>-</black> Set the player limit for each team.'
+        - '<gold><click:suggest_command:/speedrun getTeamSize>/speedrun getTeamSize</click></gold> <black>-</black> Get the player limit for each team.'
+        - '<gold><click:suggest_command:/speedrun setPointLimit>/speedrun setPointLimit [number]</click></gold> <black>-</black> Set the points required for a team to win.'
+        - '<gold><click:suggest_command:/speedrun getPointLimit>/speedrun getPointLimit</click></gold> <black>-</black> Get the points required for a team to win.'
+        - '<gold><st>                                                                                </st></gold>'
+        - ''
+      p4:
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - ''
+        - '<bold><click:run_command:/help 3><hover:show_text:''<bold>PREVIOUS PAGE</bold>''><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 4/4 </bold></white><gold><st>                          </st></gold>'
+        - '<gold><click:suggest_command:/speedrun team>/speedrun team [teamName]</click></gold> <black>-</black> Join a specific team.'
+        - '<gold><click:suggest_command:/speedrun resetAttributes>/speedrun resetAttributes</click></gold> <black>-</black> Reset all settings back to default.'
+        - '<gold><click:suggest_command:/speedrun start>/speedrun start</click></gold> <black>-</black> Generate world and start the game.'
+        - '<gold><click:suggest_command:/speedrun stop>/speedrun stop</click></gold> <black>-</black> Force end the game.'
+        - '<gold><st>                                                                                </st></gold>'
+        - ''
+        - ''
+        - ''
+
     objectiveAdded: '<prefix> Objective Added: <bold><gold><objective_type> <target></gold></bold>'
     objectiveAddedPoints: '<prefix> Objective Added: <bold><gold><objective_type>
       <target></gold></bold> - <points> points'
@@ -171,6 +260,15 @@ world:
   # Delete previously generated "speedrunworld" upon plugin startup?
   deleteOnStart: true
 
+  # Spawn point when players initially join the server (while the speedrun is not started)
+  spawnPoint:
+    world: 'world'
+    x: 0.0
+    y: 150.0
+    z: 0.0
+    pitch: 0.0
+    yaw: 0.0
+
 # ====================
 # Structure Configuration
 # ====================
@@ -184,102 +282,135 @@ structureLocations:
   PILLAGER_OUTPOST:
     averageYCoordinate: ground
     radius: 30
+    height: 25
   MINESHAFT:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 0
+    radius: 100
+    height: 20
   MINESHAFT_MESA:
     averageYCoordinate: ground
     radius: 30
+    height: 10
   MANSION:
     averageYCoordinate: ground
     radius: 30
+    height: 25
   JUNGLE_PYRAMID:
     averageYCoordinate: ground
-    radius: 30
+    radius: 10
+    height: 15
   DESERT_PYRAMID:
     averageYCoordinate: ground
-    radius: 30
+    radius: 15
+    height: 20
   IGLOO:
     averageYCoordinate: ground
-    radius: 30
+    radius: 4
+    height: 5
   SHIPWRECK:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 50
+    radius: 15
+    height: 10
   SHIPWRECK_BEACHED:
     averageYCoordinate: ground
-    radius: 30
+    radius: 15
+    height: 10
   SWAMP_HUT:
     averageYCoordinate: ground
-    radius: 30
+    radius: 4
+    height: 5
   STRONGHOLD:
     averageYCoordinate: 0
     radius: 75
+    height: 30
   MONUMENT:
-    averageYCoordinate: ground
+    averageYCoordinate: 45
     radius: 30
+    height: 16
   OCEAN_RUIN_COLD:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 45
+    radius: 10
+    height: 5
   OCEAN_RUIN_WARM:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 45
+    radius: 10
+    height: 5
   FORTRESS:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 15
+    radius: 75
+    height: 50
   NETHER_FOSSIL:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 35
+    radius: 5
+    height: 4
   END_CITY:
     averageYCoordinate: ground
     radius: 30
+    height: 100
   BURIED_TREASURE:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: ground - 4
+    radius: 2
+    height: 1
   BASTION_REMNANT:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 35
+    radius: 40
+    height: 45
   VILLAGE_PLAINS:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   VILLAGE_DESERT:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   VILLAGE_SAVANNA:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   VILLAGE_SNOWY:
     averageYCoordinate: ground
     radius: 30
   VILLAGE_TAIGA:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   RUINED_PORTAL:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   RUINED_PORTAL_DESERT:
     averageYCoordinate: ground
     radius: 30
+    height: 8
   RUINED_PORTAL_JUNGLE:
     averageYCoordinate: ground
-    radius: 30
+    radius: 5
+    height: 6
   RUINED_PORTAL_SWAMP:
     averageYCoordinate: ground
-    radius: 30
+    radius: 5
+    height: 6
   RUINED_PORTAL_MOUNTAIN:
     averageYCoordinate: ground
-    radius: 30
+    radius: 5
+    height: 6
   RUINED_PORTAL_OCEAN:
     averageYCoordinate: ground
-    radius: 30
+    radius: 5
+    height: 6
   RUINED_PORTAL_NETHER:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: 35
+    radius: 5
+    height: 6
   ANCIENT_CITY:
     averageYCoordinate: -51
     radius: 100
+    height: 50
   TRAIL_RUINS:
-    averageYCoordinate: ground
-    radius: 30
+    averageYCoordinate: ground - 8
+    radius: 5
+    height: 10
   TRIAL_CHAMBERS:
     averageYCoordinate: -30
     radius: 100
+    height: 30

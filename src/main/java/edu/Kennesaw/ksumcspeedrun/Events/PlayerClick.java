@@ -47,14 +47,14 @@ public class PlayerClick implements Listener {
 
         if (e.getWhoClicked() instanceof Player p) {
 
-            if (!plugin.getSpeedrun().isStarted()  && !p.isOp()) e.setCancelled(true);
-
-            if (plugin.getSpeedrun().teamCooldown.contains(p)) {
-                p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
-                return;
-            }
-
             if (e.getInventory().equals(tm.getTeamInventory().getInventory())) {
+
+                e.setCancelled(true);
+
+                if (plugin.getSpeedrun().teamCooldown.contains(p)) {
+                    p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
+                    return;
+                }
 
                 ItemStack currentItem = e.getCurrentItem();
 

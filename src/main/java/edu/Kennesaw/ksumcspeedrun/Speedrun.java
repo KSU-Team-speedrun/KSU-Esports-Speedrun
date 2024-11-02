@@ -4,9 +4,11 @@ import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
 import edu.Kennesaw.ksumcspeedrun.Objects.CountdownTimer;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamSpawner;
+import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import edu.Kennesaw.ksumcspeedrun.Utilities.WorldGenerator;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
@@ -52,6 +54,8 @@ public class Speedrun {
     private final ObjectiveManager objectives;
     private final TeamManager tm;
 
+    private List<SoloTeam> soloPlayers;
+
     private CountdownTimer ct;
 
     // GameRules set by admins will be located in this HashMap
@@ -63,6 +67,8 @@ public class Speedrun {
     public Map<Location, Player> bedLog;
 
     public Set<Player> teamCooldown;
+
+    private boolean teamsEnabled;
 
     final File worldFolder = new File(Bukkit.getWorldContainer(), "speedrunworld");
 
@@ -77,6 +83,7 @@ public class Speedrun {
         this.timeLimit = 60;
         this.timeUnit = TimeUnit.MINUTES;
         this.spawnRadius = 300;
+        this.teamsEnabled = true;
 
         objectives = new ObjectiveManager();
         tm = new TeamManager(plugin);
@@ -202,37 +209,14 @@ public class Speedrun {
         return isVerified;
     }
 
-    public Boolean setStarted() {
-        if (!this.isStarted) {
-            if (speedrunWorld == null) {
-                WorldGenerator wg = new WorldGenerator();
-                try {
-                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(Long.parseLong(seed)));
-                } catch (NumberFormatException e) {
-                    speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(seed.hashCode()));
-                }
-                return false;
-            }
-            assignPlayers();
-            for (Player p : tm.getAssignedPlayers()) {
-                p.getInventory().clear();
-            }
-            new PlayerMove(plugin);
-            isStarted = true;
-            ct = new CountdownTimer(plugin, timeLimit);
-            TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
-            Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
-            return true;
-        }
-        return null;
-    }
-
     public Boolean setStarted(CommandSender sender) {
         if (!this.isStarted) {
             if (speedrunWorld == null) {
-                Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-                    sender.sendMessage(plugin.getMessages().getWorldGenerating());
-                });
+                if (sender != null) {
+                    Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+                        sender.sendMessage(plugin.getMessages().getWorldGenerating());
+                    });
+                }
                 WorldGenerator wg = new WorldGenerator();
                 try {
                     speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(Long.parseLong(seed)));
@@ -241,14 +225,23 @@ public class Speedrun {
                 }
                 return false;
             }
-            assignPlayers();
-            for (Player p : tm.getAssignedPlayers()) {
-                p.getInventory().clear();
-            }
-            new PlayerMove(plugin);
             isStarted = true;
+            new PlayerMove(plugin);
             ct = new CountdownTimer(plugin, timeLimit);
-            TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
+            if (teamsEnabled) {
+                assignPlayers();
+                for (Player p : tm.getAssignedPlayers()) {
+                    p.getInventory().clear();
+                }
+                TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
+            } else {
+                for (SoloTeam p : soloPlayers) {
+                    if (!p.hasPermission("ksu.speedrun.admin")) {
+                        p.getInventory().clear();
+                    }
+                }
+                TeamSpawner.spawnPlayersInCircle(speedrunWorld, soloPlayers, spawnRadius);
+            }
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
             return true;
         }
@@ -275,19 +268,41 @@ public class Speedrun {
         }
     }
 
+    public void endGame(SoloTeam winner) {
+        if (this.isStarted) {
+            this.isStarted = false;
+            ct.stop();
+            Bukkit.broadcast(plugin.getMessages().getWinner(Component.text(winner.getName())));
+        }
+    }
+
     public void endGameTimeExpired() {
         if (this.isStarted) {
             this.isStarted = false;
-            Team winner = null;
-            int points = 0;
-            for (Team team : tm.getTeams()) {
-                if (team.getPoints() > points) {
-                    points = team.getPoints();
-                    winner = team;
+            if (this.teamsEnabled) {
+                Team winner = null;
+                int points = 0;
+                for (Team team : tm.getTeams()) {
+                    if (team.getPoints() > points) {
+                        points = team.getPoints();
+                        winner = team;
+                    }
                 }
-            }
-            if (winner != null) {
-                Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.getName()));
+                if (winner != null) {
+                    Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.getName()));
+                }
+            } else {
+                SoloTeam winner = null;
+                int points = 0;
+                for (SoloTeam player : soloPlayers) {
+                    if (player.getPoints() > points) {
+                        points = player.getPoints();
+                        winner = player;
+                    }
+                }
+                if (winner != null) {
+                    Bukkit.broadcast(plugin.getMessages().getTimeUp(Component.text(winner.getName())));
+                }
             }
         }
     }
@@ -444,6 +459,8 @@ public class Speedrun {
             this.timeLimit = 60;
             this.timeUnit = TimeUnit.MINUTES;
             this.spawnRadius = 300;
+            this.teamsEnabled = true;
+            this.soloPlayers = null;
 
             objectives.clearObjectives();
             tm.reset();
@@ -469,6 +486,41 @@ public class Speedrun {
             speedrunWorld = null;
 
         }
+    }
+
+    public boolean getTeamsEnabled() {
+        return teamsEnabled;
+    }
+
+    public void setTeamsEnabled(boolean teamsEnabled) {
+        if (!isStarted) {
+            this.teamsEnabled = teamsEnabled;
+            if (!teamsEnabled) {
+                this.soloPlayers = new ArrayList<>();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.getInventory().clear();
+                    soloPlayers.add((SoloTeam) p);
+                }
+            } else {
+                this.soloPlayers = null;
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.getInventory().setItem(4, Items.getTeamSelector());
+                }
+            }
+            tm.reset();
+        }
+    }
+
+    public List<SoloTeam> getSoloPlayers() {
+        return soloPlayers;
+    }
+
+    public void addSoloPlayer(SoloTeam player) {
+        soloPlayers.add(player);
+    }
+
+    public void removeSoloPlayer(SoloTeam player) {
+        soloPlayers.remove(player);
     }
 
     private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {

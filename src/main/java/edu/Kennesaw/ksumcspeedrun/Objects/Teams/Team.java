@@ -5,6 +5,7 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,6 +18,7 @@ public class Team {
     Main plugin;
 
     private final Component name;
+    private String strippedName;
     private int points = 0;
     private final List<Player> players = new ArrayList<>();
     private ItemStack item;
@@ -27,6 +29,7 @@ public class Team {
     public Team(Main plugin, Component teamName, ItemStack item) {
         this.plugin = plugin;
         this.name = teamName;
+        this.strippedName = PlainTextComponentSerializer.plainText().serialize(teamName);
         this.item = item;
         tm = plugin.getSpeedrun().getTeams();
     }
@@ -126,6 +129,14 @@ public class Team {
         im.lore(lore);
         item.setItemMeta(im);
         setItem(item);
+    }
+
+    public String getStrippedName() {
+        return strippedName;
+    }
+
+    public void setStrippedName(String strippedName) {
+        this.strippedName = strippedName;
     }
 
 }

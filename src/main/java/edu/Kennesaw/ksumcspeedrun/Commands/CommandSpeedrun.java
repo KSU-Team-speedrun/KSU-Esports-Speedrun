@@ -10,11 +10,13 @@ import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.SpeedrunSuggestions;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +57,7 @@ public class CommandSpeedrun implements BasicCommand {
 
     /* Main overridden execute method that is called when the command "/speedrun" is executed, with any arguments that
        follow passed as String[] args: Uses ASync thread for computation */
-    @SuppressWarnings("StatementWithEmptyBody")
+
     @Override
     public void execute(@NotNull CommandSourceStack commandSourceStack, @NotNull String @NotNull [] args) {
 
@@ -67,16 +69,61 @@ public class CommandSpeedrun implements BasicCommand {
             // If argument lengths is 0 (i.e. "/speedrun" with no subcommand)
             if (args.length == 0) {
 
-                // help list
+                // Redirect player to regular /help command
+                if (sender instanceof Player p) {
+
+                    // Commands cannot be dispatched asyncronously
+                    Bukkit.getScheduler().runTask(plugin, () -> p.performCommand("help"));
+
+                } else {
+                    // Console senders cannot be redirected
+                    sender.sendMessage(Component.text("Please use /help to see the help list."));
+                }
 
             // If argument length is greater than 0
             } else {
 
                 // First argument is "help" (i.e. "/speedrun help")
                 if (args[0].equalsIgnoreCase("help")) {
-                    // help list
 
-                    // First argument is "reload" (i.e. "/speedrun reload")
+                    // Redirect player to regular /help command
+                    if (sender instanceof Player p) {
+
+                        // Commands cannot be dispatched asyncronously
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            if (args.length == 2) {
+                                p.performCommand("help " + args[1]);
+                            } else {
+                                p.performCommand("help");
+                            }
+                        });
+
+                    } else {
+                        // Console senders cannot be redirected
+                        sender.sendMessage(Component.text("Please use /help to see the help list."));
+                    }
+
+                } else if (args[0].equalsIgnoreCase("team")) {
+
+                    if (sender instanceof Player p) {
+
+                        // Commands cannot be dispatched asyncronously
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            if (args.length == 2) {
+                                p.performCommand("team " + args[1]);
+                            } else {
+                                p.performCommand("team");
+                            }
+
+                        });
+
+                    } else {
+                        // Console senders cannot join teams
+                        sender.sendMessage(Component.text("Error: Only players may join teams."));
+                    }
+
                 } else if (args[0].equalsIgnoreCase("addObjective")) {
 
                     // Call method "addObjectiveHandler" passing sender value, args string array
@@ -292,7 +339,13 @@ public class CommandSpeedrun implements BasicCommand {
                     speedRun.endGame();
 
                 } else if (args[0].equalsIgnoreCase("test")) {
+
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.createTeams(Integer.parseInt(args[1])));
+
+                } else {
+
+                    sender.sendMessage(plugin.getMessages().getUnknownCommand(args[0]));
+
                 }
             }
         });
@@ -575,23 +628,24 @@ public class CommandSpeedrun implements BasicCommand {
         // If no arguments have been typed, main subcommands are suggested.
         if (args.length == 0) {
 
-            suggestions.add("addobjective");
-            suggestions.add("getborder");
-            suggestions.add("getpointlimit");
-            suggestions.add("getseed");
-            suggestions.add("getspawnradius");
-            suggestions.add("getteamsize");
-            suggestions.add("gettimelimit");
+            suggestions.add("addObjective");
+            suggestions.add("getBorder");
+            suggestions.add("getPointLimit");
+            suggestions.add("getSeed");
+            suggestions.add("getSpawnRadius");
+            suggestions.add("getTeamSize");
+            suggestions.add("getTimeLimit");
             suggestions.add("help");
+            suggestions.add("team");
             suggestions.add("reload");
-            suggestions.add("remobjective");
-            suggestions.add("resetattributes");
-            suggestions.add("setborder");
-            suggestions.add("setpointlimit");
-            suggestions.add("setseed");
-            suggestions.add("setspawnradius");
-            suggestions.add("setteamsize");
-            suggestions.add("settimelimit");
+            suggestions.add("remObjective");
+            suggestions.add("resetAttributes");
+            suggestions.add("setBorder");
+            suggestions.add("setPointLimit");
+            suggestions.add("setSeed");
+            suggestions.add("setSpawnRadius");
+            suggestions.add("setTeamSize");
+            suggestions.add("setTimeLimit");
             suggestions.add("start");
             suggestions.add("stop");
 
@@ -603,11 +657,11 @@ public class CommandSpeedrun implements BasicCommand {
                "addObjective", etc. */
             if (args.length == 1) {
 
-                addMatchingSuggestions(suggestions, args[0], "help", "reload", "addobjective",
-                        "remobjective", "setteamsize", "getteamsize", "start", "stop",
-                        "settimelimit", "gettimelimit", "setborder", "getborder",
-                        "setseed", "getseed", "resetattributes", "setspawnradius", "getspawnradius",
-                        "setpointlimit", "getpointlimit");
+                addMatchingSuggestions(suggestions, args[0], "help", "team", "reload", "addObjective",
+                        "remObjective", "setTeamSize", "getTeamSize", "start", "stop",
+                        "setTimeLimit", "getTimeLimit", "setBorder", "getBorder",
+                        "setSeed", "getSeed", "resetAttributes", "setSpawnRadius", "getSpawnRadius",
+                        "setPointLimit", "getPointLimit");
 
 
             /* The same continues for the second argument: If the first argument is addobjective, suggestions are made
@@ -628,8 +682,10 @@ public class CommandSpeedrun implements BasicCommand {
                     suggestions.add("[seed]");
                 } else if (args[0].equalsIgnoreCase("setspawnradius")) {
                     suggestions.add("[radius]");
-                }  else if (args[0].equalsIgnoreCase("setpointlimit")) {
+                } else if (args[0].equalsIgnoreCase("setpointlimit")) {
                     suggestions.add("[number]");
+                } else if (args[0].equalsIgnoreCase("team")) {
+                    addMatchingSuggestions(suggestions, args[1], speedRun.getTeams().getStrippedTeamNames(true));
                 }
 
             // Continues w/ third argument, just one step deeper
@@ -684,7 +740,16 @@ public class CommandSpeedrun implements BasicCommand {
     // This method makes it easier to add multiple possible suggestions to a list suggestion list & match them
     private void addMatchingSuggestions(List<String> suggestions, String arg, String... possibleSuggestions) {
         for (String suggestion : possibleSuggestions) {
-            if (suggestion.startsWith(arg.toLowerCase())) {
+            if (suggestion.toLowerCase().startsWith(arg.toLowerCase())) {
+                suggestions.add(suggestion);
+            }
+        }
+    }
+
+    // Same as above, but takes different args
+    private void addMatchingSuggestions(List<String> suggestions, String arg, List<String> teamNames) {
+        for (String suggestion : teamNames) {
+            if (suggestion.toLowerCase().startsWith(arg.toLowerCase())) {
                 suggestions.add(suggestion);
             }
         }
@@ -694,6 +759,6 @@ public class CommandSpeedrun implements BasicCommand {
        commands */
     @Override
     public @Nullable String permission() {
-        return "ksu.speedrun.user";
+        return "ksu.speedrun.admin";
     }
 }

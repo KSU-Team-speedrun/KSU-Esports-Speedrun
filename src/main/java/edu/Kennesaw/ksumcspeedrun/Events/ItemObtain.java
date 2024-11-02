@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObtainObjective;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
@@ -45,6 +46,28 @@ public class ItemObtain implements Listener {
             ItemStack is = e.getItem().getItemStack();
 
             if (entity instanceof Player p) {
+
+                if (!speedrun.getTeamsEnabled()) {
+
+                    if (p instanceof SoloTeam soloPlayer && speedrun.getSoloPlayers().contains(p)) {
+
+                        for (Objective o : soloPlayer.getIncompleteObjectives()) {
+
+                            if (o.getType().equals(Objective.ObjectiveType.OBTAIN)) {
+
+                                ObtainObjective oo = (ObtainObjective) o;
+
+                                if (getInventoryItemCount(p, is.getType()) >= oo.getAmount()) {
+                                    oo.setComplete(soloPlayer);
+                                    return;
+                                }
+
+                            }
+
+                        }
+
+                    }
+                }
 
                 Team team = tm.getTeam(p);
 

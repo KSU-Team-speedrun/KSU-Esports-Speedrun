@@ -1,7 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import org.bukkit.Bukkit;
@@ -60,25 +60,30 @@ public class PlayerClick implements Listener {
 
                 if (currentItem != null) {
 
-                    Team team = plugin.getSpeedrun().getTeams().getTeam(currentItem);
+                    TrueTeam trueTeam = plugin.getSpeedrun().getTeams().getTeam(currentItem);
 
-                    if (team != null) {
+                    if (trueTeam != null) {
 
-                        Team oldTeam = tm.getTeam(p);
+                        if (trueTeam.isFull()) {
+                            p.sendMessage(plugin.getMessages().getTeamIsFull());
+                            return;
+                        }
 
-                        if (oldTeam != null) {
+                        TrueTeam oldTrueTeam = (TrueTeam) tm.getTeam(p);
 
-                            if (oldTeam.equals(team)) {
+                        if (oldTrueTeam != null) {
+
+                            if (oldTrueTeam.equals(trueTeam)) {
                                 p.sendMessage(plugin.getMessages().getAlreadyOnTeam());
                                 return;
                             }
 
-                            oldTeam.removePlayer(p);
-                            tm.getTeamInventory().updateTeamInventory(oldTeam);
+                            oldTrueTeam.removePlayer(p);
+                            tm.getTeamInventory().updateTeamInventory(oldTrueTeam);
                         }
 
-                        team.addPlayer(p);
-                        tm.getTeamInventory().updateTeamInventory(team);
+                        trueTeam.addPlayer(p);
+                        tm.getTeamInventory().updateTeamInventory(trueTeam);
 
                         plugin.getSpeedrun().teamCooldown.add(p);
 

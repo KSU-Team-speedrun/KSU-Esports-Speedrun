@@ -3,8 +3,8 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObtainObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.Material;
@@ -47,30 +47,6 @@ public class ItemObtain implements Listener {
 
             if (entity instanceof Player p) {
 
-                if (!speedrun.getTeamsEnabled()) {
-
-                    if (speedrun.soloPlayersContain(p)) {
-
-                        SoloTeam soloPlayer = speedrun.getSoloPlayer(p);
-
-                        for (Objective o : soloPlayer.getIncompleteObjectives()) {
-
-                            if (o.getType().equals(Objective.ObjectiveType.OBTAIN)) {
-
-                                ObtainObjective oo = (ObtainObjective) o;
-
-                                if (getInventoryItemCount(p, is.getType()) >= oo.getAmount()) {
-                                    oo.setComplete(soloPlayer);
-                                    return;
-                                }
-
-                            }
-
-                        }
-
-                    }
-                }
-
                 Team team = tm.getTeam(p);
 
                 if (team == null) {
@@ -109,18 +85,21 @@ public class ItemObtain implements Listener {
 
                 int playerItemCount = 0;
 
-                for (Player teamPlayer : team.getPlayers()) {
+                if (speedrun.getTeamsEnabled() && team instanceof TrueTeam trueTeam) {
 
-                    playerItemCount += getInventoryItemCount(teamPlayer, is.getType());
+                    for (Player teamPlayer : trueTeam.getPlayers()) {
 
-                    System.out.println("total number: " + totalNumber);
-                    System.out.println("total amount: " + playerItemCount);
+                        playerItemCount += getInventoryItemCount(teamPlayer, is.getType());
 
-                    if (playerItemCount >= totalNumber) {
-                        matchedObtainObjective.setComplete(team);
-                        return;
+                        System.out.println("total number: " + totalNumber);
+                        System.out.println("total amount: " + playerItemCount);
+
+                        if (playerItemCount >= totalNumber) {
+                            matchedObtainObjective.setComplete(team);
+                            return;
+                        }
+
                     }
-
                 }
 
             }

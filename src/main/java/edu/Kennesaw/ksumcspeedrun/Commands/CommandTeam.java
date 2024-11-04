@@ -2,6 +2,7 @@ package edu.Kennesaw.ksumcspeedrun.Commands;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -30,7 +31,11 @@ public class CommandTeam implements BasicCommand {
 
         if (commandSourceStack.getSender() instanceof Player p) {
 
-            List<Team> teams = tm.getTeams();
+            if (!plugin.getSpeedrun().getTeamsEnabled()) {
+                return;
+            }
+
+            List<TrueTeam> trueTeams = tm.convertAbstractToTeam(tm.getTeams());
 
             if (args.length != 1) {
 
@@ -43,25 +48,30 @@ public class CommandTeam implements BasicCommand {
                     return;
                 }
 
-                for (Team team : teams) {
+                for (TrueTeam trueTeam : trueTeams) {
 
-                    if (args[0].equalsIgnoreCase(team.getStrippedName().replace(' ', '_'))) {
+                    if (args[0].equalsIgnoreCase(trueTeam.getStrippedName().replace(' ', '_'))) {
 
-                        Team oldTeam = tm.getTeam(p);
+                        if (trueTeam.isFull()) {
+                            p.sendMessage(plugin.getMessages().getTeamIsFull());
+                            return;
+                        }
 
-                        if (oldTeam != null) {
+                        TrueTeam oldTrueTeam = (TrueTeam) tm.getTeam(p);
 
-                            if (oldTeam.equals(team)) {
+                        if (oldTrueTeam != null) {
+
+                            if (oldTrueTeam.equals(trueTeam)) {
                                 p.sendMessage(plugin.getMessages().getAlreadyOnTeam());
                                 return;
                             }
 
-                            oldTeam.removePlayer(p);
-                            tm.getTeamInventory().updateTeamInventory(oldTeam);
+                            oldTrueTeam.removePlayer(p);
+                            tm.getTeamInventory().updateTeamInventory(oldTrueTeam);
                         }
 
-                        team.addPlayer(p);
-                        tm.getTeamInventory().updateTeamInventory(team);
+                        trueTeam.addPlayer(p);
+                        tm.getTeamInventory().updateTeamInventory(trueTeam);
 
                         plugin.getSpeedrun().teamCooldown.add(p);
 
@@ -87,7 +97,9 @@ public class CommandTeam implements BasicCommand {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 0) {
             for (Team team : tm.getTeams()) {
-                suggestions.add(team.getStrippedName().replace(' ', '_'));
+                if (team instanceof TrueTeam) {
+                    suggestions.add(team.getStrippedName().replace(' ', '_'));
+                }
             }
         } else if (args.length == 1) {
             addMatchingSuggestions(suggestions, args[0], tm.getStrippedTeamNames(true));

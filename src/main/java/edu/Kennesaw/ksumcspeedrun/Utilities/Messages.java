@@ -55,17 +55,20 @@ public class Messages {
     private String spawnRadius;
     private String pointLimitSet;
     private String pointLimit;
+    private String participationSet;
     private String gameAlreadyStarted;
     private String gameStarted;
     private String worldGenerating;
     private String worldGenerated;
     private String resetAttributes;
     private String toggleTeams;
+    private String gameStartedCannotChange;
 
     // Timer
     private String timerTitle;
     private String timeRemaining;
     private String gameOverMessage;
+    private String pointsMessage;
 
     public Messages(Main plugin) {
 
@@ -113,16 +116,19 @@ public class Messages {
             spawnRadius = config.getString("messages.admin.spawnRadius");
             pointLimitSet = config.getString("messages.admin.pointLimitSet");
             pointLimit = config.getString("messages.admin.pointLimit");
+            participationSet = config.getString("messages.admin.participationSet");
             gameAlreadyStarted = config.getString("messages.admin.gameAlreadyStarted");
             gameStarted = config.getString("messages.admin.gameStarted");
             worldGenerating = config.getString("messages.admin.worldGenerating");
             worldGenerated = config.getString("messages.admin.worldGenerated");
             resetAttributes = config.getString("messages.admin.resetAttributes");
             toggleTeams = config.getString("messages.admin.toggleTeams");
+            gameStartedCannotChange = config.getString("messages.admin.gameStartedCannotChange");
 
             timerTitle = config.getString("timer.title");
             timeRemaining = config.getString("timer.timeLeft");
             gameOverMessage = config.getString("timer.gameOverMessage");
+            pointsMessage = config.getString("timer.pointsMessage");
 
         });
 
@@ -328,6 +334,14 @@ public class Messages {
         return ComponentHelper.mmStringToComponent(this.gameStarted, prefixPlaceholder);
     }
 
+    public Component getParticipationSet(Boolean isParticipating) {
+        if (isParticipating == null) {
+            return ComponentHelper.mmStringToComponent(this.gameStartedCannotChange, prefixPlaceholder);
+        }
+        return ComponentHelper.mmStringToComponent(this.participationSet, prefixPlaceholder,
+                Placeholder.parsed("is_participating", isParticipating ? "TRUE" : "FALSE"));
+    }
+
     public Component getWorldGenerating() {
         return ComponentHelper.mmStringToComponent(this.worldGenerating, prefixPlaceholder);
     }
@@ -357,6 +371,11 @@ public class Messages {
     public String getGameOverMessage() {
         return LegacyComponentSerializer.legacySection().serialize(ComponentHelper
                 .mmStringToComponent(gameOverMessage));
+    }
+
+    public String getPointsMessage(int points) {
+        return LegacyComponentSerializer.legacySection().serialize(ComponentHelper
+                .mmStringToComponent(pointsMessage, Placeholder.parsed("points", points + "")));
     }
 
 }

@@ -6,8 +6,10 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.kyori.adventure.inventory.Book;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.BookMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
@@ -32,7 +34,8 @@ public class CommandObjectives implements BasicCommand {
             Team team = tm.getTeam(p);
 
             if (team != null) {
-                p.openBook(Items.getObjectiveBook(team));
+                Book book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted());
+                p.openBook(book);
             } else {
                 if (p.isOp()) {
                     p.openBook(Items.getAdminBook(plugin.getSpeedrun()));

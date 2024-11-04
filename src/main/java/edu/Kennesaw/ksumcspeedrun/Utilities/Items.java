@@ -1,13 +1,18 @@
 package edu.Kennesaw.ksumcspeedrun.Utilities;
 
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.EnterObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.*;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
+import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -122,9 +127,7 @@ public class Items {
             }
 
             Objective o = objectives.get(i);
-            if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
 
-            }
             String line = (i + 1) + ": " + o.getType().name() + " " + o.getTargetName();
 
             if (line.length() > maxCharsPerLine) {
@@ -153,119 +156,90 @@ public class Items {
         return bookMeta;
     }
 
+    public static Book getObjectiveBook(Team team, boolean isWeighted) {
 
-    public static BookMeta getObjectiveBook(Team team) {
+        List<Objective> incompleteObjectives = team.getIncompleteObjectives();
+        List<Component> pages = new ArrayList<>();
+        MiniMessage mm = MiniMessage.miniMessage();
 
-        ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
+        // Process incomplete objectives
+        Component page = createObjectiveHeader(mm, "INCOMPLETE", "dark_red");
+        int lines = 5;
 
-        BookMeta bookMeta = (BookMeta) bookItem.getItemMeta();
+        lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(incompleteObjectives, EnterObjective.class), isWeighted, lines, pages);
+        lines = addObjectivesByType(page, mm, "KILL", filterObjectives(incompleteObjectives, KillObjective.class), isWeighted, lines, pages);
+        lines = addObjectivesByType(page, mm, "MINE", filterObjectives(incompleteObjectives, MineObjective.class), isWeighted, lines, pages);
+        addObjectivesByType(page, mm, "OBTAIN", filterObjectives(incompleteObjectives, ObtainObjective.class), isWeighted, lines, pages);
 
-        bookMeta.setAuthor("KSU Minecraft Esports");
-        bookMeta.setTitle("Objectives");
+        List<Objective> completeObjectives = team.getCompleteObjectives();
 
-        List<String> pages = new ArrayList<>();
-        StringBuilder currentPage = new StringBuilder();
+        if (!completeObjectives.isEmpty()) {
+            page = createObjectiveHeader(mm, " COMPLETE", "dark_green");
+            lines = 5;
 
-        int maxLinesPerPage = 14;
-        int maxCharsPerLine = 22;
-        int currentLine = 0;
-        String currentColorCode;
-
-        currentPage.append("Incomplete Objectives:").append("\n");
-        currentLine++;
-        currentColorCode = "§c";
-
-        int spaceFull = 28;
-        int letterFull = 19;
-        double ratio = (double) spaceFull / letterFull;
-
-        for (Objective objective : team.getIncompleteObjectives()) {
-            appendLines(objective, currentLine, currentColorCode, ratio, maxCharsPerLine, maxLinesPerPage, spaceFull,
-                    currentPage, pages);
+            lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(completeObjectives, EnterObjective.class), isWeighted, lines, pages);
+            lines = addObjectivesByType(page, mm, "KILL", filterObjectives(completeObjectives, KillObjective.class), isWeighted, lines, pages);
+            lines = addObjectivesByType(page, mm, "MINE", filterObjectives(completeObjectives, MineObjective.class), isWeighted, lines, pages);
+            addObjectivesByType(page, mm, "OBTAIN", filterObjectives(completeObjectives, ObtainObjective.class), isWeighted, lines, pages);
         }
 
-        if (currentLine < maxLinesPerPage) {
-            currentPage.append("\n§0Completed Objectives:\n");
-            currentLine += 2;
-        } else {
+        Book.Builder book = Book.builder();
+        book.pages(pages);
 
-            pages.add(currentPage.toString());
-            currentPage = new StringBuilder("§0Completed Objectives:\n");
-            currentLine = 1;
-        }
-        currentColorCode = "§a";
-
-        for (Objective objective : team.getCompleteObjectives()) {
-            appendLines(objective, currentLine, currentColorCode, ratio, maxCharsPerLine, maxLinesPerPage, spaceFull,
-                    currentPage, pages);
-        }
-
-        if (!currentPage.isEmpty()) {
-            pages.add(currentPage.toString());
-        }
-
-        //noinspection deprecation
-        bookMeta.setPages(pages);
-
-        return bookMeta;
+        return book.build();
     }
 
-    private static List<String> wrapText(String text, int maxCharsPerLine) {
-        List<String> wrappedLines = new ArrayList<>();
-        int index = 0;
-        while (index < text.length()) {
-            wrappedLines.add(text.substring(index, Math.min(index + maxCharsPerLine, text.length())));
-            index += maxCharsPerLine;
-        }
-        return wrappedLines;
+    private static Component createObjectiveHeader(MiniMessage mm, String status, String color) {
+        return Component.empty().append(mm.deserialize("<gold><bold>    OBJECTIVES</bold></gold>")).decorate(TextDecoration.BOLD)
+                .appendNewline()
+                .append(mm.deserialize("<strikethrough>.........................................................</strikethrough>").decoration(TextDecoration.BOLD, false))
+                .appendNewline().appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false)
+                .append(mm.deserialize("<" + color + "><bold>    " + status + "</bold></" + color + ">"))
+                .appendNewline().appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
     }
 
-    private static void appendLines(Objective objective, int currentLine, String currentColorCode, double ratio,
-                                    int maxCharsPerLine, int maxLinesPerPage, int spaceFull,
-                                    StringBuilder currentPage, List<String> pages) {
-        StringBuilder objectiveText;
-
-        objectiveText = new StringBuilder(currentColorCode + "- " + objective.getType() + ": " + objective.getTargetName());
-
-        int i = objectiveText.toString().indexOf(':');
-
-        String left = objectiveText.substring(0, i);
-        String right = objectiveText.substring(i + 1).trim();
-
-        if (objectiveText.length() > 22) {
-
-            objectiveText = new StringBuilder(left + ":");
-
-            int leftSpaces;
-
-            if (objectiveText.toString().split(" ").length == 3) {
-
-                leftSpaces = (int) ((left.length() - 3) * ratio + 1);
-
-            } else {
-                leftSpaces = (int) ((left.length() - 4) * ratio + 2);
-
+    private static <T extends Objective> List<T> filterObjectives(List<Objective> objectives, Class<T> type) {
+        List<T> filteredObjectives = new ArrayList<>();
+        for (Objective o : objectives) {
+            if (type.isInstance(o)) {
+                filteredObjectives.add(type.cast(o));
             }
-
-            int spacesToAdd = spaceFull - leftSpaces - 1;
-
-            objectiveText.append(" ".repeat(Math.max(0, spacesToAdd))).append(right);
-
         }
+        return filteredObjectives;
+    }
 
-        List<String> wrappedLines = wrapText(objectiveText.toString(), maxCharsPerLine);
-        for (String line : wrappedLines) {
-            if (currentLine >= maxLinesPerPage) {
+    private static int addObjectivesByType(Component page, MiniMessage mm, String type, List<? extends Objective> objectives, boolean isWeighted, int lines, List<Component> pages) {
+        if (!objectives.isEmpty()) {
+            page = page.append(mm.deserialize("<gold><bold>" + type + ":</bold></gold>")).appendNewline()
+                    .appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
+            lines+=2;
 
-                pages.add(currentPage.toString());
-                currentPage = new StringBuilder();
-                currentLine = 0;
+            for (Objective obj : objectives) {
+                if (lines >= 12) {
+                    pages.add(page);
+                    page = Component.empty();
+                    lines = 2;
+                    page = page.append(mm.deserialize("<gold><bold>" + type + ":</bold></gold>")).appendNewline()
+                            .appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
+                    lines++;
+                }
 
-                currentPage.append(currentColorCode);
+                page = page.append(mm.deserialize("<reset><black>" + "<hover:show_text:'<b><gold>POINTS: " + obj.getWeight() + "</gold></b>'>" + obj.getTargetName() + "</hover>"));
+                if (obj instanceof ObtainObjective oo && oo.getAmount() > 1) {
+                    page = page.append(mm.deserialize(" (x" + oo.getAmount() + ")"));
+                }
+                page = page.appendNewline();
+                lines++;
+
+                if (isWeighted) {
+                    page = page.append(mm.deserialize(" - " + obj.getWeight() + " points")).appendNewline();
+                    lines++;
+                }
             }
-            currentPage.append(line).append("\n");
-            currentLine++;
+            pages.add(page);
+            lines = 5;
         }
+        return lines;
     }
 
 }

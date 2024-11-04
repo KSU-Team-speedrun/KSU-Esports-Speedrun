@@ -315,11 +315,17 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("resetattributes")) {
 
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        speedRun.resetAttributes();
-                    });
+                    Bukkit.getScheduler().runTask(plugin, () -> speedRun.resetAttributes());
 
                     sender.sendMessage(plugin.getMessages().getResetAttributes());
+
+                } else if (args[0].equalsIgnoreCase("participate")) {
+
+                    if (sender instanceof Player p) {
+                        Bukkit.getScheduler().runTask(plugin, () ->
+                                sender.sendMessage(plugin.getMessages().getParticipationSet(speedRun.participate(p))));
+
+                    }
 
                 } else if (args[0].equalsIgnoreCase("start")) {
 
@@ -350,7 +356,7 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else {
 
-                    sender.sendMessage(plugin.getMessages().getUnknownCommand(args[0]));
+                    Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getMessages().getUnknownCommand(args[0])));
 
                 }
             }
@@ -642,6 +648,7 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("getTeamSize");
             suggestions.add("getTimeLimit");
             suggestions.add("help");
+            suggestions.add("participate");
             suggestions.add("team");
             suggestions.add("reload");
             suggestions.add("remObjective");
@@ -654,6 +661,7 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("setTimeLimit");
             suggestions.add("start");
             suggestions.add("stop");
+            suggestions.add("toggleTeams");
 
         // If arguments have been typed, the following logic runs:
         } else {
@@ -665,9 +673,9 @@ public class CommandSpeedrun implements BasicCommand {
 
                 addMatchingSuggestions(suggestions, args[0], "help", "team", "reload", "addObjective",
                         "remObjective", "setTeamSize", "getTeamSize", "start", "stop",
-                        "setTimeLimit", "getTimeLimit", "setBorder", "getBorder",
+                        "setTimeLimit", "getTimeLimit", "setBorder", "getBorder", "participate",
                         "setSeed", "getSeed", "resetAttributes", "setSpawnRadius", "getSpawnRadius",
-                        "setPointLimit", "getPointLimit");
+                        "setPointLimit", "getPointLimit", "toggleTeams");
 
 
             /* The same continues for the second argument: If the first argument is addobjective, suggestions are made

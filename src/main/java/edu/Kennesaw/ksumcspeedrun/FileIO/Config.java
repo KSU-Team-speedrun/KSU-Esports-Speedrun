@@ -233,14 +233,16 @@ public class Config {
                     ""
             ));
 
-            set("messages.admin.helpMessage.p4", Arrays.asList("", "", "", "", "", "", "", "", "", "",
+            set("messages.admin.helpMessage.p4", Arrays.asList("", "", "", "", "", "", "", "", "",
                     "<bold><click:run_command:/help 3><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 4/4 </bold></white><gold><st>                          </st></gold>",
+                    "<gold><click:suggest_command:/speedrun toggleTeams>/speedrun toggleTeams</click></gold> <black>-</black> Toggle teams enabled or disabled.",
+                    "<gold><click:suggest_command:/speedrun participate>/speedrun participate</click></gold> <black>-</black> Add yourself as a game participant.",
+                    "<gold><click:suggest_command:/speedrun team>/speedrun team [teamName]</click></gold> <black>-</black> Join a specific team.",
                     "<gold><click:suggest_command:/speedrun resetAttributes>/speedrun resetAttributes</click></gold> <black>-</black> Reset all settings back to default.",
                     "<gold><click:suggest_command:/speedrun start>/speedrun start</click></gold> <black>-</black> Generate world and start the game.",
                     "<gold><click:suggest_command:/speedrun stop>/speedrun stop</click></gold> <black>-</black> Force end the game.",
-                    "<gold><click:suggest_command:/speedrun team>/speedrun team [teamName]</click></gold> <black>-</black> Join a specific team.",
                     "<gold><st>                                                                                </st></gold>",
-                    "", "", ""
+                    ""
             ));
 
             set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
@@ -267,10 +269,12 @@ public class Config {
             set("messages.admin.pointLimit", "<prefix> Point Limit: <bold><gold><point_limit></gold></bold>");
             set("messages.admin.gameAlreadyStarted", "<prefix> The game has already started!");
             set("messages.admin.gameStarted", "<prefix> You have started the speedrun!");
+            set("messages.admin.gameStartedCannotChange", "<prefix> This attribute cannot be changed after the game has started.");
             set("messages.admin.worldGenerating", "<prefix> Generating world... Please wait.");
             set("messages.admin.worldGenerated", "<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to start the game.");
             set("messages.admin.resetAttributes", "<prefix> All attributes have been reset.");
             set("messages.admin.toggleTeams", "<prefix> Teams have been: <toggle_option>");
+            set("messages.admin.participationSet", "<prefix> Participation set: <is_participating>");
         }
 
         if (!config.contains("timer")) {
@@ -281,6 +285,7 @@ public class Config {
             set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
             set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
             set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
+            set("timer.pointsMessage", "<white>Team Points:</white> <bold><gold><points></gold></bold>");
 
         }
 
@@ -358,11 +363,11 @@ public class Config {
         if (!config.contains("world")) {
             set("world.deleteOnStart", true);
             set("world.spawnPoint.world", "world");
-            set("world.spawnPoint.x", 0.0);
-            set("world.spawnPoint.y", 150.0);
-            set("world.spawnPoint.z", 0.0);
+            set("world.spawnPoint.x", -860.5);
+            set("world.spawnPoint.y", 178.0);
+            set("world.spawnPoint.z", 307.5);
             set("world.spawnPoint.pitch", 0.0);
-            set("world.spawnPoint.yaw", 0.0);
+            set("world.spawnPoint.yaw", -0.0);
         }
 
         /* Loops through every structure in the game and adds it to the config by default. Administrators can update

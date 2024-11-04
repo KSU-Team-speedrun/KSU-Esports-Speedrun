@@ -1,8 +1,9 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ public abstract class Objective {
     private final int weight;
 
     private final List<Team> completedTeams;
-    private final List<SoloTeam> completedPlayers;
     private String targetName;
 
     Main plugin;
@@ -32,7 +32,6 @@ public abstract class Objective {
         this.type = type;
         this.weight = 1;
         this.completedTeams = new ArrayList<>();
-        this.completedPlayers = new ArrayList<>();
         this.plugin = plugin;
         System.out.println("Objective added");
     }
@@ -42,7 +41,6 @@ public abstract class Objective {
         this.type = type;
         this.weight = weight;
         this.completedTeams = new ArrayList<>();
-        this.completedPlayers = new ArrayList<>();
         this.plugin = plugin;
     }
 
@@ -62,56 +60,51 @@ public abstract class Objective {
         team.addPoints(weight);
         team.addCompleteObjective(this);
 
-        if (type.equals(ObjectiveType.OBTAIN)) {
+        if (team instanceof TrueTeam trueTeam && plugin.getSpeedrun().getTeamsEnabled()) {
 
-            ObtainObjective oo = (ObtainObjective) this;
+            if (type.equals(ObjectiveType.OBTAIN)) {
 
-            int number = oo.getAmount();
-            
-            if (number > 1) {
+                ObtainObjective oo = (ObtainObjective) this;
 
-                for (Player p : team.getPlayers()) {
-                    p.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
+                int number = oo.getAmount();
+
+                if (number > 1) {
+
+                    for (Player p : trueTeam.getPlayers()) {
+                        p.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
+                                targetName, number, weight));
+                    }
+                    return;
+                }
+
+            }
+
+            for (Player p : trueTeam.getPlayers()) {
+                p.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
+            }
+
+        } else if (team instanceof SoloTeam soloTeam && !plugin.getSpeedrun().getTeamsEnabled()) {
+
+            if (type.equals(ObjectiveType.OBTAIN)) {
+
+                ObtainObjective oo = (ObtainObjective) this;
+
+                int number = oo.getAmount();
+
+                if (number > 1) {
+
+                    soloTeam.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
                             targetName, number, weight));
                 }
-                return;
             }
+            soloTeam.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
 
         }
-
-        for (Player p : team.getPlayers()) {
-            p.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
-        }
-
-    }
-
-    public void setComplete(SoloTeam player) {
-        this.completedPlayers.add(player);
-        player.addPoints(weight);
-        player.addCompleteObjective(this);
-
-        if (type.equals(ObjectiveType.OBTAIN)) {
-
-            ObtainObjective oo = (ObtainObjective) this;
-
-            int number = oo.getAmount();
-
-            if (number > 1) {
-
-                player.sendMessage(plugin.getMessages().getObjectiveCompleteNumber(type.toString(),
-                        targetName, number, weight));
-            }
-        }
-        player.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
 
     }
 
     public boolean isComplete(Team team) {
         return completedTeams.contains(team);
-    }
-
-    public boolean isComplete(SoloTeam player) {
-        return completedPlayers.contains(player);
     }
 
     public void setTargetName(String target) {

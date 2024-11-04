@@ -3,8 +3,6 @@ package edu.Kennesaw.ksumcspeedrun.Events;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.MineObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObtainObjective;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
@@ -38,32 +36,6 @@ public class MineBlock implements Listener {
 
             Player p = e.getPlayer();
             Block b = e.getBlock();
-
-            if (!speedrun.getTeamsEnabled()) {
-
-                if (speedrun.soloPlayersContain(p)) {
-
-                    SoloTeam soloPlayer = speedrun.getSoloPlayer(p);
-
-                    for (Objective o : soloPlayer.getIncompleteObjectives()) {
-
-                        if (o.getType().equals(Objective.ObjectiveType.MINE)) {
-
-                            MineObjective mo = (MineObjective) o;
-
-                            if (mo.getBlockTarget().equals(b.getType())) {
-
-                                mo.setComplete(soloPlayer);
-                                break;
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            }
 
             Team team = tm.getTeam(p);
 

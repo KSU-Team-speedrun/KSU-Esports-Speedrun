@@ -4,10 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
 import edu.Kennesaw.ksumcspeedrun.Objects.CountdownTimer;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamSpawner;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.*;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import edu.Kennesaw.ksumcspeedrun.Utilities.WorldGenerator;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -42,9 +39,6 @@ public class Speedrun {
     private int playerLimit;
     private World speedrunWorld;
 
-    // "isVerified" meaning objectives can be completed on world seed within world border constraints
-    private boolean isVerified;
-
     // True if the Speedrun has started
     private boolean isStarted;
 
@@ -53,9 +47,6 @@ public class Speedrun {
     // ObjectiveManager contains the list of all Objectives & all incomplete objectives, can be modified
     private final ObjectiveManager objectives;
     private final TeamManager tm;
-
-    private Map<Player, SoloTeam> soloPlayers;
-    private List<SoloTeam> soloPlayersList;
 
     private CountdownTimer ct;
 
@@ -69,6 +60,8 @@ public class Speedrun {
 
     public Set<Player> teamCooldown;
 
+    // Admins are left unincluded from games and team calculations unless they specify
+    private final List<Player> onlinePlayers;
     private boolean teamsEnabled;
 
     final File worldFolder = new File(Bukkit.getWorldContainer(), "speedrunworld");
@@ -88,6 +81,8 @@ public class Speedrun {
 
         objectives = new ObjectiveManager();
         tm = new TeamManager(plugin);
+
+        onlinePlayers = new ArrayList<>();
 
         gameRules = new ConcurrentHashMap<>();
 
@@ -201,15 +196,6 @@ public class Speedrun {
         return playerLimit;
     }
 
-    public void verifyMap() {
-        // verify map
-        isVerified = true;
-    }
-
-    public boolean isVerified() {
-        return isVerified;
-    }
-
     public Boolean setStarted(CommandSender sender) {
         if (!this.isStarted) {
             if (speedrunWorld == null) {
@@ -229,18 +215,11 @@ public class Speedrun {
             isStarted = true;
             new PlayerMove(plugin);
             ct = new CountdownTimer(plugin, timeLimit);
-            if (teamsEnabled) {
-                assignPlayers();
-                for (Player p : tm.getAssignedPlayers()) {
-                    p.getInventory().clear();
-                }
-                TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius);
-            } else {
-                for (SoloTeam soloPlayer : soloPlayersList) {
-                    soloPlayer.getInventory().clear();
-                }
-                TeamSpawner.spawnPlayersInCircle(speedrunWorld, soloPlayers, spawnRadius);
+            if (teamsEnabled) assignPlayers();
+            for (Player p : tm.getAssignedPlayers()) {
+                p.getInventory().clear();
             }
+            TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius, teamsEnabled);
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
             return true;
         }
@@ -267,14 +246,6 @@ public class Speedrun {
         }
     }
 
-    public void endGame(SoloTeam winner) {
-        if (this.isStarted) {
-            this.isStarted = false;
-            ct.stop();
-            Bukkit.broadcast(plugin.getMessages().getWinner(winner.displayName()));
-        }
-    }
-
     public void endGameTimeExpired() {
         if (this.isStarted) {
             this.isStarted = false;
@@ -289,19 +260,6 @@ public class Speedrun {
                 }
                 if (winner != null) {
                     Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.getName()));
-                }
-            } else {
-                SoloTeam winner = null;
-                int points = 0;
-                for (Map.Entry<Player, SoloTeam> entry : soloPlayers.entrySet()) {
-                    SoloTeam soloTeam = entry.getValue();
-                    if (soloTeam.getPoints() > points) {
-                        points = soloTeam.getPoints();
-                        winner = soloTeam;
-                    }
-                }
-                if (winner != null) {
-                    Bukkit.broadcast(plugin.getMessages().getTimeUp(winner.displayName()));
                 }
             }
         }
@@ -318,116 +276,128 @@ public class Speedrun {
         return objectives.getTotalWeight();
     }
 
+    public boolean isWeighted() {
+        return this.totalWeight != 0;
+    }
+
     /**
-     *  @param onlinePlayersTest This function should be called with null as the argument in
+     *  @param onlinePlayers This function should be called with null as the argument in
      *                           standard situations, it is currently included for testing purposes
      *                           and will later be removed.
      */
-    public void createTeams(Integer onlinePlayersTest) {
+    public void createTeams(Integer onlinePlayers) {
 
-        if (onlinePlayersTest == null) {
-            onlinePlayersTest = Bukkit.getServer().getOnlinePlayers().size();
-        }
-        int numberOfTeams = (int) Math.ceil((double) onlinePlayersTest / getTeamSizeLimit());
+        if (teamsEnabled && !this.onlinePlayers.isEmpty()) {
 
-        ConfigurationSection teamsSection = plugin.getConfig().getConfigurationSection("teams");
+            List<TrueTeam> trueTeams = tm.convertAbstractToTeam(tm.getTeams());
 
-        if (teamsSection == null) {
-            plugin.getLogger().severe("No teams found in the configuration!");
-            return;
-        }
-
-        Set<String> teamKeys = teamsSection.getKeys(false);
-
-        int maxTeams = Math.min(numberOfTeams, teamKeys.size());
-
-        if (tm.getTeams().size() > maxTeams) {
-            List<Team> teamsToRemove = new ArrayList<>(tm.getTeams().subList(maxTeams, tm.getTeams().size()));
-
-            for (Team team : teamsToRemove) {
-                redistributePlayers(team);
-                tm.removeTeam(team);
+            if (onlinePlayers == null) {
+                onlinePlayers = this.onlinePlayers.size();
             }
-        }
+            int numberOfTeams = (int) Math.ceil((double) onlinePlayers / getTeamSizeLimit());
 
-        int count = 0;
-        for (String teamKey : teamKeys) {
+            ConfigurationSection teamsSection = plugin.getConfig().getConfigurationSection("teams");
 
-            if (teamKey.equals("inventory")) {
-                continue;
+            if (teamsSection == null) {
+                plugin.getLogger().severe("No teams found in the configuration!");
+                return;
             }
 
-            if (count >= maxTeams) {
-                break;
-            }
+            Set<String> teamKeys = teamsSection.getKeys(false);
 
-            Component teamName = plugin.getSpeedrunConfig().getComponent("teams." + teamKey + ".name");
+            int maxTeams = Math.min(numberOfTeams, teamKeys.size());
 
-            Team team = tm.getTeam(teamName);
+            if (tm.getTeams().size() > maxTeams) {
+                List<TrueTeam> teamsToRemove = new ArrayList<>(trueTeams.subList(maxTeams, tm.getTeams().size()));
 
-            if (team != null) {
-                ItemStack item = team.getItem();
-                ItemMeta itemim = item.getItemMeta();
-                List<Component> lore = itemim.lore();
-                if (lore != null) {
-                    if (team.isFull()) {
-                        lore.set(1, Component.text("This team is FULL!")
-                                .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
-                    } else {
-                        lore.set(1,Component.text( team.getSize() + "/" + tm.getSizeLimit() + " players on this team.")
-                                .color(TextColor.fromHexString("#c4c4c4")));
-                    }
-
+                for (TrueTeam trueTeam : teamsToRemove) {
+                    redistributePlayers(trueTeam);
+                    remTeam(trueTeam);
                 }
-                itemim.lore(lore);
-                item.setItemMeta(itemim);
-                team.setItem(item);
+            }
+
+            int count = 0;
+            for (String teamKey : teamKeys) {
+
+                if (teamKey.equals("inventory")) {
+                    continue;
+                }
+
+                if (count >= maxTeams) {
+                    break;
+                }
+
+                Component teamName = plugin.getSpeedrunConfig().getComponent("teams." + teamKey + ".name");
+
+                TrueTeam trueTeam = (TrueTeam) tm.getTeam(teamName);
+
+                if (trueTeam != null) {
+                    ItemStack item = trueTeam.getItem();
+                    ItemMeta itemim = item.getItemMeta();
+                    List<Component> lore = itemim.lore();
+                    if (lore != null) {
+                        if (trueTeam.isFull()) {
+                            lore.set(1, Component.text("This team is FULL!")
+                                    .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
+                        } else {
+                            lore.set(1,Component.text( trueTeam.getSize() + "/" + tm.getSizeLimit() + " players on this team.")
+                                    .color(TextColor.fromHexString("#c4c4c4")));
+                        }
+
+                    }
+                    itemim.lore(lore);
+                    item.setItemMeta(itemim);
+                    trueTeam.setItem(item);
+                    count++;
+                    continue;
+                }
+
+                Component teamLore = plugin.getSpeedrunConfig().getComponent("teams." + teamKey + ".lore");
+                String teamItem = plugin.getSpeedrunConfig().getString("teams." + teamKey + ".item");
+
+                if (teamName == null || teamItem == null) {
+                    plugin.getLogger().warning("Team '" + teamKey + "' is missing a name or item in the configuration.");
+                    continue;
+                }
+
+                ItemStack teamItemStack = new ItemStack(Material.valueOf(teamItem));
+                ItemMeta tim = teamItemStack.getItemMeta();
+                tim.displayName(teamName);
+                List<Component> lore = new ArrayList<>();
+                lore.add(teamLore);
+                lore.add(Component.text( "0/" + tm.getSizeLimit() + " players on this team.")
+                        .color(TextColor.fromHexString("#c4c4c4")));
+                tim.lore(lore);
+                teamItemStack.setItemMeta(tim);
+
+                trueTeam = new TrueTeam(plugin, teamName, teamItemStack);
+                tm.addTeam(trueTeam);
+
                 count++;
-                continue;
+
             }
 
-            Component teamLore = plugin.getSpeedrunConfig().getComponent("teams." + teamKey + ".lore");
-            String teamItem = plugin.getSpeedrunConfig().getString("teams." + teamKey + ".item");
+            tm.getTeamInventory().createTeamInventory();
 
-            if (teamName == null || teamItem == null) {
-                plugin.getLogger().warning("Team '" + teamKey + "' is missing a name or item in the configuration.");
-                continue;
-            }
-
-            ItemStack teamItemStack = new ItemStack(Material.valueOf(teamItem));
-            ItemMeta tim = teamItemStack.getItemMeta();
-            tim.displayName(teamName);
-            List<Component> lore = new ArrayList<>();
-            lore.add(teamLore);
-            lore.add(Component.text( "0/" + tm.getSizeLimit() + " players on this team.")
-                    .color(TextColor.fromHexString("#c4c4c4")));
-            tim.lore(lore);
-            teamItemStack.setItemMeta(tim);
-
-            team = new Team(plugin, teamName, teamItemStack);
-            tm.addTeam(team);
-
-            count++;
+            plugin.getLogger().info("Total teams created: " + tm.getTeams().size());
 
         }
-
-        tm.getTeamInventory().createTeamInventory();
-
-        plugin.getLogger().info("Total teams created: " + tm.getTeams().size());
 
     }
 
-    private void redistributePlayers(Team team) {
-        List<Player> playersToRedistribute = new ArrayList<>(team.getPlayers());
-        team.getPlayers().clear();
+    private void redistributePlayers(TrueTeam trueTeam) {
+        if (teamsEnabled) {
+            List<Player> playersToRedistribute = new ArrayList<>(trueTeam.getPlayers());
+            trueTeam.getPlayers().clear();
 
-        List<Team> remainingTeams = tm.getTeams();
+            List<TrueTeam> remainingTrueTeams = tm.convertAbstractToTeam(tm.getTeams());
 
-        int teamIndex = 0;
-        for (Player player : playersToRedistribute) {
-            Team targetTeam = remainingTeams.get(teamIndex);
-            targetTeam.addPlayer(player);
-            teamIndex = (teamIndex + 1) % remainingTeams.size();
+            int teamIndex = 0;
+            for (Player player : playersToRedistribute) {
+                TrueTeam targetTrueTeam = remainingTrueTeams.get(teamIndex);
+                targetTrueTeam.addPlayer(player);
+                teamIndex = (teamIndex + 1) % remainingTrueTeams.size();
+            }
         }
     }
 
@@ -435,13 +405,10 @@ public class Speedrun {
 
         List<Player> assignedPlayers = tm.getAssignedPlayers();
         List<Player> noTeamPlayers = new ArrayList<>();
-        Collection<?> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
 
-        for (Object o : onlinePlayers) {
-            if (o instanceof Player p) {
-                if (!assignedPlayers.contains(p)) {
-                    noTeamPlayers.add(p);
-                }
+        for (Player p : onlinePlayers) {
+            if (!assignedPlayers.contains(p)) {
+                noTeamPlayers.add(p);
             }
         }
 
@@ -460,8 +427,6 @@ public class Speedrun {
             this.timeUnit = TimeUnit.MINUTES;
             this.spawnRadius = 300;
             this.teamsEnabled = true;
-            this.soloPlayers = null;
-            this.soloPlayersList = null;
 
             objectives.clearObjectives();
             tm.reset();
@@ -497,62 +462,83 @@ public class Speedrun {
         if (!isStarted) {
             this.teamsEnabled = teamsEnabled;
             tm.reset();
-            if (!teamsEnabled) {
-                this.soloPlayers = new HashMap<>();
-                this.soloPlayersList = new ArrayList<>();
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    p.getInventory().clear();
+            if (!this.teamsEnabled) {
+                for (Player p : onlinePlayers) {
+                    p.getInventory().setItem(4, new ItemStack(Material.AIR));
                     SoloTeam soloTeam = new SoloTeam(plugin, p);
-                    soloPlayers.put(p, soloTeam);
-                    soloPlayersList.add(soloTeam);
+                    tm.addTeam(soloTeam);
                 }
             } else {
-                this.soloPlayers = null;
-                this.soloPlayersList = null;
                 createTeams(null);
-                for (Player p : Bukkit.getOnlinePlayers()) {
+                for (Player p : onlinePlayers) {
                     p.getInventory().setItem(4, Items.getTeamSelector());
                 }
             }
         }
     }
 
-    public List<SoloTeam> getSoloPlayers() {
-        return soloPlayersList;
+    public Boolean participate(Player player) {
+        if (!isStarted) {
+            boolean isParticipating = true;
+            if (teamsEnabled) {
+                TrueTeam trueTeam = (TrueTeam) getTeams().getTeam(player);
+                if (!onlinePlayers.contains(player)) {
+                    onlinePlayers.add(player);
+                    player.getInventory().setItem(4, Items.getTeamSelector());
+                } else {
+                    player.getInventory().setItem(4, new ItemStack(Material.AIR));
+                    if (trueTeam != null) {
+                        trueTeam.removePlayer(player);
+                    }
+                    onlinePlayers.remove(player);
+                    isParticipating = false;
+                }
+                if (onlinePlayers.size() % getTeamSizeLimit() == 0 || getTeams()
+                        .getTeamInventory().getInventory() == null) {
+                    createTeams(null);
+                } else if (!isParticipating) {
+                    getTeams().getTeamInventory().updateTeamInventory(trueTeam);
+                }
+            } else {
+                if (!onlinePlayers.contains(player)) {
+                    onlinePlayers.add(player);
+                    SoloTeam st = new SoloTeam(plugin, player);
+                    addTeam(st);
+                } else {
+                    SoloTeam st = (SoloTeam) getTeams().getTeam(player);
+                    if (st != null) {
+                        remTeam(st);
+                        onlinePlayers.remove(player);
+                        isParticipating = false;
+                    }
+                }
+            }
+            return isParticipating;
+        }
+        return null;
     }
 
-    public void addSoloPlayer(Player player) {
-        soloPlayers.put(player, new SoloTeam(plugin, player));
-        soloPlayersList.add(soloPlayers.get(player));
-    }
-
-    public SoloTeam getSoloPlayer(Player player) {
-        return soloPlayers.get(player);
-    }
-
-    public void removeSoloPlayer(Player player) {
-        soloPlayersList.remove(soloPlayers.get(player));
-        soloPlayers.remove(player);
-    }
-
-    public boolean soloPlayersContain(Player p) {
-        return soloPlayers.containsKey(p);
+    public boolean isParticipating(Player p) {
+        return onlinePlayers.contains(p);
     }
 
     private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {
-        Iterator<Player> iterator = noTeamPlayers.iterator();
-        while (iterator.hasNext()) {
-            Player player = iterator.next();
-            Team team = tm.getTeams().get(teamIndex);
-            if (team.getSize() > tm.getSizeLimit()) {
-                assignPlayers(noTeamPlayers, teamIndex + 1);
-                break;
+        if (teamsEnabled) {
+            Iterator<Player> iterator = noTeamPlayers.iterator();
+            List<TrueTeam> trueTeams = tm.convertAbstractToTeam(tm.getTeams());
+            while (iterator.hasNext()) {
+                Player player = iterator.next();
+                TrueTeam trueTeam = trueTeams.get(teamIndex);
+                if (trueTeam.getSize() > tm.getSizeLimit()) {
+                    assignPlayers(noTeamPlayers, teamIndex + 1);
+                    break;
+                }
+                trueTeam.addPlayer(player);
+                teamIndex = (teamIndex + 1) % tm.getTeams().size();
+                iterator.remove();
             }
-            team.addPlayer(player);
-            teamIndex = (teamIndex + 1) % tm.getTeams().size();
-            iterator.remove();
+            balanceTeams();
         }
-        balanceTeams();
     }
 
 
@@ -563,13 +549,14 @@ public class Speedrun {
     }
 
     private void balanceTeams() {
-        tm.getTeams().sort(Comparator.comparingInt(Team::getSize));
-
-        while (tm.getTeams().getLast().getSize() - tm.getTeams().getFirst().getSize() > 1) {
-            Player playerToMove =  tm.getTeams().getLast().getPlayers().remove(tm.getTeams().getLast().getSize() - 1);
-            tm.getTeams().getFirst().addPlayer(playerToMove);
-
-            tm.getTeams().sort(Comparator.comparingInt(Team::getSize));
+        if (teamsEnabled) {
+            List<TrueTeam> trueTeams = tm.convertAbstractToTeam(tm.getTeams());
+            trueTeams.sort(Comparator.comparingInt(TrueTeam::getSize));
+            while (trueTeams.getLast().getSize() - trueTeams.getFirst().getSize() > 1) {
+                Player playerToMove =  trueTeams.getLast().getPlayers().remove(trueTeams.getLast().getSize() - 1);
+                trueTeams.getFirst().addPlayer(playerToMove);
+                trueTeams.sort(Comparator.comparingInt(TrueTeam::getSize));
+            }
         }
     }
 

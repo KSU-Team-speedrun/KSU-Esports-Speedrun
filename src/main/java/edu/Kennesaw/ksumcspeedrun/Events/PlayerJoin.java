@@ -5,6 +5,7 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,22 +29,13 @@ public class PlayerJoin implements Listener {
 
         if (!sr.isStarted()) {
 
-            if (sr.getTeamsEnabled()) {
-
-                p.getInventory().setItem(4, Items.getTeamSelector());
-
-                if (Bukkit.getServer().getOnlinePlayers().size() % sr.getTeamSizeLimit() == 0 || sr.getTeams()
-                        .getTeamInventory().getInventory() == null) {
-                    sr.createTeams(null);
-                }
-
-            } else {
-
-                sr.addSoloPlayer(p);
-
-            }
-
             p.teleport(plugin.getSpawnPoint());
+
+            if (!p.hasPermission("ksu.speedrun.admin")) {
+                p.setGameMode(GameMode.SURVIVAL);
+                p.getInventory().clear();
+                sr.participate(p);
+            }
 
         }
 

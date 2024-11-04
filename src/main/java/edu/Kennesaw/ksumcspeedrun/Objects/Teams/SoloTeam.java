@@ -7,11 +7,12 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SoloTeam {
+public class SoloTeam extends Team {
 
     Main plugin;
     private final List<Objective> completedObjectives;
@@ -19,10 +20,17 @@ public class SoloTeam {
     private int points;
 
     public SoloTeam(Main plugin, Player player) {
+        super(plugin);
         this.player = player;
         this.plugin = plugin;
         this.completedObjectives = new ArrayList<>();
         points = 0;
+        plugin.getSpeedrun().getTeams().setPlayerTeam(player, this);
+    }
+
+    @Override
+    public Component getName() {
+        return player.displayName();
     }
 
     public int getPoints() {
@@ -48,16 +56,17 @@ public class SoloTeam {
         completedObjectives.add(o);
     }
 
+    @Override
+    public String getStrippedName() {
+        return player.getName();
+    }
+
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
     }
 
     public Inventory getInventory() {
         return player.getInventory();
-    }
-
-    public Component displayName() {
-        return player.displayName();
     }
 
     public Location getLocation() {
@@ -72,5 +81,16 @@ public class SoloTeam {
         player.sendMessage(component);
     }
 
+    public void teleport(Location location) {
+        player.teleport(location);
+    }
+
+    public void setRespawnLocation(Location location) {
+        player.setRespawnLocation(location);
+    }
+
+    public void setScoreboard(Scoreboard scoreboard) {
+        player.setScoreboard(scoreboard);
+    }
 
 }

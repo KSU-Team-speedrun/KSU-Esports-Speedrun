@@ -13,7 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Team {
+public class TrueTeam extends Team {
 
     Main plugin;
 
@@ -26,7 +26,8 @@ public class Team {
     private final List<Objective> completedObjectives = new ArrayList<>();
 
 
-    public Team(Main plugin, Component teamName, ItemStack item) {
+    public TrueTeam(Main plugin, Component teamName, ItemStack item) {
+        super(plugin);
         this.plugin = plugin;
         this.name = teamName;
         this.strippedName = PlainTextComponentSerializer.plainText().serialize(teamName);
@@ -37,10 +38,6 @@ public class Team {
     public void addPlayer(Player player) {
         if (players.contains(player)) {
             player.sendMessage(plugin.getMessages().getAlreadyOnTeam());
-            return;
-        }
-        if (isFull()) {
-            player.sendMessage(plugin.getMessages().getTeamIsFull());
             return;
         }
         players.add(player);
@@ -65,8 +62,8 @@ public class Team {
     }
 
     @SuppressWarnings("unused")
-    public void changeLastPlayer(Team team) {
-        team.addPlayer(players.getLast());
+    public void changeLastPlayer(TrueTeam trueTeam) {
+        trueTeam.addPlayer(players.getLast());
     }
 
     public Component getName() {
@@ -131,6 +128,7 @@ public class Team {
         setItem(item);
     }
 
+    @Override
     public String getStrippedName() {
         return strippedName;
     }

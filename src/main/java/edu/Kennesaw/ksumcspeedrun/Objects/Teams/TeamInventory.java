@@ -20,7 +20,7 @@ public class TeamInventory {
     private Inventory inv;
     private final Component inventoryName;
 
-    private Map<Team, Integer> inventoryLoc;
+    private Map<TrueTeam, Integer> inventoryLoc;
 
     public TeamInventory(TeamManager tm, Component inventoryName) {
         this.tm = tm;
@@ -28,6 +28,8 @@ public class TeamInventory {
     }
 
     public void createTeamInventory() {
+
+        if (tm.getTeams().isEmpty()) return;
 
         int itemCount = tm.getTeams().size();
         int rowsNeeded = Items.determineRows(itemCount);
@@ -37,8 +39,10 @@ public class TeamInventory {
 
         List<ItemStack> teamItems = new ArrayList<>();
 
-        for (Team team : tm.getTeams()) {
-            teamItems.add(team.getItem());
+        List<TrueTeam> trueTrueTeams = tm.convertAbstractToTeam(tm.getTeams());
+
+        for (TrueTeam trueTeam : trueTrueTeams) {
+            teamItems.add(trueTeam.getItem());
         }
 
         List<Integer> slots = Items.generateSlots(itemCount, rowsNeeded);
@@ -47,7 +51,7 @@ public class TeamInventory {
 
         for (int i = 0; i < itemCount && i < slots.size(); i++) {
             inv.setItem(slots.get(i), teamItems.get(i));
-            inventoryLoc.put(tm.getTeams().get(i), slots.get(i));
+            inventoryLoc.put(trueTrueTeams.get(i), slots.get(i));
         }
 
         List<HumanEntity> viewers = null;
@@ -69,18 +73,18 @@ public class TeamInventory {
             for (HumanEntity he : viewers) {
 
                 if (he instanceof Player p) {
-
                     p.openInventory(this.inv);
                 }
             }
         }
     }
 
-    public void updateTeamInventory(Team teamToUpdate) {
-        inv.setItem(inventoryLoc.get(teamToUpdate), teamToUpdate.getItem());
+    public void updateTeamInventory(TrueTeam trueTeamToUpdate) {
+        if (inventoryLoc.get(trueTeamToUpdate) == null) return;
+        inv.setItem(inventoryLoc.get(trueTeamToUpdate), trueTeamToUpdate.getItem());
         for (HumanEntity viewer : inv.getViewers()) {
             if (viewer instanceof Player player) {
-                player.getOpenInventory().getTopInventory().setItem(inventoryLoc.get(teamToUpdate), teamToUpdate.getItem());
+                player.getOpenInventory().getTopInventory().setItem(inventoryLoc.get(trueTeamToUpdate), trueTeamToUpdate.getItem());
             }
         }
     }

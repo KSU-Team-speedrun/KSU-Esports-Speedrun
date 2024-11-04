@@ -118,15 +118,14 @@ messages:
         - ''
         - ''
         - ''
-        - ''
         - '<bold><click:run_command:/help 3><hover:show_text:''<bold>PREVIOUS PAGE</bold>''><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 4/4 </bold></white><gold><st>                          </st></gold>'
+        - '<gold><click:suggest_command:/speedrun toggleTeams>/speedrun toggleTeams</click></gold> <black>-</black> Toggle teams enabled or disabled.'
+        - '<gold><click:suggest_command:/speedrun participate>/speedrun participate</click></gold> <black>-</black> Add yourself as a game participant.'
         - '<gold><click:suggest_command:/speedrun team>/speedrun team [teamName]</click></gold> <black>-</black> Join a specific team.'
         - '<gold><click:suggest_command:/speedrun resetAttributes>/speedrun resetAttributes</click></gold> <black>-</black> Reset all settings back to default.'
         - '<gold><click:suggest_command:/speedrun start>/speedrun start</click></gold> <black>-</black> Generate world and start the game.'
         - '<gold><click:suggest_command:/speedrun stop>/speedrun stop</click></gold> <black>-</black> Force end the game.'
         - '<gold><st>                                                                                </st></gold>'
-        - ''
-        - ''
         - ''
 
     objectiveAdded: '<prefix> Objective Added: <bold><gold><objective_type> <target></gold></bold>'
@@ -151,11 +150,13 @@ messages:
     pointLimit: '<prefix> Point Limit: <bold><gold><point_limit></gold></bold>'
     gameAlreadyStarted: '<prefix> The game has already started!'
     gameStarted: '<prefix> You have started the speedrun!'
+    gameStartedCannotChange: '<prefix> This attribute cannot be changed after the game has started.'
     worldGenerating: '<prefix> Generating world... Please wait.'
     worldGenerated: '<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to 
       start the game.'
     resetAttributes: '<prefix> All attributes have been reset.'
     toggleTeams: '<prefix> Teams have been: <toggle_option>'
+    participationSet: '<prefix> Participation set: <is_participating>'
 
 
 # ====================
@@ -172,6 +173,7 @@ timer:
   title: '<bold><gold>KSU SPEEDRUN</gold></bold>'
   timeLeft: '<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>'
   gameOverMessage: '<white><bold>GAME OVER!</bold></white>'
+  pointsMessage: '<white>Team Points:</white> <bold><gold><points></gold></bold>'
 
 # ====================
 # Team Configuration
@@ -264,11 +266,11 @@ world:
   # Spawn point when players initially join the server (while the speedrun is not started)
   spawnPoint:
     world: 'world'
-    x: 0.0
-    y: 150.0
-    z: 0.0
+    x: -860.5
+    y: 178.0
+    z: 307.5
     pitch: 0.0
-    yaw: 0.0
+    yaw: -0.0
 
 # ====================
 # Structure Configuration

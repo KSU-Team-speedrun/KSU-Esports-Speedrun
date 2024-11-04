@@ -13,43 +13,35 @@ import java.util.Map;
 
 public class TeamSpawner {
 
-    public static void spawnTeamsInCircle(World world, TeamManager tm, double radius) {
+    public static void spawnTeamsInCircle(World world, TeamManager tm, double radius, boolean teamsEnabled) {
         // Calculate angle step based on the number of teams
         double angleStep = 2 * Math.PI / tm.getTeams().size();
 
         for (int i = 0; i < tm.getTeams().size(); i++) {
             double angle = i * angleStep;
             Location teamSpawnLocation = findSafeLocation(world, angle, radius);
+            if (teamsEnabled) {
+                // Teleport each player to the team's spawn location and set their respawn point
+                for (Player player : tm.convertAbstractToTeam(tm.getTeams()).get(i).getPlayers()) {
 
-            // Teleport each player to the team's spawn location and set their respawn point
-            for (Player player : tm.getTeams().get(i).getPlayers()) {
+                    player.teleport(teamSpawnLocation);
 
-                player.teleport(teamSpawnLocation);
+                    // Set the player's respawn location
+                    player.setRespawnLocation(teamSpawnLocation);
+                }
+            } else {
 
-                // Set the player's respawn location
-                player.setRespawnLocation(teamSpawnLocation);
+                if (tm.getTeams().get(i) instanceof SoloTeam p) {
+
+                    // Teleport each player to the team's spawn location and set their respawn point
+                    p.teleport(teamSpawnLocation);
+
+                    // Set the player's respawn location
+                    p.setRespawnLocation(teamSpawnLocation);
+
+                }
             }
         }
-    }
-
-    public static void spawnPlayersInCircle(World world, Map<Player, SoloTeam> participatingPlayers, double radius) {
-
-        List<Player> playersList = new ArrayList<>(participatingPlayers.keySet());
-        // Calculate angle step based on the number of teams
-        double angleStep = 2 * Math.PI / participatingPlayers.size();
-
-        for (int i = 0; i < playersList.size(); i++) {
-            Player p = playersList.get(i);
-            double angle = i * angleStep;
-            Location teamSpawnLocation = findSafeLocation(world, angle, radius);
-
-            // Teleport each player to the team's spawn location and set their respawn point
-            p.teleport(teamSpawnLocation);
-
-            // Set the player's respawn location
-            p.setRespawnLocation(teamSpawnLocation);
-        }
-
     }
 
     private static Location findSafeLocation(World world, double initialAngle, double radius) {

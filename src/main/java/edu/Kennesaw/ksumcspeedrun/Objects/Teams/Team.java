@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 
 import java.util.List;
 
@@ -27,5 +28,9 @@ public abstract class Team {
     public abstract void addCompleteObjective(Objective o);
 
     public abstract String getStrippedName();
+
+    public abstract Location getRespawnLocation();
+
+    public abstract void setRespawnLocation(Location location);
 
 }

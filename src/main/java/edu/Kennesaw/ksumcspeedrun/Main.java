@@ -31,7 +31,7 @@ public class Main extends JavaPlugin {
     private Config config;
     private Speedrun speedrun;
     private Messages messages;
-    private Location spawnPoint;
+    private Location spawnPoint = null;
     private Map<GameRule<?>, Object> gameRules;
 
     // The following method runs when the plugin is Enabled
@@ -60,6 +60,7 @@ public class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerLeave(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemDrop(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemPickup(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerRespawn(this), this);
 
 
         getLogger().info("Playtime tracker enabled");
@@ -77,10 +78,12 @@ public class Main extends JavaPlugin {
             commands.register("help", "Default help message for KSU-MC-Speedrun", new CommandHelp(this));
         });
 
-        spawnPoint = new Location(Bukkit.getWorld(config.getString("world.spawnPoint.world")),
-                config.getDouble("world.spawnPoint.x"), config.getDouble("world.spawnPoint.y"),
-                config.getDouble("world.spawnPoint.z"), config.getDouble("world.spawnPoint.pitch").floatValue(),
-                config.getDouble("world.spawnPoint.yaw").floatValue());
+        if (config.getBoolean("world.spawnPoint.enabled")) {
+            spawnPoint = new Location(Bukkit.getWorld(config.getString("world.spawnPoint.world")),
+                    config.getDouble("world.spawnPoint.x"), config.getDouble("world.spawnPoint.y"),
+                    config.getDouble("world.spawnPoint.z"), config.getDouble("world.spawnPoint.pitch").floatValue(),
+                    config.getDouble("world.spawnPoint.yaw").floatValue());
+        }
 
         loadGameRules();
 

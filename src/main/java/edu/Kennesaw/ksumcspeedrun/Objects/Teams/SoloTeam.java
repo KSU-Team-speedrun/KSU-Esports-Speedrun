@@ -18,6 +18,7 @@ public class SoloTeam extends Team {
     private final List<Objective> completedObjectives;
     private final Player player;
     private int points;
+    private Location respawnLocation;
 
     public SoloTeam(Main plugin, Player player) {
         super(plugin);
@@ -85,12 +86,16 @@ public class SoloTeam extends Team {
         player.teleport(location);
     }
 
-    public void setRespawnLocation(Location location) {
-        player.setRespawnLocation(location);
-    }
-
     public void setScoreboard(Scoreboard scoreboard) {
         player.setScoreboard(scoreboard);
+    }
+
+    public Location getRespawnLocation() {
+        return respawnLocation;
+    }
+
+    public void setRespawnLocation(Location location) {
+        this.respawnLocation = location;
     }
 
 }

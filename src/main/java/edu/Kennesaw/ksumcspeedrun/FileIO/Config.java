@@ -204,6 +204,7 @@ public class Config {
                     "point(s)</gold></bold>!");
             set("messages.objectiveIncrement", "<prefix> Objective Progress: <bold><gold><objective_type> <target></gold></bold>: <current_amount>/<total_amount>");
 
+            set("messages.error.unknownCommand", "<prefix> Unknown Subcommand: /speedrun <unknown_command>");
             set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
             set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
             set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
@@ -375,6 +376,7 @@ public class Config {
 
         if (!config.contains("world")) {
             set("world.deleteOnStart", true);
+            set("world.spawnPoint.enabled", false);
             set("world.spawnPoint.world", "world");
             set("world.spawnPoint.x", -860.5);
             set("world.spawnPoint.y", 178.0);

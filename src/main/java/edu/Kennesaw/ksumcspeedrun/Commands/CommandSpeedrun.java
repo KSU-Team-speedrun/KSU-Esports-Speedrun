@@ -104,6 +104,26 @@ public class CommandSpeedrun implements BasicCommand {
                         sender.sendMessage(Component.text("Please use /help to see the help list."));
                     }
 
+                } else if (args[0].equalsIgnoreCase("objectives")) {
+
+                    // Redirect player to regular /objectives command
+                    if (sender instanceof Player p) {
+
+                        // Commands cannot be dispatched asyncronously
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+
+                            if (args.length == 2) {
+                                p.performCommand("objectives " + args[1]);
+                            } else {
+                                p.performCommand("objectives");
+                            }
+                        });
+
+                    } else {
+                        // Console senders cannot be redirected
+                        sender.sendMessage(Component.text("This command cannot be run from the console."));
+                    }
+
                 } else if (args[0].equalsIgnoreCase("team")) {
 
                     if (sender instanceof Player p) {
@@ -681,6 +701,7 @@ public class CommandSpeedrun implements BasicCommand {
         if (args.length == 0) {
 
             suggestions.add("addObjective");
+            suggestions.add("objectives");
             suggestions.add("getBorder");
             suggestions.add("getPointLimit");
             suggestions.add("getSeed");
@@ -712,7 +733,7 @@ public class CommandSpeedrun implements BasicCommand {
             if (args.length == 1) {
 
                 addMatchingSuggestions(suggestions, args[0], "help", "team", "reload", "addObjective",
-                        "remObjective", "setTeamSize", "getTeamSize", "start", "stop",
+                        "remObjective", "setTeamSize", "getTeamSize", "start", "stop", "objectives",
                         "setTimeLimit", "getTimeLimit", "setBorder", "getBorder", "participate",
                         "setSeed", "getSeed", "resetAttributes", "setSpawnRadius", "getSpawnRadius",
                         "setPointLimit", "getPointLimit", "toggleTeams");
@@ -725,7 +746,7 @@ public class CommandSpeedrun implements BasicCommand {
                 if (args[0].equalsIgnoreCase("addobjective")) {
                     addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain");
                 } else if (args[0].equalsIgnoreCase("remobjective")) {
-                    suggestions.add("[number");
+                    suggestions.add("[number]");
                 } else if (args[0].equalsIgnoreCase("setteamsize")) {
                     suggestions.add("[number]");
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {

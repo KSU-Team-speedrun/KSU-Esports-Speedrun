@@ -21,13 +21,15 @@ public class TeamSpawner {
             double angle = i * angleStep;
             Location teamSpawnLocation = findSafeLocation(world, angle, radius);
             if (teamsEnabled) {
+
+                TrueTeam team = tm.convertAbstractToTeam(tm.getTeams()).get(i);
+
+                team.setRespawnLocation(teamSpawnLocation);
+
                 // Teleport each player to the team's spawn location and set their respawn point
-                for (Player player : tm.convertAbstractToTeam(tm.getTeams()).get(i).getPlayers()) {
+                for (Player player : team.getPlayers()) {
 
                     player.teleport(teamSpawnLocation);
-
-                    // Set the player's respawn location
-                    player.setRespawnLocation(teamSpawnLocation);
                 }
             } else {
 

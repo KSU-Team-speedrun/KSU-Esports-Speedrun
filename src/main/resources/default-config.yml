@@ -43,6 +43,7 @@ messages:
 
   # Error Messages
   error:
+    unknownCommand: '<prefix> Unknown Subcommand: /speedrun <unknown_command>'
     invalidArguments: '<prefix> Invalid Arguments! Usage: <usage>'
     illegalArgument: '<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.'
     outOfBounds: '<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.'
@@ -276,10 +277,11 @@ world:
 
   # Spawn point when players initially join the server (while the speedrun is not started)
   spawnPoint:
+    enabled: false
     world: 'world'
-    x: -860.5
-    y: 178.0
-    z: 307.5
+    x: 0.0
+    y: 0.0
+    z: 0.0
     pitch: 0.0
     yaw: -0.0
 

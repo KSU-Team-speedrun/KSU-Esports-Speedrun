@@ -44,7 +44,7 @@ public class CommandObjectives implements BasicCommand {
                 }
                 p.openBook(book);
             } else {
-                if (!plugin.getSpeedrun().isParticipating(p) && p.hasPermission("ksu.admin.speedrun")) {
+                if (!plugin.getSpeedrun().isParticipating(p) && p.hasPermission("ksu.speedrun.admin")) {
                     p.openBook(Items.getAdminBook(plugin.getSpeedrun()));
                 }
             }

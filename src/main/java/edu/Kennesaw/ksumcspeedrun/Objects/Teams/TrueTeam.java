@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -24,6 +25,7 @@ public class TrueTeam extends Team {
     private ItemStack item;
     private final TeamManager tm;
     private final List<Objective> completedObjectives = new ArrayList<>();
+    private Location respawnLocation;
 
 
     public TrueTeam(Main plugin, Component teamName, ItemStack item) {
@@ -135,6 +137,14 @@ public class TrueTeam extends Team {
 
     public void setStrippedName(String strippedName) {
         this.strippedName = strippedName;
+    }
+
+    public void setRespawnLocation(Location location) {
+        this.respawnLocation = location;
+    }
+
+    public Location getRespawnLocation() {
+        return respawnLocation;
     }
 
 }

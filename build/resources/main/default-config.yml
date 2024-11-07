@@ -39,12 +39,14 @@ messages:
   objectiveCompleteNumber: '<prefix> Objective Complete: <bold><gold><objective_type>
     <number> <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points>
     point(s)</gold></bold>!'
+  objectiveIncrement: '<prefix> Objective Progress: <bold><gold><objective_type> <target></gold></bold>: <current_amount>/<total_amount>'
 
   # Error Messages
   error:
     invalidArguments: '<prefix> Invalid Arguments! Usage: <usage>'
     illegalArgument: '<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.'
     outOfBounds: '<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.'
+    cannotStartGame: '<prefix> The game cannot be started at the moment. Please check console logs.'
 
 
   # Admin Messages
@@ -186,6 +188,15 @@ teams:
     title: <bold><yellow>SELECT A TEAM:</yellow></bold>
     cooldown: 5
 
+  # Send a message to all team members when objective progress is incremented?
+  objectiveIncrement: true
+
+  # Enable same-team PvP?
+  teamPvP: false
+
+  # Enable PvP between different teams?
+  PvP: true
+
   # Team Definitions - Add and Remove Teams Here
   white:
     name: '<!italic><white><bold>WHITE TEAM</bold></white>'
@@ -271,6 +282,73 @@ world:
     z: 307.5
     pitch: 0.0
     yaw: -0.0
+
+# ====================
+# Game Rule Configuration
+# ====================
+
+gameRules:
+
+  enabled: false
+
+  # GameRules are the same default Minecraft GameRules. You can leave this configuration unmodified and use
+  # default GameRules if you would like. This allows for more permanent GameRule settings if applicable.
+  # GameRule settings here are applied when the game starts and removed when the speedrunworld is deleted:
+  # They will be automatically deleted if 'deleteOnStart' is true above.
+  # GameRules added in the future are supported but will have to be manually added.
+  # Possible options are: 'default', true, false, or an integer value
+
+  tntExplosionDropDecay: 'default'
+  globalSoundEvents: 'default'
+  enderPearlsVanishOnDeath: 'default'
+  doFireTick: 'default'
+  maxCommandChainLength: 'default'
+  doVinesSpread: 'default'
+  disableElytraMovementCheck: 'default'
+  lavaSourceConversion: 'default'
+  commandBlockOutput: 'default'
+  forgiveDeadPlayers: 'default'
+  playersNetherPortalCreativeDelay: 'default'
+  doMobSpawning: 'default'
+  maxEntityCramming: 'default'
+  universalAnger: 'default'
+  playersSleepingPercentage: 'default'
+  snowAccumulationHeight: 'default'
+  doImmediateRespawn: 'default'
+  blockExplosionDropDecay: 'default'
+  naturalRegeneration: 'default'
+  doMobLoot: 'default'
+  fallDamage: 'default'
+  doEntityDrops: 'default'
+  randomTickSpeed: 'default'
+  playersNetherPortalDefaultDelay: 'default'
+  spawnRadius: 'default'
+  freezeDamage: 'default'
+  sendCommandFeedback: 'default'
+  doWardenSpawning: 'default'
+  fireDamage: 'default'
+  reducedDebugInfo: 'default'
+  waterSourceConversion: 'default'
+  projectilesCanBreakBlocks: 'default'
+  announceAdvancements: 'default'
+  drowningDamage: 'default'
+  spawnChunkRadius: 'default'
+  disableRaids: 'default'
+  doWeatherCycle: 'default'
+  mobExplosionDropDecay: 'default'
+  doDaylightCycle: 'default'
+  showDeathMessages: 'default'
+  doTileDrops: 'default'
+  doInsomnia: 'default'
+  keepInventory: 'default'
+  doLimitedCrafting: 'default'
+  mobGriefing: 'default'
+  doTraderSpawning: 'default'
+  commandModificationBlockLimit: 'default'
+  logAdminCommands: 'default'
+  spectatorsGenerateChunks: 'default'
+  doPatrolSpawning: 'default'
+  maxCommandForkCount: 'default'
 
 # ====================
 # Structure Configuration

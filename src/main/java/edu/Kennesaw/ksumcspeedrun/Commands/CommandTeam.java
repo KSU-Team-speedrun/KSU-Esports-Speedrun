@@ -4,9 +4,9 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
+import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
@@ -14,16 +14,17 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class CommandTeam implements BasicCommand {
 
     Main plugin;
     TeamManager tm;
+    Speedrun speedrun;
 
     public CommandTeam(Main plugin) {
         this.plugin = plugin;
-        this.tm = plugin.getSpeedrun().getTeams();
+        this.speedrun = plugin.getSpeedrun();
+        this.tm = speedrun.getTeams();
     }
 
     @Override
@@ -31,7 +32,7 @@ public class CommandTeam implements BasicCommand {
 
         if (commandSourceStack.getSender() instanceof Player p) {
 
-            if (!plugin.getSpeedrun().getTeamsEnabled()) {
+            if (!speedrun.getTeamsEnabled()) {
                 return;
             }
 
@@ -43,7 +44,7 @@ public class CommandTeam implements BasicCommand {
 
             } else {
 
-                if (plugin.getSpeedrun().teamCooldown.contains(p)) {
+                if (speedrun.getTeamCooldown().contains(p)) {
                     p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
                     return;
                 }
@@ -68,16 +69,15 @@ public class CommandTeam implements BasicCommand {
 
                             oldTrueTeam.removePlayer(p);
                             tm.getTeamInventory().updateTeamInventory(oldTrueTeam);
+                        } else if (!speedrun.isParticipating(p)) {
+                            speedrun.participate(p);
                         }
 
                         trueTeam.addPlayer(p);
                         tm.getTeamInventory().updateTeamInventory(trueTeam);
 
-                        plugin.getSpeedrun().teamCooldown.add(p);
+                        speedrun.addTeamCooldown(p);
 
-                        Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask ->
-                                        plugin.getSpeedrun().teamCooldown.remove(p),
-                                plugin.getConfig().getInt("teams.inventory.cooldown"), TimeUnit.SECONDS);
                         return;
 
                     }

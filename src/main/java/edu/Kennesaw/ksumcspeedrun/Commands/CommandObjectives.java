@@ -34,10 +34,17 @@ public class CommandObjectives implements BasicCommand {
             Team team = tm.getTeam(p);
 
             if (team != null) {
-                Book book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted());
+                Book book = Items.getObjectiveBookMain();;
+                if (args.length == 1) {
+                    if (args[0].equalsIgnoreCase("incomplete")) {
+                        book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted(), true);
+                    } else if (args[0].equalsIgnoreCase("complete")) {
+                        book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted(), false);
+                    }
+                }
                 p.openBook(book);
             } else {
-                if (p.isOp()) {
+                if (!plugin.getSpeedrun().isParticipating(p) && p.hasPermission("ksu.admin.speedrun")) {
                     p.openBook(Items.getAdminBook(plugin.getSpeedrun()));
                 }
             }

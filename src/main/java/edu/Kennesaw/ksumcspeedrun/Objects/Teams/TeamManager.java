@@ -15,6 +15,7 @@ public class TeamManager {
     private int teamSizeLimit;
 
     private TeamInventory teamInventory;
+    private int inventoryCooldown;
 
     private Map<Player, Team> playerTeam;
     private Map<Component, Team> teamName;
@@ -30,6 +31,7 @@ public class TeamManager {
         teamItem = new HashMap<>();
         teamInventory = new TeamInventory(this, plugin.getSpeedrunConfig()
                 .getComponent("teams.inventory.title"));
+        inventoryCooldown = plugin.getConfig().getInt("teams.inventory.cooldown");
 
     }
 
@@ -128,6 +130,10 @@ public class TeamManager {
             if (abstractTeam instanceof TrueTeam) trueTeams.add(((TrueTeam) abstractTeam));
         });
         return trueTeams;
+    }
+
+    public int getInventoryCooldown() {
+        return inventoryCooldown;
     }
 
 }

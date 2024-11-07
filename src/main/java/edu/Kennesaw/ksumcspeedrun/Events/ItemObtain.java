@@ -94,6 +94,8 @@ public class ItemObtain implements Listener {
                         System.out.println("total number: " + totalNumber);
                         System.out.println("total amount: " + playerItemCount);
 
+                        matchedObtainObjective.setIncrementNumber(team, playerItemCount);
+
                         if (playerItemCount >= totalNumber) {
                             matchedObtainObjective.setComplete(team);
                             return;

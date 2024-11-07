@@ -103,6 +103,21 @@ public class EntityDeath implements Listener {
                        then the objective is complete */
                         if (ko.getTarget().equals(e.getEntityType())) {
 
+                            if (ko.getHasCount()) {
+
+                                ko.incrementTeam(team);
+
+                                if (ko.getCount(team) >= ko.getAmount()) {
+
+                                    ko.setComplete(team);
+                                    break;
+
+                                }
+
+                                continue;
+
+                            }
+
                             ko.setComplete(team);
                             break;
 

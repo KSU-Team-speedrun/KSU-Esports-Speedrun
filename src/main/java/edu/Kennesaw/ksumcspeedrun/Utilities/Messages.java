@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ public class Messages {
     private String timeUp;
     private String objectiveComplete;
     private String objectiveCompleteNumber;
+    private String objectiveIncrement;
     private String invalidArguments;
     private String illegalArguments;
     private String outOfBounds;
@@ -63,6 +63,7 @@ public class Messages {
     private String resetAttributes;
     private String toggleTeams;
     private String gameStartedCannotChange;
+    private String cannotStartGame;
 
     // Timer
     private String timerTitle;
@@ -76,7 +77,7 @@ public class Messages {
 
         Config config = plugin.getSpeedrunConfig();
 
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
 
             prefix = config.getComponent("messages.prefix");
             prefixPlaceholder = Placeholder.component("prefix", prefix);
@@ -94,10 +95,12 @@ public class Messages {
             timeUp = config.getString("messages.timeUp");
             objectiveComplete = config.getString("messages.objectiveComplete");
             objectiveCompleteNumber = config.getString("messages.objectiveCompleteNumber");
+            objectiveIncrement = config.getString("messages.objectiveIncrement");
             invalidArguments = config.getString("messages.error.invalidArguments");
             illegalArguments = config.getString("messages.error.illegalArgument");
             outOfBounds = config.getString("messages.error.outOfBounds");
             unknownCommand = config.getString("messages.error.unknownCommand");
+            cannotStartGame = config.getString("messages.error.cannotStartGame");
             adminHelpMessage = config.getConfigurationSection("messages.admin.helpMessage");
             objectiveAdded = config.getString("messages.admin.objectiveAdded");
             objectiveAddedNumber = config.getString("messages.admin.objectiveAddedNumber");
@@ -201,6 +204,15 @@ public class Messages {
                 Placeholder.parsed("points", points + ""));
     }
 
+    public Component getObjectiveIncrement(String objectiveType, String target, int currentAmount, int totalAmount, int points) {
+        return ComponentHelper.mmStringToComponent(objectiveIncrement, prefixPlaceholder,
+                Placeholder.parsed("objective_type", objectiveType),
+                Placeholder.parsed("target", target),
+                Placeholder.parsed("current_amount", currentAmount + ""),
+                Placeholder.parsed("total_amount", totalAmount + ""),
+                Placeholder.parsed("points", points + ""));
+    }
+
     public Component getInvalidArguments(String usage) {
         return ComponentHelper.mmStringToComponent(invalidArguments, prefixPlaceholder,
                 Placeholder.parsed("usage", usage));
@@ -221,6 +233,10 @@ public class Messages {
     public Component getUnknownCommand(String subcommand) {
         return ComponentHelper.mmStringToComponent(unknownCommand, prefixPlaceholder,
                 Placeholder.parsed("unknown_command", subcommand));
+    }
+
+    public Component getCannotStartGame() {
+        return ComponentHelper.mmStringToComponent(cannotStartGame, prefixPlaceholder);
     }
 
     public List<Component> getAdminHelpMessage(int pageNumber) {

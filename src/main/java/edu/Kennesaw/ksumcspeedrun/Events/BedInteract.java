@@ -20,16 +20,15 @@ public class BedInteract implements Listener {
 
     @EventHandler
     public void onPlayerBedInteract(PlayerBedEnterEvent e) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
             if (e.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.NOT_POSSIBLE_HERE)) {
                 Location loc = e.getBed().getLocation().toBlockLocation();
                 Player p = e.getPlayer();
                 plugin.getSpeedrun().bedLog.put(loc, p);
-                Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask1 -> {
+                plugin.runAsyncDelayed(() -> {
                     plugin.getSpeedrun().bedLog.remove(loc);
                 }, 1, TimeUnit.SECONDS);
             }
         });
     }
-
 }

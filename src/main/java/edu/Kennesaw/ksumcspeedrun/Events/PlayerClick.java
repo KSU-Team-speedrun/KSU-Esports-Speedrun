@@ -51,7 +51,7 @@ public class PlayerClick implements Listener {
 
                 e.setCancelled(true);
 
-                if (plugin.getSpeedrun().teamCooldown.contains(p)) {
+                if (plugin.getSpeedrun().getTeamCooldown().contains(p)) {
                     p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
                     return;
                 }
@@ -85,11 +85,7 @@ public class PlayerClick implements Listener {
                         trueTeam.addPlayer(p);
                         tm.getTeamInventory().updateTeamInventory(trueTeam);
 
-                        plugin.getSpeedrun().teamCooldown.add(p);
-
-                        Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask ->
-                                        plugin.getSpeedrun().teamCooldown.remove(p),
-                                plugin.getConfig().getInt("teams.inventory.cooldown"), TimeUnit.SECONDS);
+                        plugin.getSpeedrun().addTeamCooldown(p);
                     }
                 }
             }

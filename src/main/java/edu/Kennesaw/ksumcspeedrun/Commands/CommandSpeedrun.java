@@ -64,7 +64,7 @@ public class CommandSpeedrun implements BasicCommand {
         final CommandSender sender = commandSourceStack.getSender();
 
         // Move to a different thread for the following logic
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
 
             // If argument lengths is 0 (i.e. "/speedrun" with no subcommand)
             if (args.length == 0) {
@@ -80,7 +80,7 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(Component.text("Please use /help to see the help list."));
                 }
 
-            // If argument length is greater than 0
+                // If argument length is greater than 0
             } else {
 
                 // First argument is "help" (i.e. "/speedrun help")
@@ -330,13 +330,18 @@ public class CommandSpeedrun implements BasicCommand {
                 } else if (args[0].equalsIgnoreCase("start")) {
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        Boolean isStarted = speedRun.setStarted(sender);
-                        if (isStarted == null) {
-                            sender.sendMessage(plugin.getMessages().getGameAlreadyStarted());
-                        } else if (isStarted) {
-                            sender.sendMessage(plugin.getMessages().getGameStarted());
-                        } else {
-                            sender.sendMessage(plugin.getMessages().getWorldGenerated());
+                        try {
+                            Boolean isStarted = speedRun.setStarted(sender);
+                            if (isStarted == null) {
+                                sender.sendMessage(plugin.getMessages().getGameAlreadyStarted());
+                            } else if (isStarted) {
+                                sender.sendMessage(plugin.getMessages().getGameStarted());
+                            } else {
+                                sender.sendMessage(plugin.getMessages().getWorldGenerated());
+                            }
+                        } catch (NoSuchElementException e) {
+                            sender.sendMessage(plugin.getMessages().getCannotStartGame());
+                            plugin.getLogger().warning("A user attempted to start the game while all teams are empty.");
                         }
                     });
 
@@ -409,12 +414,25 @@ public class CommandSpeedrun implements BasicCommand {
             /* This allows us to consider the optional weight flag if it is included in the argument
                e.g., /speedrun addObjective kill ENDER_DRAGON -w 10 */
             Optional<Integer> weight = parseWeightFlag(args);
+            Optional<Integer> amount = parseAmountFlag(args);
 
-            KillObjective ko = weight.map(w -> {
-
-                /* If the weight flag is included in the argument, we attempt to assign ko to a new KillObjective with
-                   the preassigned EntityType as a target. If the EntityType is not-living (e.g., EXPERIENCE_ORB), an
-                   exception will be thrown, as non-living entities cannot be killed. */
+            KillObjective ko = weight.map(w -> amount.map(a -> {
+                /* If both the weight and amount flags are included in the arguments, we attempt to assign ko to a new
+                   KillObjective with the preassigned EntityType as a target and specified weight and amount.
+                   If the EntityType is not-living (e.g., EXPERIENCE_ORB), an exception will be thrown, as non-living
+                   entities cannot be killed. */
+                try {
+                    KillObjective newKo = new KillObjective(e, w, a, plugin);
+                    sender.sendMessage(plugin.getMessages().getObjectiveAddedPointsNumber("KILL", e.name(), a, w));
+                    return newKo;
+                } catch (NonLivingEntityException ex) {
+                    sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
+                    return null;
+                }
+            }).orElseGet(() -> {
+                /* If only the weight flag is included in the argument, we attempt to assign ko to a new KillObjective with
+                   the preassigned EntityType as a target and specified weight. If the EntityType is not-living (e.g., EXPERIENCE_ORB),
+                   an exception will be thrown, as non-living entities cannot be killed. */
                 try {
                     KillObjective newKo = new KillObjective(e, w, plugin);
                     sender.sendMessage(plugin.getMessages().getObjectiveAddedPoints("KILL", e.name(), w));
@@ -423,9 +441,22 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
                     return null;
                 }
+            })).orElseGet(() -> amount.map(a -> {
+                /* If only the amount flag is included in the argument, we assign ko to a new KillObjective with
+                   the preassigned EntityType as a target and default weight of 1. If the EntityType is not-living,
+                   an exception will be thrown. */
+                try {
+                    KillObjective newKo = new KillObjective(e, 1, a, plugin);
+                    sender.sendMessage(plugin.getMessages().getObjectiveAddedPointsNumber("KILL", e.name(), a, 1));
+                    return newKo;
+                } catch (NonLivingEntityException ex) {
+                    sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
+                    return null;
+                }
             }).orElseGet(() -> {
-
-                // Same as above, but the weight flag was not included in the sender's arguments.
+                /* If neither the weight nor amount flags are included in the argument, we attempt to assign ko to a
+                   new KillObjective with only the preassigned EntityType as a target. If the EntityType is not-living,
+                   an exception will be thrown, as non-living entities cannot be killed. */
                 try {
                     KillObjective newKo = new KillObjective(e, plugin);
                     sender.sendMessage(plugin.getMessages().getObjectiveAdded("KILL", e.name()));
@@ -434,7 +465,8 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(plugin.getMessages().getIllegalArguments(args[2], "living entity"));
                     return null;
                 }
-            });
+            }));
+
 
             // Add the returned kill objective to the objectives in the Speedrun instance
             speedRun.addObjective(ko);
@@ -531,13 +563,21 @@ public class CommandSpeedrun implements BasicCommand {
 
                 // Optional weight integer flag, same as explained above. No try/catch needed here.
                 Optional<Integer> weight = parseWeightFlag(args);
-                MineObjective mo = weight.map(w -> {
+                Optional<Integer> amount = parseAmountFlag(args);
+
+                MineObjective mo = weight.map(w -> amount.map(a -> {
+                    sender.sendMessage(plugin.getMessages().getObjectiveAddedPointsNumber("MINE", m.name(), a, w));
+                    return new MineObjective(m, w, a, plugin);
+                }).orElseGet(() -> {
                     sender.sendMessage(plugin.getMessages().getObjectiveAddedPoints("MINE", m.name(), w));
                     return new MineObjective(m, w, plugin);
+                })).orElseGet(() -> amount.map(a -> {
+                    sender.sendMessage(plugin.getMessages().getObjectiveAddedPointsNumber("MINE", m.name(), a, 1));
+                    return new MineObjective(m, 1, a, plugin);
                 }).orElseGet(() -> {
                     sender.sendMessage(plugin.getMessages().getObjectiveAdded("MINE", m.name()));
                     return new MineObjective(m, plugin);
-                });
+                }));
 
                 // Add the returned objective to the objective list in Speedrun instance
                 speedRun.addObjective(mo);

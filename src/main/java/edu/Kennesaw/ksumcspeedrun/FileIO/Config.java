@@ -9,6 +9,8 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -79,6 +81,10 @@ public class Config {
             return config.getDouble(line);
         }
         return null;
+    }
+
+    public Object get(String line) {
+        return config.get(line);
     }
 
     public ConfigurationSection getConfigurationSection(String line) {
@@ -196,10 +202,12 @@ public class Config {
             set("messages.objectiveCompleteNumber", "<prefix> Objective Complete: <bold><gold><objective_type> <number>" +
                     " <target></gold></bold><newline><prefix> Your team has earned <bold><gold><points> " +
                     "point(s)</gold></bold>!");
+            set("messages.objectiveIncrement", "<prefix> Objective Progress: <bold><gold><objective_type> <target></gold></bold>: <current_amount>/<total_amount>");
 
             set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
             set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
             set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
+            set("messages.error.cannotStartGame", "<prefix> The game cannot be started at the moment. Please check console logs.");
 
             set("messages.admin.helpMessage.p1", Arrays.asList("", "", "", "", "", "", "", "", "", "",
                     "<gold><st>                             </st></gold><white><bold> ADMIN HELP 1/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 2><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
@@ -294,6 +302,11 @@ public class Config {
             set("teams.inventory.title", "<bold><yellow>SELECT A TEAM:</yellow></bold>");
             set("teams.inventory.cooldown", 5);
 
+            set("teams.objectiveIncrement", true);
+
+            set("teams.teamPvP", false);
+            set("teams.PvP", true);
+
             set("teams.white.name", "<!italic><white><bold>WHITE TEAM</bold></white>");
             set("teams.white.item", "WHITE_WOOL");
             set("teams.white.lore", "<!italic><white>Click here to join <bold>WHITE TEAM</bold>!</white>");
@@ -368,6 +381,16 @@ public class Config {
             set("world.spawnPoint.z", 307.5);
             set("world.spawnPoint.pitch", 0.0);
             set("world.spawnPoint.yaw", -0.0);
+        }
+
+        if (!config.contains("gameRules")) {
+
+            set("gameRules.enabled", false);
+
+            for (GameRule<?> rule : GameRule.values()) {
+                set("gameRules." + rule.getName(), "default");
+            }
+
         }
 
         /* Loops through every structure in the game and adds it to the config by default. Administrators can update

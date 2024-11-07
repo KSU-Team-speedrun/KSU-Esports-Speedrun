@@ -156,46 +156,66 @@ public class Items {
         return bookMeta;
     }
 
-    public static Book getObjectiveBook(Team team, boolean isWeighted) {
+    public static Book getObjectiveBookMain() {
 
-        List<Objective> incompleteObjectives = team.getIncompleteObjectives();
+        MiniMessage mm = MiniMessage.miniMessage();
+
+        Component page = mm.deserialize("<gold><b>   KSU Speedrun</b></gold>").appendNewline();
+        page = page.append(mm.deserialize("<gold><b> Make a Selection:</b></gold>")).appendNewline().appendNewline();
+
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_red>View Incomplete Objectives</dark_red></b>'><click:run_command:'/objectives incomplete'><dark_red><b>   -----------</b></dark_red></click></hover>")).appendNewline();
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_red>View Incomplete Objectives</dark_red></b>'><click:run_command:'/objectives incomplete'><dark_red><b>    INCOMPLETE</b></dark_red></click></hover>").appendNewline());
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_red>View Incomplete Objectives</dark_red></b>'><click:run_command:'/objectives incomplete'><dark_red><b>    OBJECTIVES</b></dark_red></click></hover>").appendNewline());
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_red>View Incomplete Objectives</dark_red></b>'><click:run_command:'/objectives incomplete'><dark_red><b>   -----------</b></dark_red></click></hover>")).appendNewline().appendNewline();
+
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_green>View Complete Objectives</dark_green></b>'><click:run_command:'/objectives complete'><dark_green><b>   -----------</b></dark_green></click></hover>")).appendNewline();
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_green>View Complete Objectives</dark_green></b>'><click:run_command:'/objectives complete'><dark_green><b>     COMPLETE</b></dark_green></click></hover>").appendNewline());
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_green>View Complete Objectives</dark_green></b>'><click:run_command:'/objectives complete'><dark_green><b>    OBJECTIVES</b></dark_green></click></hover>").appendNewline());
+        page = page.append(mm.deserialize("<hover:show_text:'<b><dark_green>View Complete Objectives</dark_green></b>'><click:run_command:'/objectives complete'><dark_green><b>   -----------</b></dark_green></click></hover>")).appendNewline();
+
+        Book.Builder book = Book.builder();
+        book.addPage(page);
+
+        return book.build();
+
+    }
+
+    public static Book getObjectiveBook(Team team, boolean isWeighted, boolean isIncomplete) {
+
         List<Component> pages = new ArrayList<>();
         MiniMessage mm = MiniMessage.miniMessage();
 
-        // Process incomplete objectives
-        Component page = createObjectiveHeader(mm, "INCOMPLETE", "dark_red");
-        int lines = 5;
+        Component page = Component.empty();
+        int lines = 1;
 
-        lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(incompleteObjectives, EnterObjective.class), isWeighted, lines, pages);
-        lines = addObjectivesByType(page, mm, "KILL", filterObjectives(incompleteObjectives, KillObjective.class), isWeighted, lines, pages);
-        lines = addObjectivesByType(page, mm, "MINE", filterObjectives(incompleteObjectives, MineObjective.class), isWeighted, lines, pages);
-        addObjectivesByType(page, mm, "OBTAIN", filterObjectives(incompleteObjectives, ObtainObjective.class), isWeighted, lines, pages);
+        if (isIncomplete) {
 
-        List<Objective> completeObjectives = team.getCompleteObjectives();
+            List<Objective> incompleteObjectives = team.getIncompleteObjectives();
 
-        if (!completeObjectives.isEmpty()) {
-            page = createObjectiveHeader(mm, " COMPLETE", "dark_green");
-            lines = 5;
+            lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(incompleteObjectives, EnterObjective.class), isWeighted, lines, pages, false, team);
+            lines = addObjectivesByType(page, mm, "KILL", filterObjectives(incompleteObjectives, KillObjective.class), isWeighted, lines, pages, false, team);
+            lines = addObjectivesByType(page, mm, "MINE", filterObjectives(incompleteObjectives, MineObjective.class), isWeighted, lines, pages, false, team);
+            addObjectivesByType(page, mm, "OBTAIN", filterObjectives(incompleteObjectives, ObtainObjective.class), isWeighted, lines, pages, false, team);
 
-            lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(completeObjectives, EnterObjective.class), isWeighted, lines, pages);
-            lines = addObjectivesByType(page, mm, "KILL", filterObjectives(completeObjectives, KillObjective.class), isWeighted, lines, pages);
-            lines = addObjectivesByType(page, mm, "MINE", filterObjectives(completeObjectives, MineObjective.class), isWeighted, lines, pages);
-            addObjectivesByType(page, mm, "OBTAIN", filterObjectives(completeObjectives, ObtainObjective.class), isWeighted, lines, pages);
+        } else {
+
+            List<Objective> completeObjectives = team.getCompleteObjectives();
+
+            if (completeObjectives.isEmpty()) {
+                pages.add(page.append(mm.deserialize("<hover:show_text:'<b><gold>Go Back</gold></b>'><click:run_command:'/objectives'><i>< Back</i></click></hover>")));
+            } else {
+                lines = addObjectivesByType(page, mm, "ENTER", filterObjectives(completeObjectives, EnterObjective.class), isWeighted, lines, pages, true, team);
+                lines = addObjectivesByType(page, mm, "KILL", filterObjectives(completeObjectives, KillObjective.class), isWeighted, lines, pages, true, team);
+                lines = addObjectivesByType(page, mm, "MINE", filterObjectives(completeObjectives, MineObjective.class), isWeighted, lines, pages, true, team);
+                addObjectivesByType(page, mm, "OBTAIN", filterObjectives(completeObjectives, ObtainObjective.class), isWeighted, lines, pages, true, team);
+            }
+
         }
 
         Book.Builder book = Book.builder();
         book.pages(pages);
 
         return book.build();
-    }
-
-    private static Component createObjectiveHeader(MiniMessage mm, String status, String color) {
-        return Component.empty().append(mm.deserialize("<gold><bold>    OBJECTIVES</bold></gold>")).decorate(TextDecoration.BOLD)
-                .appendNewline()
-                .append(mm.deserialize("<strikethrough>.........................................................</strikethrough>").decoration(TextDecoration.BOLD, false))
-                .appendNewline().appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false)
-                .append(mm.deserialize("<" + color + "><bold>    " + status + "</bold></" + color + ">"))
-                .appendNewline().appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
     }
 
     private static <T extends Objective> List<T> filterObjectives(List<Objective> objectives, Class<T> type) {
@@ -208,36 +228,38 @@ public class Items {
         return filteredObjectives;
     }
 
-    private static int addObjectivesByType(Component page, MiniMessage mm, String type, List<? extends Objective> objectives, boolean isWeighted, int lines, List<Component> pages) {
+    private static int addObjectivesByType(Component page, MiniMessage mm, String type, List<? extends Objective> objectives, boolean isWeighted, int lines, List<Component> pages, boolean isComplete, Team team) {
         if (!objectives.isEmpty()) {
-            page = page.append(mm.deserialize("<gold><bold>" + type + ":</bold></gold>")).appendNewline()
+            String color = isComplete ? "dark_green" : "dark_red";
+            objectives.sort((o1, o2) -> Integer.compare(o2.getWeight(), o1.getWeight()));
+            page = page.append(mm.deserialize("<hover:show_text:'<b><gold>Go Back</gold></b>'><click:run_command:'/objectives'><i>< Back</i></click></hover>")).appendNewline().appendNewline().append(mm.deserialize("<" + color + "><bold>" + type + ":</bold></" + color + ">")).appendNewline()
                     .appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
-            lines+=2;
+            lines+=4;
 
             for (Objective obj : objectives) {
-                if (lines >= 12) {
+                if (lines >= 14) {
                     pages.add(page);
                     page = Component.empty();
-                    lines = 2;
-                    page = page.append(mm.deserialize("<gold><bold>" + type + ":</bold></gold>")).appendNewline()
+                    lines = 4;
+                    page = page.append(mm.deserialize("<hover:show_text:'<b><gold>Go Back</gold></b>'><click:run_command:'/objectives'><i>< Back</i></click></hover>")).appendNewline().appendNewline().append(mm.deserialize("<" + color + "><bold>" + type + ":</bold></" + color + ">")).appendNewline()
                             .appendNewline().decoration(TextDecoration.BOLD, false).decoration(TextDecoration.STRIKETHROUGH, false);
                     lines++;
                 }
 
-                page = page.append(mm.deserialize("<reset><black>" + "<hover:show_text:'<b><gold>POINTS: " + obj.getWeight() + "</gold></b>'>" + obj.getTargetName() + "</hover>"));
-                if (obj instanceof ObtainObjective oo && oo.getAmount() > 1) {
-                    page = page.append(mm.deserialize(" (x" + oo.getAmount() + ")"));
+                page = page.append(mm.deserialize("<reset><black>" + "<hover:show_text:'<b><gold>Points Awarded: " + obj.getWeight() + "</gold></b>'>- " + obj.getTargetName() + "</hover>"));
+                if (obj.getAmount() > 1) {
+                    page = page.append(mm.deserialize(" <hover:show_text:'<b><gold>Current Progress: " + obj.getCount(team) + "/" + obj.getAmount() + "</gold></b>'>(x" + obj.getAmount() + ")</hover>"));
                 }
                 page = page.appendNewline();
                 lines++;
 
-                if (isWeighted) {
-                    page = page.append(mm.deserialize(" - " + obj.getWeight() + " points")).appendNewline();
-                    lines++;
-                }
+                //if (isWeighted) {
+                    //page = page.append(mm.deserialize("<white>.</white>  - " + obj.getWeight() + " points")).appendNewline();
+                    //lines++;
+                //}
             }
             pages.add(page);
-            lines = 5;
+            lines = 1;
         }
         return lines;
     }

@@ -55,7 +55,7 @@ public class SRStructure {
     @SuppressWarnings("unused")
     public static void getStructures(Main plugin, StructureListResultCallback structList) {
 
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
             List<Structure> structures = new ArrayList<>();
             for (Field f : Structure.class.getFields()) {
                 Object value;
@@ -109,7 +109,7 @@ public class SRStructure {
     public static void getNearestStructureToLocation(Main plugin, SRStructure structureToFind, Location locFrom, LocationResultCallback callback) {
 
         // We use an Async thread to access the config:
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
 
             /* Bukkit's StructureSearchResult does not return the Y-coordinate
            for specific structures being located for some reason, so the best workaround is to manually set the average
@@ -187,12 +187,12 @@ public class SRStructure {
     }
 
     public static void getStructureRadius(Main plugin, SRStructure target, RadiusResultCallback callback) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> callback.onResult(plugin.getSpeedrunConfig()
+        plugin.runAsyncTask(() -> callback.onResult(plugin.getSpeedrunConfig()
                 .getInt("structureLocations." + target.getName() + ".radius")));
     }
 
     public static void getStructureHeight(Main plugin, SRStructure target, RadiusResultCallback callback) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> callback.onResult(plugin.getSpeedrunConfig()
+        plugin.runAsyncTask(() ->callback.onResult(plugin.getSpeedrunConfig()
                 .getInt("structureLocations." + target.getName() + ".height")));
     }
 

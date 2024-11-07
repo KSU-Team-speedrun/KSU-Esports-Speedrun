@@ -51,6 +51,21 @@ public class MineBlock implements Listener {
 
                     if (mo.getBlockTarget().equals(b.getType())) {
 
+                        if (mo.getHasCount()) {
+
+                            mo.incrementTeam(team);
+
+                            if (mo.getCount(team) >= mo.getAmount()) {
+
+                                mo.setComplete(team);
+                                break;
+
+                            }
+
+                            continue;
+
+                        }
+
                         mo.setComplete(team);
                         break;
 

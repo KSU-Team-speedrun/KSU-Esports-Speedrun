@@ -17,6 +17,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.slf4j.event.KeyValuePair;
 
 import java.io.File;
 import java.util.*;
@@ -58,7 +59,7 @@ public class Speedrun {
 
     public Map<Location, Player> bedLog;
 
-    public Set<Player> teamCooldown;
+    private Set<Player> teamCooldown;
 
     // Admins are left unincluded from games and team calculations unless they specify
     private final List<Player> onlinePlayers;
@@ -200,9 +201,7 @@ public class Speedrun {
         if (!this.isStarted) {
             if (speedrunWorld == null) {
                 if (sender != null) {
-                    Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-                        sender.sendMessage(plugin.getMessages().getWorldGenerating());
-                    });
+                    plugin.runAsyncTask(() -> sender.sendMessage(plugin.getMessages().getWorldGenerating()));
                 }
                 WorldGenerator wg = new WorldGenerator();
                 try {
@@ -212,6 +211,16 @@ public class Speedrun {
                 }
                 return false;
             }
+            if (plugin.getSpeedrunConfig().getBoolean("gameRules.enabled")) {
+                for (Map.Entry<GameRule<?>, Object> entry : plugin.getGameRules().entrySet()) {
+                    if (entry.getKey().getType() == Boolean.class) {
+                        speedrunWorld.setGameRule((GameRule<Boolean>) entry.getKey(), (Boolean) entry.getValue());
+                    } else {
+                        speedrunWorld.setGameRule((GameRule<Integer>) entry.getKey(), (Integer) entry.getValue());
+                    }
+                    plugin.getLogger().info("Setting GameRule '" + entry.getKey() + "' to '" + entry.getValue()+ "'.");
+                }
+            }
             isStarted = true;
             new PlayerMove(plugin);
             ct = new CountdownTimer(plugin, timeLimit);
@@ -219,11 +228,20 @@ public class Speedrun {
             for (Player p : tm.getAssignedPlayers()) {
                 p.getInventory().clear();
             }
+            for (Team team : tm.getTeams()) {
+                for (Objective o : objectives.getObjectives()) {
+                    if (o.getHasCount()) o.addTeam(team);
+                }
+            }
             TeamSpawner.spawnTeamsInCircle(speedrunWorld, tm, spawnRadius, teamsEnabled);
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
             return true;
         }
         return null;
+    }
+
+    public World getSpeedrunWorld() {
+        return speedrunWorld;
     }
 
     public boolean isStarted() {
@@ -445,9 +463,7 @@ public class Speedrun {
                 Bukkit.unloadWorld(speedrunWorld, false);
             }
 
-            Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
-                deleteWorldFolder(worldFolder);
-            });
+            plugin.runAsyncTask(() -> deleteWorldFolder(worldFolder));
 
             speedrunWorld = null;
 
@@ -522,6 +538,16 @@ public class Speedrun {
         return onlinePlayers.contains(p);
     }
 
+    public void addTeamCooldown(Player p) {
+        teamCooldown.add(p);
+        plugin.runAsyncDelayed(() -> teamCooldown.remove(p),
+                tm.getInventoryCooldown(), TimeUnit.SECONDS);
+    }
+
+    public Set<Player> getTeamCooldown() {
+        return teamCooldown;
+    }
+
     private void noTeamLoop(List<Player> noTeamPlayers, int teamIndex) {
         if (teamsEnabled) {
             Iterator<Player> iterator = noTeamPlayers.iterator();
@@ -553,7 +579,7 @@ public class Speedrun {
             List<TrueTeam> trueTeams = tm.convertAbstractToTeam(tm.getTeams());
             trueTeams.sort(Comparator.comparingInt(TrueTeam::getSize));
             while (trueTeams.getLast().getSize() - trueTeams.getFirst().getSize() > 1) {
-                Player playerToMove =  trueTeams.getLast().getPlayers().remove(trueTeams.getLast().getSize() - 1);
+                Player playerToMove = trueTeams.getLast().getPlayers().remove(trueTeams.getLast().getSize() - 1);
                 trueTeams.getFirst().addPlayer(playerToMove);
                 trueTeams.sort(Comparator.comparingInt(TrueTeam::getSize));
             }

@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.intellij.lang.annotations.Subst;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class Config {
@@ -93,6 +94,7 @@ public class Config {
 
     /* Gets a string from the Config.yml given a specified path and returns the value as the actual String (rather
        than a Component) */
+    @Subst("")
     public String getString(String line) {
 
         return config.getString(line);
@@ -178,8 +180,12 @@ public class Config {
                     "<gold><st>                            </st></gold><white><bold> SPEEDRUN HELP </bold></white><gold><st>                           </st></gold>",
                     "<gold><click:suggest_command:/objectives>/objectives</click></gold> <black>-</black> View all speedrun objectives",
                     "<gold><click:suggest_command:/team>/team [teamName]</click></gold> <black>-</black> Join a specific team.",
+                    "<gold><click:suggest_command:/scoreboard>/scoreboard</click></gold> <black>-</black> Enable or disable scoreboard.",
+                    "<gold><click:suggest_command:/spawn>/spawn</click></gold> <black>-</black> Teleport to your team's spawn.",
                     "<gold><st>                                                                                </st></gold>"
             ));
+
+            set("messages.toggleScoreboard", "<prefix> Scoreboard is: <is_enabled>");
 
             set("messages.teamJoinMessage", "<prefix> You joined: <team_name>");
             set("messages.teamCooldownMessage", "<prefix> Please wait a few seconds before changing your team.");
@@ -204,14 +210,22 @@ public class Config {
                     "point(s)</gold></bold>!");
             set("messages.objectiveIncrement", "<prefix> Objective Progress: <bold><gold><objective_type> <target></gold></bold>: <current_amount>/<total_amount>");
 
+            set("messages.noTeleportInCombat", "<prefix> You cannot teleport while in combat. Please try again in 15 seconds.");
+
             set("messages.error.unknownCommand", "<prefix> Unknown Subcommand: /speedrun <unknown_command>");
             set("messages.error.invalidArguments", "<prefix> Invalid Arguments! Usage: <usage>");
             set("messages.error.illegalArgument", "<prefix> Illegal Argument! <illegal_arg> is not a <expected_type>.");
             set("messages.error.outOfBounds", "<prefix> Illegal Argument! <illegal_arg> is out of bounds for <object>.");
             set("messages.error.cannotStartGame", "<prefix> The game cannot be started at the moment. Please check console logs.");
+            set("messages.error.worldNotGenerated", "<prefix> This command cannot be executed until a world is generated. Please type " +
+                    "<click:run_command:'/speedrun generateWorld'><hover:show_text:'<bold><gold>Click here to generate " +
+                    "a world.</gold></bold>'><bold><gold>/speedrun generateWorld</gold></bold></hover></click> to generate a world.");
+            set("messages.error.teamsNotEnabled", "<prefix> Teams are not enabled in this speedrun.");
+            set("messages.error.noObjectives", "<prefix> A speedrun cannot be started without any objectives.");
+
 
             set("messages.admin.helpMessage.p1", Arrays.asList("", "", "", "", "", "", "", "", "", "",
-                    "<gold><st>                             </st></gold><white><bold> ADMIN HELP 1/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 2><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
+                    "<gold><st>                             </st></gold><white><bold> ADMIN HELP 1/5 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 2><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
                     "<gold><click:suggest_command:/speedrun addObjective>/speedrun addObjective [objectiveType] [target] <-flag(s)></click></gold> <black>-</black> Add an objective.",
                     "<gold><click:suggest_command:/speedrun objectives>/speedrun objectives</click></gold> <black>-</black> List all objectives.",
                     "<gold><click:suggest_command:/speedrun remObjective>/speedrun remObjective [number]</click></gold> <black>-</black> Remove an objective according to number on objective list.",
@@ -222,7 +236,7 @@ public class Config {
             ));
 
             set("messages.admin.helpMessage.p2", Arrays.asList("", "", "", "", "", "", "", "", "", "",
-                    "<bold><click:run_command:/help 1><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 2/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 3><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
+                    "<bold><click:run_command:/help 1><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 2/5 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 3><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
                     "<gold><click:suggest_command:/speedrun getBorder>/speedrun getBorder</click></gold> <black>-</black> Get the map border.",
                     "<gold><click:suggest_command:/speedrun setTimeLimit>/speedrun setTimeLimit [minutes]</click></gold> <black>-</black> Set the game time limit.",
                     "<gold><click:suggest_command:/speedrun getTimeLimit>/speedrun getTimeLimit</click></gold> <black>-</black> Get the game time limit.",
@@ -233,7 +247,7 @@ public class Config {
             ));
 
             set("messages.admin.helpMessage.p3", Arrays.asList("", "", "", "", "", "", "", "", "", "",
-                    "<bold><click:run_command:/help 2><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 3/4 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 4><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
+                    "<bold><click:run_command:/help 2><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 3/5 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 4><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
                     "<gold><click:suggest_command:/speedrun setTeamSize>/speedrun setTeamSize [number]</click></gold> <black>-</black> Set the player limit for each team.",
                     "<gold><click:suggest_command:/speedrun getTeamSize>/speedrun getTeamSize</click></gold> <black>-</black> Get the player limit for each team.",
                     "<gold><click:suggest_command:/speedrun setPointLimit>/speedrun setPointLimit [number]</click></gold> <black>-</black> Set the points required for a team to win.",
@@ -243,7 +257,7 @@ public class Config {
             ));
 
             set("messages.admin.helpMessage.p4", Arrays.asList("", "", "", "", "", "", "", "", "",
-                    "<bold><click:run_command:/help 3><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 4/4 </bold></white><gold><st>                          </st></gold>",
+                    "<bold><click:run_command:/help 3><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 4/5 </bold></white><gold><st>                        </st></gold><bold><click:run_command:/help 5><hover:show_text:'<bold>NEXT PAGE</bold>'>></hover></click></bold>",
                     "<gold><click:suggest_command:/speedrun toggleTeams>/speedrun toggleTeams</click></gold> <black>-</black> Toggle teams enabled or disabled.",
                     "<gold><click:suggest_command:/speedrun participate>/speedrun participate</click></gold> <black>-</black> Add yourself as a game participant.",
                     "<gold><click:suggest_command:/speedrun team>/speedrun team [teamName]</click></gold> <black>-</black> Join a specific team.",
@@ -252,6 +266,16 @@ public class Config {
                     "<gold><click:suggest_command:/speedrun stop>/speedrun stop</click></gold> <black>-</black> Force end the game.",
                     "<gold><st>                                                                                </st></gold>",
                     ""
+            ));
+
+            set("messages.admin.helpMessage.p5", Arrays.asList("", "", "", "", "", "", "", "", "",
+                    "<bold><click:run_command:/help 4><hover:show_text:'<bold>PREVIOUS PAGE</bold>'><</hover></click></bold><gold><st>                           </st></gold><white><bold> ADMIN HELP 5/5 </bold></white><gold><st>                          </st></gold>",
+                    "<gold><click:suggest_command:/speedrun setTeamSpawnLocation>/speedrun setTeamSpawnLocation [teamNumber]</click></gold> <black>-</black> Set team spawn location to current location.",
+                    "<gold><click:suggest_command:/speedrun getTeamSpawnLocations>/speedrun getTeamSpawnLocations</click></gold> <black>-</black> Get all team spawn locations.",
+                    "<gold><click:suggest_command:/speedrun generateWorld>/speedrun generateWorld</click></gold> <black>-</black> Generate the speedrun world.",
+                    "<gold><click:suggest_command:/speedrun deleteWorld>/speedrun deleteWorld</click></gold> <black>-</black> Delete current speedrun world.",
+                    "<gold><st>                                                                                </st></gold>",
+                    "", ""
             ));
 
             set("messages.admin.objectiveAdded", "<prefix> Objective Added: <bold><gold><objective_type> <target>" +
@@ -277,24 +301,49 @@ public class Config {
             set("messages.admin.pointLimitSet", "<prefix> Point limit set to: <bold><gold><point_limit></gold></bold>");
             set("messages.admin.pointLimit", "<prefix> Point Limit: <bold><gold><point_limit></gold></bold>");
             set("messages.admin.gameAlreadyStarted", "<prefix> The game has already started!");
+            set("messages.admin.gameNotStarted", "<prefix> There is no game currently in progress.");
             set("messages.admin.gameStarted", "<prefix> You have started the speedrun!");
             set("messages.admin.gameStartedCannotChange", "<prefix> This attribute cannot be changed after the game has started.");
             set("messages.admin.worldGenerating", "<prefix> Generating world... Please wait.");
-            set("messages.admin.worldGenerated", "<prefix> World generated! Please enter <bold><gold>/speedrun start</gold></bold> again to start the game.");
+            set("messages.admin.worldGenerated", "<prefix> World generated!");
+            set("messages.admin.worldDeleted", "<prefix> The existing speedrun world has been deleted.");
+            set("messages.admin.spawnsGenerating", "<prefix> Locating team spawn points... Please wait.");
+            set("messages.admin.spawnsGenerated", "<prefix> Team spawn points located! Please enter <gold><b><click:run_command:/speedrun " +
+                    "getTeamSpawnLocations><hover:show_text:'<b><gold>Click to Execute Command</gold></b>'>/speedrun getTeamSpawnLocations</hover>" +
+                    "</click></b></gold> to inspect spawn locations, or enter <gold><b><click:run_command:/speedrun start>" +
+                    "<hover:show_text:'<b><gold>Click to Execute Command</gold></b>'>/speedrun start</hover></click></b></gold> to start the game.");
             set("messages.admin.resetAttributes", "<prefix> All attributes have been reset.");
             set("messages.admin.toggleTeams", "<prefix> Teams have been: <toggle_option>");
             set("messages.admin.participationSet", "<prefix> Participation set: <is_participating>");
+            set("messages.admin.teamSpawnSet", "<prefix> Team #<team_number> spawn point has been updated.");
+            set("messages.admin.teamSpawnLocations", "<prefix> Team Spawn Locations:");
+            set("messages.admin.teamSpawnLocation", "<gold><b><number></b></gold>: <click:run_command:/execute in speedrunworld run teleport <player> " +
+                    "<location_x> <location_y> <location_z>><hover:show_text:'<b><gold>Click to Teleport</gold></b>'>(<location_x>, " +
+                    "<location_y>, <location_z>)</hover></click>");
+            set("messages.admin.unsafeSpawnAlert", "<bold><red>[ALERT]</red></bold> The spawn point for team #<team_number> is unsafe. Consider manually setting this spawn point or choosing a different seed.");
+            set("messages.admin.leavesWarning", "<b><yellow>[NOTICE]</yellow></b> The spawn point for team #<team_number> is on <type>. Consider reviewing this spawn point to ensure it is safe.");
         }
 
-        if (!config.contains("timer")) {
+        if (!config.contains("scoreboard")) {
 
-            set("timer.interval", 1);
-            set("timer.disable", false);
+            set("scoreboard.interval", 1);
+            set("scoreboard.disable", false);
 
-            set("timer.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
-            set("timer.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
-            set("timer.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
-            set("timer.pointsMessage", "<white>Team Points:</white> <bold><gold><points></gold></bold>");
+            set("scoreboard.title", "<bold><gold>KSU SPEEDRUN</gold></bold>");
+            set("scoreboard.timeLeft", "<white>Time Remaining:</white> <bold><gold><time_remaining></gold></bold>");
+            set("scoreboard.gameOverMessage", "<white><bold>GAME OVER!</bold></white>");
+            set("scoreboard.pointsMessage", "<white>Team Points:</white> <bold><gold><points></gold></bold><white>/</white><bold><gold><total_points></gold></bold>");
+
+        }
+
+        if (!config.contains("title")) {
+
+            set("title.enabled", true);
+
+            set("title.gameOverTitle", "<b><gold>GAME OVER!</gold></b>");
+            set("title.gameOverSubtitle", "<b><winner> has won the game!</b>");
+
+            set("title.sound", "item.goat_horn.sound.1");
 
         }
 
@@ -378,9 +427,9 @@ public class Config {
             set("world.deleteOnStart", true);
             set("world.spawnPoint.enabled", false);
             set("world.spawnPoint.world", "world");
-            set("world.spawnPoint.x", -860.5);
-            set("world.spawnPoint.y", 178.0);
-            set("world.spawnPoint.z", 307.5);
+            set("world.spawnPoint.x", 0);
+            set("world.spawnPoint.y", "ground");
+            set("world.spawnPoint.z", 0);
             set("world.spawnPoint.pitch", 0.0);
             set("world.spawnPoint.yaw", -0.0);
         }

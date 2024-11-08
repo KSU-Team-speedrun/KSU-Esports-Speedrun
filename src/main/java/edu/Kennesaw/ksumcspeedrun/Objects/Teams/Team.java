@@ -19,6 +19,8 @@ public abstract class Team {
 
     public abstract int getPoints();
 
+    public abstract void removePoints(int points);
+
     public abstract void addPoints(int points);
 
     public abstract List<Objective> getIncompleteObjectives();

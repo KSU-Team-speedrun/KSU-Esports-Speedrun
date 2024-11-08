@@ -9,7 +9,6 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.inventory.Book;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.BookMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
@@ -44,7 +43,7 @@ public class CommandObjectives implements BasicCommand {
                 }
                 p.openBook(book);
             } else {
-                if (!plugin.getSpeedrun().isParticipating(p) && p.hasPermission("ksu.speedrun.admin")) {
+                if ((!plugin.getSpeedrun().isParticipating(p) || !plugin.getSpeedrun().isStarted()) && p.hasPermission("ksu.speedrun.admin")) {
                     p.openBook(Items.getAdminBook(plugin.getSpeedrun()));
                 }
             }

@@ -32,7 +32,13 @@ public class CommandTeam implements BasicCommand {
 
         if (commandSourceStack.getSender() instanceof Player p) {
 
+            if (speedrun.isStarted()) {
+                p.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                return;
+            }
+
             if (!speedrun.getTeamsEnabled()) {
+                p.sendMessage(plugin.getMessages().getTeamsNotEnabled());
                 return;
             }
 

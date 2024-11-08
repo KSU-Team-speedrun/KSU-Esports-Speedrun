@@ -30,16 +30,15 @@ public class PlayerClick implements Listener {
 
         Player p = e.getPlayer();
 
-        if (e.getAction().isLeftClick() || e.getAction().isLeftClick()) {
+        if (e.getAction().isLeftClick() || e.getAction().isRightClick()) {
 
             if (p.getInventory().getItemInMainHand().equals(Items.getTeamSelector())) {
 
-                p.openInventory(tm.getTeamInventory().getInventory());
-
+                if (plugin.getSpeedrun().isParticipating(p)) {
+                    p.openInventory(tm.getTeamInventory().getInventory());
+                }
             }
-
         }
-
     }
 
     @EventHandler

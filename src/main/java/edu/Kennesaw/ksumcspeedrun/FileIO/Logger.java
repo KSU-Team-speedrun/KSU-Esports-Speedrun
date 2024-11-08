@@ -7,6 +7,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Date;
 
 @SuppressWarnings("SpellCheckingInspection")
@@ -17,7 +18,6 @@ public class Logger {
 
         plugin.runAsyncTask(() -> {
             plugin.getLogger().severe(message);
-            plugin.getLogger().severe(e.getMessage());
             Date date = new Date();
             String timeStamp = String.valueOf(date.getTime());
             File errorDir = new File(plugin.getDataFolder(), "errorlog");
@@ -30,7 +30,7 @@ public class Logger {
                     try (PrintWriter pw = new PrintWriter(errorFile)) {
                         pw.println("Severe error occurred on: " + date + " at " + date.getTime() + ":");
                         pw.println(message);
-                        pw.println(e.getMessage());
+                        pw.println(Arrays.toString(e.getStackTrace()));
                     }
                 }
             } catch (IOException k) {

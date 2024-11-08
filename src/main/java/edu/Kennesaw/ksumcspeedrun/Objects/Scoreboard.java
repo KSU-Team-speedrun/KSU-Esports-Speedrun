@@ -5,7 +5,6 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -14,22 +13,24 @@ import org.bukkit.scoreboard.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CountdownTimer {
+public class Scoreboard {
 
     private final Main plugin;
     private final TeamManager teamManager;
-    private final Map<Team, Scoreboard> teamScoreboards;
+    private final Map<Team, org.bukkit.scoreboard.Scoreboard> teamScoreboards;
     private final int interval;
     private int timeLeftInSeconds;
+    private boolean replaced;
 
-    public CountdownTimer(Main plugin, int timeInMinutes) {
+    public Scoreboard(Main plugin, int timeInMinutes) {
         this.plugin = plugin;
         this.teamManager = plugin.getSpeedrun().getTeams();
         this.teamScoreboards = new HashMap<>();
         this.timeLeftInSeconds = timeInMinutes * 60;
-        this.interval = plugin.getSpeedrunConfig().getInt("timer.interval");
+        this.interval = plugin.getSpeedrunConfig().getInt("scoreboard.interval");
+        replaced = false;
 
-        if (!plugin.getSpeedrunConfig().getBoolean("timer.disable")) {
+        if (!plugin.getSpeedrunConfig().getBoolean("scoreboard.disable")) {
             setupScoreboards();
             startCountdown();
         }
@@ -39,6 +40,8 @@ public class CountdownTimer {
         this.timeLeftInSeconds = 0;
     }
 
+    public void replace() { this.replaced = true; }
+
     private void startCountdown() {
         new BukkitRunnable() {
             @Override
@@ -46,6 +49,10 @@ public class CountdownTimer {
                 if (timeLeftInSeconds <= 0) {
                     updateScoreboards();
                     plugin.getSpeedrun().endGameTimeExpired();
+                    cancel();
+                    return;
+                }
+                if (replaced) {
                     cancel();
                     return;
                 }
@@ -61,7 +68,7 @@ public class CountdownTimer {
 
         for (Team team : teamManager.getTeams()) {
             // Create a new scoreboard and objective for each team
-            Scoreboard teamScoreboard = sbm.getNewScoreboard();
+            org.bukkit.scoreboard.Scoreboard teamScoreboard = sbm.getNewScoreboard();
             Objective teamObjective = teamScoreboard.registerNewObjective("timer_" + team.getName(), Criteria.DUMMY, plugin.getMessages().getTimerTitle());
             teamObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -71,9 +78,9 @@ public class CountdownTimer {
     }
 
     private void updateScoreboards(String time) {
-        for (Map.Entry<Team, Scoreboard> entry : teamScoreboards.entrySet()) {
+        for (Map.Entry<Team, org.bukkit.scoreboard.Scoreboard> entry : teamScoreboards.entrySet()) {
             Team team = entry.getKey();
-            Scoreboard teamScoreboard = entry.getValue();
+            org.bukkit.scoreboard.Scoreboard teamScoreboard = entry.getValue();
             Objective teamObjective = teamScoreboard.getObjective(DisplaySlot.SIDEBAR);
 
             if (teamObjective != null) {
@@ -85,27 +92,32 @@ public class CountdownTimer {
                 timerScore.setScore(2);
 
                 // Update team points
-                String pointsMessage = plugin.getMessages().getPointsMessage(team.getPoints());
+                String pointsMessage = plugin.getMessages().getPointsMessage(team.getPoints(), plugin.getSpeedrun().getTotalWeight());
                 Score pointsScore = teamObjective.getScore(pointsMessage);
                 pointsScore.setScore(1);
 
                 // Assign this team’s scoreboard to each player on the team
                 if (team instanceof TrueTeam tt) {
                     for (Player player : tt.getPlayers()) {
-                        player.setScoreboard(teamScoreboard);
+                        if (!plugin.getSpeedrun().getScoreboardDisabled().contains(player)) {
+                            player.setScoreboard(teamScoreboard);
+                        }
+                        player.sendActionBar(tt.getName());
                     }
                 } else {
                     SoloTeam st = (SoloTeam) team;
-                    st.setScoreboard(teamScoreboard);
+                    if (!plugin.getSpeedrun().getScoreboardDisabled().contains(st.getPlayer())) {
+                        st.setScoreboard(teamScoreboard);
+                    }
                 }
             }
         }
     }
 
     private void updateScoreboards() {
-        for (Map.Entry<Team, Scoreboard> entry : teamScoreboards.entrySet()) {
+        for (Map.Entry<Team, org.bukkit.scoreboard.Scoreboard> entry : teamScoreboards.entrySet()) {
             Team team = entry.getKey();
-            Scoreboard teamScoreboard = entry.getValue();
+            org.bukkit.scoreboard.Scoreboard teamScoreboard = entry.getValue();
             Objective teamObjective = teamScoreboard.getObjective(DisplaySlot.SIDEBAR);
 
             if (teamObjective != null) {
@@ -117,18 +129,22 @@ public class CountdownTimer {
                 timerScore.setScore(2);
 
                 // Update team points
-                String pointsMessage = plugin.getMessages().getPointsMessage(team.getPoints());
+                String pointsMessage = plugin.getMessages().getPointsMessage(team.getPoints(), plugin.getSpeedrun().getTotalWeight());
                 Score pointsScore = teamObjective.getScore(pointsMessage);
                 pointsScore.setScore(1);
 
                 // Assign this team’s scoreboard to each player on the team
                 if (team instanceof TrueTeam tt) {
                     for (Player player : tt.getPlayers()) {
-                        player.setScoreboard(teamScoreboard);
+                        if (!plugin.getSpeedrun().getScoreboardDisabled().contains(player)) {
+                            player.setScoreboard(teamScoreboard);
+                        }
                     }
                 } else {
                     SoloTeam st = (SoloTeam) team;
-                    st.setScoreboard(teamScoreboard);
+                    if (!plugin.getSpeedrun().getScoreboardDisabled().contains(st.getPlayer())) {
+                        st.setScoreboard(teamScoreboard);
+                    }
                 }
             }
         }

@@ -2,10 +2,12 @@ package edu.Kennesaw.ksumcspeedrun.Utilities;
 
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class Messages {
     private TagResolver.Single prefixPlaceholder;
 
     private List<String> playerHelpMessage;
+    private String toggleScoreboard;
     private String teamJoinMessage;
     private String teamCooldownMessage;
     private String teamHelp;
@@ -33,10 +36,14 @@ public class Messages {
     private String objectiveComplete;
     private String objectiveCompleteNumber;
     private String objectiveIncrement;
+    private String noTeleportInCombat;
     private String invalidArguments;
     private String illegalArguments;
     private String outOfBounds;
     private String unknownCommand;
+    private String worldNotGenerated;
+    private String teamsNotEnabled;
+    private String noObjectives;
     private ConfigurationSection adminHelpMessage;
     private String objectiveAdded;
     private String objectiveAddedPoints;
@@ -57,19 +64,32 @@ public class Messages {
     private String pointLimit;
     private String participationSet;
     private String gameAlreadyStarted;
+    private String gameNotStarted;
     private String gameStarted;
     private String worldGenerating;
     private String worldGenerated;
+    private String worldDeleted;
+    private String spawnsGenerating;
+    private String spawnsGenerated;
     private String resetAttributes;
     private String toggleTeams;
     private String gameStartedCannotChange;
     private String cannotStartGame;
+    private String teamSpawnSet;
+    private String teamSpawnLocations;
+    private String teamSpawnLocation;
+    private String unsafeSpawnAlert;
+    private String leavesWarning;
 
-    // Timer
-    private String timerTitle;
+    // Scoreboard
+    private String scoreboardTitle;
     private String timeRemaining;
     private String gameOverMessage;
     private String pointsMessage;
+
+    // Title
+    private String gameOverTitle;
+    private String gameOverSubtitle;
 
     public Messages(Main plugin) {
 
@@ -83,6 +103,7 @@ public class Messages {
             prefixPlaceholder = Placeholder.component("prefix", prefix);
 
             playerHelpMessage = config.getStringList("messages.helpMessage");
+            toggleScoreboard = config.getString("messages.toggleScoreboard");
             teamJoinMessage = config.getString("messages.teamJoinMessage");
             teamCooldownMessage = config.getString("messages.teamCooldownMessage");
             teamHelp = config.getString("messages.teamHelp");
@@ -96,11 +117,15 @@ public class Messages {
             objectiveComplete = config.getString("messages.objectiveComplete");
             objectiveCompleteNumber = config.getString("messages.objectiveCompleteNumber");
             objectiveIncrement = config.getString("messages.objectiveIncrement");
+            noTeleportInCombat = config.getString("messages.noTeleportInCombat");
             invalidArguments = config.getString("messages.error.invalidArguments");
             illegalArguments = config.getString("messages.error.illegalArgument");
             outOfBounds = config.getString("messages.error.outOfBounds");
             unknownCommand = config.getString("messages.error.unknownCommand");
             cannotStartGame = config.getString("messages.error.cannotStartGame");
+            worldNotGenerated = config.getString("messages.error.worldNotGenerated");
+            teamsNotEnabled = config.getString("messages.error.teamsNotEnabled");
+            noObjectives = config.getString("messages.error.noObjectives");
             adminHelpMessage = config.getConfigurationSection("messages.admin.helpMessage");
             objectiveAdded = config.getString("messages.admin.objectiveAdded");
             objectiveAddedNumber = config.getString("messages.admin.objectiveAddedNumber");
@@ -121,17 +146,29 @@ public class Messages {
             pointLimit = config.getString("messages.admin.pointLimit");
             participationSet = config.getString("messages.admin.participationSet");
             gameAlreadyStarted = config.getString("messages.admin.gameAlreadyStarted");
+            gameNotStarted = config.getString("messages.admin.gameNotStarted");
             gameStarted = config.getString("messages.admin.gameStarted");
             worldGenerating = config.getString("messages.admin.worldGenerating");
             worldGenerated = config.getString("messages.admin.worldGenerated");
+            worldDeleted = config.getString("messages.admin.worldDeleted");
+            spawnsGenerating = config.getString("messages.admin.spawnsGenerating");
+            spawnsGenerated = config.getString("messages.admin.spawnsGenerated");
             resetAttributes = config.getString("messages.admin.resetAttributes");
             toggleTeams = config.getString("messages.admin.toggleTeams");
+            teamSpawnSet = config.getString("messages.admin.teamSpawnSet");
             gameStartedCannotChange = config.getString("messages.admin.gameStartedCannotChange");
+            teamSpawnLocations = config.getString("messages.admin.teamSpawnLocations");
+            teamSpawnLocation = config.getString("messages.admin.teamSpawnLocation");
+            unsafeSpawnAlert = config.getString("messages.admin.unsafeSpawnAlert");
+            leavesWarning = config.getString("messages.admin.leavesWarning");
 
-            timerTitle = config.getString("timer.title");
-            timeRemaining = config.getString("timer.timeLeft");
-            gameOverMessage = config.getString("timer.gameOverMessage");
-            pointsMessage = config.getString("timer.pointsMessage");
+            scoreboardTitle = config.getString("scoreboard.title");
+            timeRemaining = config.getString("scoreboard.timeLeft");
+            gameOverMessage = config.getString("scoreboard.gameOverMessage");
+            pointsMessage = config.getString("scoreboard.pointsMessage");
+
+            gameOverTitle = config.getString("title.gameOverTitle");
+            gameOverSubtitle = config.getString("title.gameOverSubtitle");
 
         });
 
@@ -143,6 +180,11 @@ public class Messages {
             helpMessage.add(ComponentHelper.mmStringToComponent(line));
         }
         return helpMessage;
+    }
+
+    public Component getToggleScoreboard(boolean isEnabled) {
+        return ComponentHelper.mmStringToComponent(toggleScoreboard, prefixPlaceholder,
+                Placeholder.parsed("is_enabled", isEnabled ? "ENABLED" : "DISABLED"));
     }
 
     public Component getTeamJoinMessage(Component teamName) {
@@ -213,6 +255,10 @@ public class Messages {
                 Placeholder.parsed("points", points + ""));
     }
 
+    public Component getNoTeleportInCombat() {
+        return ComponentHelper.mmStringToComponent(noTeleportInCombat, prefixPlaceholder);
+    }
+
     public Component getInvalidArguments(String usage) {
         return ComponentHelper.mmStringToComponent(invalidArguments, prefixPlaceholder,
                 Placeholder.parsed("usage", usage));
@@ -237,6 +283,18 @@ public class Messages {
 
     public Component getCannotStartGame() {
         return ComponentHelper.mmStringToComponent(cannotStartGame, prefixPlaceholder);
+    }
+
+    public Component getWorldNotGenerated() {
+        return ComponentHelper.mmStringToComponent(worldNotGenerated, prefixPlaceholder);
+    }
+
+    public Component getTeamsNotEnabled() {
+        return ComponentHelper.mmStringToComponent(teamsNotEnabled, prefixPlaceholder);
+    }
+
+    public Component getNoObjectives() {
+        return ComponentHelper.mmStringToComponent(noObjectives, prefixPlaceholder);
     }
 
     public List<Component> getAdminHelpMessage(int pageNumber) {
@@ -346,16 +404,21 @@ public class Messages {
         return ComponentHelper.mmStringToComponent(this.gameAlreadyStarted, prefixPlaceholder);
     }
 
+    public Component getGameNotStarted() {
+        return ComponentHelper.mmStringToComponent(this.gameNotStarted, prefixPlaceholder);
+    }
+
     public Component getGameStarted() {
         return ComponentHelper.mmStringToComponent(this.gameStarted, prefixPlaceholder);
     }
 
     public Component getParticipationSet(Boolean isParticipating) {
-        if (isParticipating == null) {
-            return ComponentHelper.mmStringToComponent(this.gameStartedCannotChange, prefixPlaceholder);
-        }
         return ComponentHelper.mmStringToComponent(this.participationSet, prefixPlaceholder,
                 Placeholder.parsed("is_participating", isParticipating ? "TRUE" : "FALSE"));
+    }
+
+    public Component getGameStartedCannotChange() {
+        return ComponentHelper.mmStringToComponent(this.gameStartedCannotChange, prefixPlaceholder);
     }
 
     public Component getWorldGenerating() {
@@ -364,6 +427,19 @@ public class Messages {
 
     public Component getWorldGenerated() {
         return ComponentHelper.mmStringToComponent(this.worldGenerated, prefixPlaceholder);
+    }
+
+    public Component getWorldDeleted() {
+        return ComponentHelper.mmStringToComponent(this.worldDeleted, prefixPlaceholder);
+    }
+
+
+    public Component getSpawnsGenerating() {
+        return ComponentHelper.mmStringToComponent(this.spawnsGenerating, prefixPlaceholder);
+    }
+
+    public Component getSpawnsGenerated() {
+        return ComponentHelper.mmStringToComponent(this.spawnsGenerated, prefixPlaceholder);
     }
 
     public Component getResetAttributes() {
@@ -375,8 +451,37 @@ public class Messages {
                 Placeholder.parsed("toggle_option", toggleOption ? "ENABLED" : "DISABLED"));
     }
 
+    public Component getTeamSpawnSet(int teamNumber) {
+        return ComponentHelper.mmStringToComponent(this.teamSpawnSet, prefixPlaceholder,
+                Placeholder.parsed("team_number", teamNumber + ""));
+    }
+
+    public Component getTeamSpawnLocations() {
+        return ComponentHelper.mmStringToComponent(this.teamSpawnLocations, prefixPlaceholder);
+    }
+
+    public Component getTeamSpawnLocation(String playerName, Location location, int number) {
+        return ComponentHelper.mmStringToComponent(this.teamSpawnLocation, prefixPlaceholder,
+                Placeholder.parsed("location_x", location.getBlockX() + ""),
+                Placeholder.parsed("location_y", location.getBlockY() + ""),
+                Placeholder.parsed("location_z", location.getBlockZ() + ""),
+                Placeholder.parsed("player", playerName),
+                Placeholder.parsed("number", number + ""));
+    }
+
+    public Component getUnsafeSpawnAlert(int increment) {
+        return ComponentHelper.mmStringToComponent(this.unsafeSpawnAlert, prefixPlaceholder,
+                Placeholder.parsed("team_number", increment + ""));
+    }
+
+    public Component getLeavesWarning(int increment, String type) {
+        return ComponentHelper.mmStringToComponent(this.leavesWarning, prefixPlaceholder,
+                Placeholder.parsed("team_number", increment + ""),
+                Placeholder.parsed("type", type));
+    }
+
     public Component getTimerTitle() {
-        return ComponentHelper.mmStringToComponent(timerTitle);
+        return ComponentHelper.mmStringToComponent(scoreboardTitle);
     }
 
     public String getTimeLeft(String mmSSTimeFormat) {
@@ -389,9 +494,20 @@ public class Messages {
                 .mmStringToComponent(gameOverMessage));
     }
 
-    public String getPointsMessage(int points) {
+    public String getPointsMessage(int points, int totalPoints) {
         return LegacyComponentSerializer.legacySection().serialize(ComponentHelper
-                .mmStringToComponent(pointsMessage, Placeholder.parsed("points", points + "")));
+                .mmStringToComponent(pointsMessage, Placeholder.parsed("points", points + ""),
+                        Placeholder.parsed("total_points", totalPoints + "")));
+    }
+
+    public Component getGameOverTitle(Team winner) {
+        return ComponentHelper.mmStringToComponent(gameOverTitle,
+                Placeholder.parsed("winner", winner == null ? "" : winner.getStrippedName()));
+    }
+
+    public Component getGameOverSubtitle(Team winner) {
+        return ComponentHelper.mmStringToComponent(gameOverSubtitle,
+                Placeholder.parsed("winner", winner == null ? "NOBODY" : winner.getStrippedName()));
     }
 
 }

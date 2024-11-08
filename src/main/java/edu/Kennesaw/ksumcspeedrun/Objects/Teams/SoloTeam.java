@@ -45,6 +45,10 @@ public class SoloTeam extends Team {
         }
     }
 
+    public void removePoints(int points) {
+        this.points -= points;
+    }
+
     public List<Objective> getIncompleteObjectives() {
         return plugin.getSpeedrun().getObjectives().getIncompleteObjectives(this);
     }
@@ -96,6 +100,10 @@ public class SoloTeam extends Team {
 
     public void setRespawnLocation(Location location) {
         this.respawnLocation = location;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
 }

@@ -4,6 +4,8 @@ import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.*;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamSpawner;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
@@ -12,6 +14,7 @@ import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
@@ -149,7 +152,7 @@ public class CommandSpeedrun implements BasicCommand {
                     // Call method "addObjectiveHandler" passing sender value, args string array
                     addObjectiveHandler(sender, args);
 
-                } else if (args[0].equalsIgnoreCase("remobjective")) {
+                } else if (args[0].equalsIgnoreCase("remObjective")) {
 
                     if (args.length != 2) {
 
@@ -171,7 +174,7 @@ public class CommandSpeedrun implements BasicCommand {
                                 Objective objective = om.getObjectives().get(objectiveNum);
                                 String objectiveType = objective.getType().name();
                                 String target = objective.getTargetName();
-                                om.removeObjective(objectiveNum);
+                                speedRun.remObjective(objectiveNum);
                                 sender.sendMessage(plugin.getMessages().getObjectiveRemoved(objectiveType, target));
 
                             });
@@ -188,7 +191,17 @@ public class CommandSpeedrun implements BasicCommand {
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setseed [seed]"));
 
                     } else {
-                        speedRun.setSeed(args[1]);
+                        if (!speedRun.isStarted()) {
+                            speedRun.setSeed(args[1]);
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                if (speedRun.getSpeedrunWorld() != null) {
+                                    speedRun.generateWorld(sender);
+                                }
+                            });
+                        } else {
+                            sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                            return;
+                        }
                         sender.sendMessage(plugin.getMessages().getSeedSet(args[1]));
                     }
 
@@ -238,7 +251,12 @@ public class CommandSpeedrun implements BasicCommand {
 
                             try {
                                 int size = Integer.parseInt(arguments);
-                                speedRun.setTeamSizeLimit(size);
+                                if (!speedRun.isStarted()) {
+                                    speedRun.setTeamSizeLimit(size);
+                                } else {
+                                    sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                                    return;
+                                }
                                 sender.sendMessage(plugin.getMessages().getTeamSizeLimitSet(arguments));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
@@ -253,23 +271,16 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(plugin.getMessages().getTeamSizeLimit(speedRun.getTeamSizeLimit() + ""));
 
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {
-
                     if (args.length != 2) {
-
                         sender.sendMessage(plugin.getMessages()
                                 .getInvalidArguments("/speedrun settimelimit [timeInMinutes]"));
-
                     } else {
-
                         try {
-
-                            speedRun.setTimeLimit(Integer.parseInt(args[1]));
+                            Bukkit.getScheduler().runTask(plugin, () -> speedRun.setTimeLimit(Integer.parseInt(args[1])));
                             sender.sendMessage(plugin.getMessages().getTimeLimitSet(args[1]));
 
                         } catch (NumberFormatException e) {
-
                             sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "number"));
-
                         }
                     }
 
@@ -291,7 +302,21 @@ public class CommandSpeedrun implements BasicCommand {
 
                             try {
                                 int size = Integer.parseInt(arguments);
-                                speedRun.setSpawnRadius(size);
+                                if (!speedRun.isStarted()) {
+                                    speedRun.setSpawnRadius(size);
+                                    if (speedRun.getSpeedrunWorld() != null) {
+                                        sender.sendMessage(plugin.getMessages().getSpawnsGenerating());
+                                        TeamSpawner.getTeamSpawnLocations(plugin).thenAccept(locations -> {
+                                            speedRun.setTeamSpawnLocations(locations);
+                                            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(
+                                                    plugin.getMessages().getSpawnsGenerated())
+                                            );
+                                        });
+                                    }
+                                } else {
+                                    sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                                    return;
+                                }
                                 sender.sendMessage(plugin.getMessages().getSpawnRadiusSet(arguments));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
@@ -335,16 +360,26 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("resetattributes")) {
 
-                    Bukkit.getScheduler().runTask(plugin, () -> speedRun.resetAttributes());
-
-                    sender.sendMessage(plugin.getMessages().getResetAttributes());
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (!speedRun.isStarted()) {
+                            speedRun.resetAttributes();
+                        } else {
+                            sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                            return;
+                        }
+                        sender.sendMessage(plugin.getMessages().getResetAttributes());
+                    });
 
                 } else if (args[0].equalsIgnoreCase("participate")) {
 
                     if (sender instanceof Player p) {
-                        Bukkit.getScheduler().runTask(plugin, () ->
-                                sender.sendMessage(plugin.getMessages().getParticipationSet(speedRun.participate(p))));
-
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            if (!speedRun.isStarted()) {
+                                sender.sendMessage(plugin.getMessages().getParticipationSet(speedRun.participate(p)));
+                            } else {
+                                sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                            }
+                        });
                     }
 
                 } else if (args[0].equalsIgnoreCase("start")) {
@@ -356,8 +391,6 @@ public class CommandSpeedrun implements BasicCommand {
                                 sender.sendMessage(plugin.getMessages().getGameAlreadyStarted());
                             } else if (isStarted) {
                                 sender.sendMessage(plugin.getMessages().getGameStarted());
-                            } else {
-                                sender.sendMessage(plugin.getMessages().getWorldGenerated());
                             }
                         } catch (NoSuchElementException e) {
                             sender.sendMessage(plugin.getMessages().getCannotStartGame());
@@ -367,7 +400,13 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("stop")) {
 
-                    speedRun.endGame();
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (speedRun.isStarted()) {
+                            speedRun.endGame();
+                        } else {
+                            sender.sendMessage(plugin.getMessages().getGameNotStarted());
+                        }
+                    });
 
                 } else if (args[0].equalsIgnoreCase("test")) {
 
@@ -375,14 +414,79 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("toggleTeams")) {
 
-                    sender.sendMessage(plugin.getMessages().getToggleTeams(!speedRun.getTeamsEnabled()));
+                    if (speedRun.isStarted()) {
+                        sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                        return;
+                    }
 
+                    sender.sendMessage(plugin.getMessages().getToggleTeams(!speedRun.getTeamsEnabled()));
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.setTeamsEnabled(!speedRun.getTeamsEnabled()));
 
+                } else if (args[0].equalsIgnoreCase("getTeamSpawnLocations")) {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        List<Location> locations = speedRun.getTeamSpawnLocations();
+                        if (locations.isEmpty()) {
+                            sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
+                        } else {
+                            sender.sendMessage(plugin.getMessages().getTeamSpawnLocations());
+                            for (Location loc : locations) {
+                                sender.sendMessage(plugin.getMessages().getTeamSpawnLocation(sender.getName(), loc, locations.indexOf(loc) + 1));
+                            }
+                        }
+                    });
+                } else if (args[0].equalsIgnoreCase("setTeamSpawnLocation")) {
+                    if (sender instanceof Player p) {
+                        if (args.length != 2) {
+                            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin
+                                    .getMessages().getInvalidArguments("/speedrun setTeamSpawnLocation [teamNumber]"))
+                            );
+                        } else {
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                if (speedRun.getTeamSpawnLocations().isEmpty()) {
+                                    sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
+                                } else {
+                                    try {
+                                        int arg = Integer.parseInt(args[1]);
+                                        try {
+                                            if (speedRun.isStarted()) {
+                                                Team team = speedRun.getTeamFromSpawnLocationIndex(arg - 1);
+                                                if (team != null) {
+                                                    team.setRespawnLocation(p.getLocation());
+                                                }
+                                            }
+                                            speedRun.setTeamSpawnLocation(arg - 1, p.getLocation());
+                                            sender.sendMessage(plugin.getMessages().getTeamSpawnSet(arg));
+                                        } catch (IndexOutOfBoundsException e) {
+                                            sender.sendMessage(plugin.getMessages().getOutOfBounds(args[1], "teams"));
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "number"));
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("deleteWorld")) {
+
+                    if (speedRun.isStarted()) {
+                        sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                        return;
+                    }
+
+                    sender.sendMessage(plugin.getMessages().getWorldDeleted());
+                    Bukkit.getScheduler().runTask(plugin, () -> speedRun.deleteSpeedrunWorld());
+
+                } else if (args[0].equalsIgnoreCase("generateWorld")) {
+
+                    if (speedRun.isStarted()) {
+                        sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
+                        return;
+                    }
+
+                    Bukkit.getScheduler().runTask(plugin, () -> speedRun.generateWorld(sender));
+
                 } else {
-
                     Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getMessages().getUnknownCommand(args[0])));
-
                 }
             }
         });
@@ -723,6 +827,9 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("start");
             suggestions.add("stop");
             suggestions.add("toggleTeams");
+            suggestions.add("getTeamSpawnLocations");
+            suggestions.add("setTeamSpawnLocation");
+            suggestions.add("deleteWorld");
 
         // If arguments have been typed, the following logic runs:
         } else {
@@ -734,9 +841,9 @@ public class CommandSpeedrun implements BasicCommand {
 
                 addMatchingSuggestions(suggestions, args[0], "help", "team", "reload", "addObjective",
                         "remObjective", "setTeamSize", "getTeamSize", "start", "stop", "objectives",
-                        "setTimeLimit", "getTimeLimit", "setBorder", "getBorder", "participate",
-                        "setSeed", "getSeed", "resetAttributes", "setSpawnRadius", "getSpawnRadius",
-                        "setPointLimit", "getPointLimit", "toggleTeams");
+                        "setTimeLimit", "getTimeLimit", "setBorder", "getBorder", "participate", "deleteWorld",
+                        "setSeed", "getSeed", "resetAttributes", "setSpawnRadius", "getSpawnRadius", "generateWorld",
+                        "setPointLimit", "getPointLimit", "toggleTeams", "getTeamSpawnLocations", "setTeamSpawnLocation");
 
 
             /* The same continues for the second argument: If the first argument is addobjective, suggestions are made
@@ -761,6 +868,8 @@ public class CommandSpeedrun implements BasicCommand {
                     suggestions.add("[number]");
                 } else if (args[0].equalsIgnoreCase("team")) {
                     addMatchingSuggestions(suggestions, args[1], speedRun.getTeams().getStrippedTeamNames(true));
+                } else if (args[0].equalsIgnoreCase("setteamspawnlocation")) {
+                    suggestions.add("[teamNumber]");
                 }
 
             // Continues w/ third argument, just one step deeper

@@ -18,9 +18,11 @@ public class PlayerLeave implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         Speedrun sr = plugin.getSpeedrun();
-        Player p = e.getPlayer();
-        if (sr.isParticipating(p)) {
-            sr.participate(p);
+        if (!sr.isStarted()) {
+            Player p = e.getPlayer();
+            if (sr.isParticipating(p)) {
+                sr.participate(p);
+            }
         }
     }
 }

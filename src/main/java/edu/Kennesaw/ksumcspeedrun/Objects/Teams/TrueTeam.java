@@ -2,6 +2,7 @@ package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
+import edu.Kennesaw.ksumcspeedrun.Utilities.ComponentHelper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -39,19 +40,23 @@ public class TrueTeam extends Team {
 
     public void addPlayer(Player player) {
         if (players.contains(player)) {
-            player.sendMessage(plugin.getMessages().getAlreadyOnTeam());
+            if (player instanceof Player onlinePlayer) {
+                onlinePlayer.sendMessage(plugin.getMessages().getAlreadyOnTeam());
+            }
             return;
         }
         players.add(player);
-        player.sendMessage(plugin.getMessages().getTeamJoinMessage(name));
+        if (player instanceof Player onlinePlayer) {
+            onlinePlayer.sendMessage(plugin.getMessages().getAlreadyOnTeam());
+        }
         tm.setPlayerTeam(player, this);
-        updateItemLore();
+        updateItemLore(true, player);
     }
 
     public void removePlayer(Player player) {
+        updateItemLore(false, player);
         players.remove(player);
         tm.removePlayerTeam(player);
-        updateItemLore();
     }
 
     public List<Player> getPlayers() {
@@ -83,6 +88,10 @@ public class TrueTeam extends Team {
         }
     }
 
+    public void removePoints(int points) {
+        this.points -= points;
+    }
+
     public List<Objective> getIncompleteObjectives() {
         return plugin.getSpeedrun().getObjectives().getIncompleteObjectives(this);
     }
@@ -112,7 +121,7 @@ public class TrueTeam extends Team {
         return (players.size() == tm.getSizeLimit());
     }
 
-    private void updateItemLore() {
+    private void updateItemLore(boolean adding, Player p) {
         ItemMeta im = item.getItemMeta();
         List<Component> lore = im.lore();
         if (lore != null) {
@@ -120,8 +129,13 @@ public class TrueTeam extends Team {
                 lore.set(1, Component.text("This team is FULL!")
                         .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
             } else {
-                lore.set(1, Component.text(getSize() + "/" + tm.getSizeLimit() + " players on this team.")
+                lore.set(1, Component.text((getSize() + (adding ? 0 : -1)) + "/" + tm.getSizeLimit() + " players on this team.")
                         .color(TextColor.fromHexString("#c4c4c4")));
+            }
+            if (adding) {
+                lore.add(players.indexOf(p) + 2, ComponentHelper.mmStringToComponent("<gray> - " + p.getName() + "</gray>").decoration(TextDecoration.ITALIC, false));
+            } else {
+                lore.remove(players.indexOf(p) + 2);
             }
         }
 

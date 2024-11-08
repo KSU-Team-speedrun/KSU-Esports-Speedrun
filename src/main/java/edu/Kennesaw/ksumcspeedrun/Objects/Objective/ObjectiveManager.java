@@ -37,7 +37,7 @@ public class ObjectiveManager {
     public List<Objective> getIncompleteObjectives(TrueTeam trueTeam) {
         List<Objective> incompleteObjectives = new ArrayList<>();
         for (Objective o : objectives) {
-            if (!o.isComplete(trueTeam)) {
+            if (o.isIncomplete(trueTeam)) {
                 incompleteObjectives.add(o);
             }
         }
@@ -48,7 +48,7 @@ public class ObjectiveManager {
     public List<Objective> getIncompleteObjectives(SoloTeam player) {
         List<Objective> incompleteObjectives = new ArrayList<>();
         for (Objective o : objectives) {
-            if (!o.isComplete(player)) {
+            if (o.isIncomplete(player)) {
                 incompleteObjectives.add(o);
             }
         }
@@ -63,6 +63,7 @@ public class ObjectiveManager {
 
     // Remove objective by the number that it appears in the list
     public void removeObjective(int number) {
+        totalWeight-=objectives.get(number).getWeight();
         objectives.remove(number);
     }
 
@@ -77,5 +78,9 @@ public class ObjectiveManager {
 
     public void clearObjectives() {
         this.objectives = new ArrayList<>();
+    }
+
+    public Objective getObjective(int number) {
+        return objectives.get(number);
     }
 }

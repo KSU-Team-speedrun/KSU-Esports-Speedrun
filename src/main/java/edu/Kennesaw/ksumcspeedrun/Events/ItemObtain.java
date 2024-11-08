@@ -100,7 +100,6 @@ public class ItemObtain implements Listener {
                             matchedObtainObjective.setComplete(team);
                             return;
                         }
-
                     }
                 }
 

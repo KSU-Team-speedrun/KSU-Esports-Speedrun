@@ -79,11 +79,6 @@ public abstract class Objective {
     }
 
     public void setComplete(Team team) {
-
-        this.completedTeams.add(team);
-        team.addPoints(weight);
-        team.addCompleteObjective(this);
-
         if (team instanceof TrueTeam trueTeam && plugin.getSpeedrun().getTeamsEnabled()) {
             if (amount > 1) {
                 for (Player p : trueTeam.getPlayers()) {
@@ -103,10 +98,13 @@ public abstract class Objective {
                 soloTeam.sendMessage(plugin.getMessages().getObjectiveComplete(type.toString(), targetName, weight));
             }
         }
+        this.completedTeams.add(team);
+        team.addPoints(weight);
+        team.addCompleteObjective(this);
     }
 
-    public boolean isComplete(Team team) {
-        return completedTeams.contains(team);
+    public boolean isIncomplete(Team team) {
+        return !completedTeams.contains(team);
     }
 
     public void setTargetName(String target) {

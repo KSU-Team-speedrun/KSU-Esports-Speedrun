@@ -66,7 +66,7 @@ public class DamageEvent implements Listener {
                         UUID uuid = le.getUniqueId();
 
                         if (plugin.getSpeedrun().combatTasks.containsKey(uuid)) {
-                            plugin.getSpeedrun().combatLog.remove(uuid);
+                            plugin.getSpeedrun().combatLog.removeByKey(uuid);
                             plugin.getSpeedrun().combatTasks.get(uuid).cancel();
                             System.out.println("Updating combat log");
                         } else {
@@ -76,9 +76,9 @@ public class DamageEvent implements Listener {
                         plugin.getSpeedrun().combatLog.put(uuid, p);
 
                         ScheduledTask task = plugin.runAsyncDelayed(() -> {
-                            plugin.getSpeedrun().combatLog.remove(uuid);
+                            plugin.getSpeedrun().combatLog.removeByKey(uuid);
                             plugin.getSpeedrun().combatTasks.remove(uuid);
-                        }, 10, TimeUnit.SECONDS);
+                        }, 15, TimeUnit.SECONDS);
 
                         plugin.getSpeedrun().combatTasks.put(uuid, task);
 

@@ -30,12 +30,12 @@ public class PlayerJoin implements Listener {
         if (!sr.isStarted()) {
 
             Location spawnPoint = plugin.getSpawnPoint();
+            p.getInventory().clear();
 
             if (spawnPoint != null) p.teleport(spawnPoint);
 
             if (!p.hasPermission("ksu.speedrun.admin")) {
                 p.setGameMode(GameMode.SURVIVAL);
-                p.getInventory().clear();
                 sr.participate(p);
             }
 

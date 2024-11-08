@@ -1,9 +1,6 @@
 package edu.Kennesaw.ksumcspeedrun;
 
-import edu.Kennesaw.ksumcspeedrun.Commands.CommandHelp;
-import edu.Kennesaw.ksumcspeedrun.Commands.CommandObjectives;
-import edu.Kennesaw.ksumcspeedrun.Commands.CommandSpeedrun;
-import edu.Kennesaw.ksumcspeedrun.Commands.CommandTeam;
+import edu.Kennesaw.ksumcspeedrun.Commands.*;
 import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Logger;
@@ -12,9 +9,11 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /* The Main class will be passed to most instances of any other class, so that the Config and Speedrun instances
@@ -76,13 +76,21 @@ public class Main extends JavaPlugin {
             commands.register("objectives", "Display a list of objectives to players", new CommandObjectives(this));
             commands.register("team", "Alternative to using Team GUI to join a team.", new CommandTeam(this));
             commands.register("help", "Default help message for KSU-MC-Speedrun", new CommandHelp(this));
+            commands.register("scoreboard", "Toggle scoreboard enabled or disabled", new CommandScoreboard(this));
+            commands.register("spawn", "Teleport to your team's spawnpoint", new CommandSpawn(this));
         });
 
         if (config.getBoolean("world.spawnPoint.enabled")) {
+            double y = 100.0;
             spawnPoint = new Location(Bukkit.getWorld(config.getString("world.spawnPoint.world")),
-                    config.getDouble("world.spawnPoint.x"), config.getDouble("world.spawnPoint.y"),
+                    config.getDouble("world.spawnPoint.x"), y,
                     config.getDouble("world.spawnPoint.z"), config.getDouble("world.spawnPoint.pitch").floatValue(),
                     config.getDouble("world.spawnPoint.yaw").floatValue());
+            if (config.get("world.spawnPoint.y") instanceof String) {
+                spawnPoint.setY(spawnPoint.getWorld().getHighestBlockYAt(spawnPoint));
+            } else if (config.get("world.spawnPoint.y") instanceof Double) {
+                spawnPoint.setY(config.getDouble("world.spawnPoint.y"));
+            }
         }
 
         loadGameRules();
@@ -121,6 +129,20 @@ public class Main extends JavaPlugin {
         });
     }
 
+    public CompletableFuture<Void> runCompletableFutureAsyncTask(Runnable task) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        Bukkit.getAsyncScheduler().runNow(this, scheduledTask -> {
+            try {
+                task.run();
+                future.complete(null);
+            } catch (Exception e) {
+                Bukkit.getScheduler().runTask(this, () -> logError(e, Thread.currentThread()));
+                future.completeExceptionally(null);
+            }
+        });
+        return future;
+    }
+
     public ScheduledTask runAsyncDelayed(Runnable task, long delay, TimeUnit unit) {
         return Bukkit.getAsyncScheduler().runDelayed(this, scheduledTask -> {
             try {
@@ -133,6 +155,14 @@ public class Main extends JavaPlugin {
 
     public Map<GameRule<?>, Object> getGameRules() {
         return gameRules;
+    }
+
+    public void asyncBroadcast(Component message, String permission) {
+        runAsyncTask(() -> {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission(permission) || permission.isEmpty()) p.sendMessage(message);
+            }
+        });
     }
 
     private void logError(Throwable throwable, Thread thread) {

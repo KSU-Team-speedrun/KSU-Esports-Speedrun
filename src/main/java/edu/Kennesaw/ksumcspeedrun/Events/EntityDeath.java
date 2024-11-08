@@ -71,7 +71,7 @@ public class EntityDeath implements Listener {
 
                 } else if (plugin.getSpeedrun().combatLog.containsKey(uuid)) {
 
-                    Player op = plugin.getSpeedrun().combatLog.get(uuid);
+                    Player op = plugin.getSpeedrun().combatLog.getByKey(uuid);
 
                     if (op.isOnline()) {
 
@@ -81,7 +81,7 @@ public class EntityDeath implements Listener {
 
                     plugin.getSpeedrun().combatTasks.get(uuid).cancel();
                     plugin.getSpeedrun().combatTasks.remove(uuid);
-                    plugin.getSpeedrun().combatLog.remove(uuid);
+                    plugin.getSpeedrun().combatLog.removeByKey(uuid);
 
                 }
             }

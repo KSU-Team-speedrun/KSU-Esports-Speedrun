@@ -3,6 +3,7 @@ package edu.Kennesaw.ksumcspeedrun.Structures;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.util.StructureSearchResult;
@@ -54,7 +55,7 @@ public class SRStructure {
     @SuppressWarnings("unused")
     public static void getStructures(Main plugin, StructureListResultCallback structList) {
 
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
             List<Structure> structures = new ArrayList<>();
             for (Field f : Structure.class.getFields()) {
                 Object value;
@@ -106,9 +107,9 @@ public class SRStructure {
 
     // Locate the nearest specified structure to a given location, return the location of the structure using callback
     public static void getNearestStructureToLocation(Main plugin, SRStructure structureToFind, Location locFrom, LocationResultCallback callback) {
-        
+
         // We use an Async thread to access the config:
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+        plugin.runAsyncTask(() -> {
 
             /* Bukkit's StructureSearchResult does not return the Y-coordinate
            for specific structures being located for some reason, so the best workaround is to manually set the average
@@ -124,7 +125,7 @@ public class SRStructure {
             }
             final String finalAvgY = averageY;
             final int finalY = y;
-            
+
             /* Once we have this coordinate value, we go back to the main thread to do a structure search (any
                computation that interacts with players or the world must be on the main thread) */
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -139,8 +140,35 @@ public class SRStructure {
                     Location loc = srs.getLocation();
 
                     // We manually set the Y-coordinate to the average value specified in the Config.yml file.
-                    if (finalAvgY != null && finalAvgY.equalsIgnoreCase("ground")) {
-                        loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+                    if (finalAvgY != null && finalAvgY.toLowerCase().startsWith("ground")) {
+                        String[] avgYParser = finalAvgY.split(" ");
+                        if (avgYParser.length == 3) {
+                            if (avgYParser[1].equalsIgnoreCase("-")) {
+                                try {
+                                    int adjustment = Integer.parseInt(avgYParser[2]);
+                                    loc.setY(loc.getWorld().getHighestBlockYAt(loc) - adjustment);
+                                } catch (NumberFormatException e) {
+                                    plugin.getLogger().warning("Config error for " + structureToFind + ": "
+                                    + avgYParser[2] + " must be a number. Setting avgY at ground level..");
+                                    loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+                                }
+                            } else if (avgYParser[1].equalsIgnoreCase("+")) {
+                                try {
+                                    int adjustment = Integer.parseInt(avgYParser[2]);
+                                    loc.setY(loc.getWorld().getHighestBlockYAt(loc) + adjustment);
+                                } catch (NumberFormatException e) {
+                                    plugin.getLogger().warning("Config error for " + structureToFind + ": "
+                                            + avgYParser[2] + " must be a number. Setting avgY at ground level..");
+                                    loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+                                }
+                            } else {
+                                plugin.getLogger().warning("Config error for " + structureToFind + ": "
+                                        + avgYParser[1] + " must be a '+' or '-'. Setting avgY at ground level..");
+                                loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+                            }
+                        } else {
+                            loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+                        }
                     } else {
                         loc.setY(finalY);
                     }
@@ -159,8 +187,13 @@ public class SRStructure {
     }
 
     public static void getStructureRadius(Main plugin, SRStructure target, RadiusResultCallback callback) {
-        Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> callback.onResult(plugin.getSpeedrunConfig()
+        plugin.runAsyncTask(() -> callback.onResult(plugin.getSpeedrunConfig()
                 .getInt("structureLocations." + target.getName() + ".radius")));
+    }
+
+    public static void getStructureHeight(Main plugin, SRStructure target, RadiusResultCallback callback) {
+        plugin.runAsyncTask(() ->callback.onResult(plugin.getSpeedrunConfig()
+                .getInt("structureLocations." + target.getName() + ".height")));
     }
 
     public interface LocationResultCallback {

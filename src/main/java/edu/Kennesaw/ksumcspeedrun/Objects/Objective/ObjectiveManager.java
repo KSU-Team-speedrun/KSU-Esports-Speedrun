@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.SoloTeam;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,21 @@ public class ObjectiveManager {
     }
 
     // Returns the list of incomplete objectives
-    public List<Objective> getIncompleteObjectives(Team team) {
+    public List<Objective> getIncompleteObjectives(TrueTeam trueTeam) {
         List<Objective> incompleteObjectives = new ArrayList<>();
         for (Objective o : objectives) {
-            if (!o.isComplete(team)) {
+            if (o.isIncomplete(trueTeam)) {
+                incompleteObjectives.add(o);
+            }
+        }
+        return incompleteObjectives;
+    }
+
+    // Returns the list of incomplete objectives
+    public List<Objective> getIncompleteObjectives(SoloTeam player) {
+        List<Objective> incompleteObjectives = new ArrayList<>();
+        for (Objective o : objectives) {
+            if (o.isIncomplete(player)) {
                 incompleteObjectives.add(o);
             }
         }
@@ -51,6 +63,7 @@ public class ObjectiveManager {
 
     // Remove objective by the number that it appears in the list
     public void removeObjective(int number) {
+        totalWeight-=objectives.get(number).getWeight();
         objectives.remove(number);
     }
 
@@ -65,5 +78,9 @@ public class ObjectiveManager {
 
     public void clearObjectives() {
         this.objectives = new ArrayList<>();
+    }
+
+    public Objective getObjective(int number) {
+        return objectives.get(number);
     }
 }

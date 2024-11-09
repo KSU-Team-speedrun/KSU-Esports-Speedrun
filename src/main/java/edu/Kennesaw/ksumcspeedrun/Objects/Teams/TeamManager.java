@@ -1,7 +1,6 @@
 package edu.Kennesaw.ksumcspeedrun.Objects.Teams;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.TeamInventory;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,10 +15,11 @@ public class TeamManager {
     private int teamSizeLimit;
 
     private TeamInventory teamInventory;
+    private int inventoryCooldown;
 
     private Map<Player, Team> playerTeam;
     private Map<Component, Team> teamName;
-    private Map<ItemStack, Team> teamItem;
+    private Map<ItemStack, TrueTeam> teamItem;
 
 
     public TeamManager(Main plugin) {
@@ -31,28 +31,42 @@ public class TeamManager {
         teamItem = new HashMap<>();
         teamInventory = new TeamInventory(this, plugin.getSpeedrunConfig()
                 .getComponent("teams.inventory.title"));
+        inventoryCooldown = plugin.getConfig().getInt("teams.inventory.cooldown");
 
     }
 
     public void addTeam(Team team) {
         teams.add(team);
         teamName.put(team.getName(), team);
-        teamItem.put(team.getItem(), team);
+        if (team instanceof TrueTeam trueTeam) teamItem.put(trueTeam.getItem(), trueTeam);
+
     }
 
     public void removeTeam(Team team) {
         teams.remove(team);
         teamName.remove(team.getName());
-        teamItem.remove(team.getItem());
+        if (team instanceof TrueTeam trueTeam) teamItem.remove(trueTeam.getItem());
     }
 
     public List<Team> getTeams() {
         return teams;
     }
 
-    public Team getTeam(Component team) {
-        if (teamName.containsKey(team)) {
-            return teamName.get(team);
+    /**
+     * @param replaceSpace - Return stripped names including spaces or replacing spaces with underscores?
+     */
+    public List<String> getStrippedTeamNames(boolean replaceSpace) {
+        List<String> strippedTeamNames = new ArrayList<>();
+        for (Team team : teams) {
+            strippedTeamNames.add(replaceSpace ? team.getStrippedName().replace(' ', '_') :
+                    team.getStrippedName());
+        }
+        return strippedTeamNames;
+    }
+
+    public Team getTeam(Component name) {
+        if (teamName.containsKey(name)) {
+            return teamName.get(name);
         }
         return null;
     }
@@ -64,7 +78,7 @@ public class TeamManager {
         return null;
     }
 
-    public Team getTeam(ItemStack item) {
+    public TrueTeam getTeam(ItemStack item) {
         if (teamItem.containsKey(item)) {
             return teamItem.get(item);
         }
@@ -96,8 +110,8 @@ public class TeamManager {
         return teamInventory;
     }
 
-    public void addTeamItem(Team team, ItemStack item) {
-        teamItem.put(item, team);
+    public void addTeamItem(TrueTeam trueTeam, ItemStack item) {
+        teamItem.put(item, trueTeam);
     }
 
     public void reset() {
@@ -108,6 +122,18 @@ public class TeamManager {
         teamItem = new HashMap<>();
         teamInventory = new TeamInventory(this, plugin.getSpeedrunConfig()
                 .getComponent("teams.inventory.title"));
+    }
+
+    public List<TrueTeam> convertAbstractToTeam(List<Team> teams) {
+        List<TrueTeam> trueTeams = new ArrayList<>();
+        getTeams().forEach(abstractTeam -> {
+            if (abstractTeam instanceof TrueTeam) trueTeams.add(((TrueTeam) abstractTeam));
+        });
+        return trueTeams;
+    }
+
+    public int getInventoryCooldown() {
+        return inventoryCooldown;
     }
 
 }

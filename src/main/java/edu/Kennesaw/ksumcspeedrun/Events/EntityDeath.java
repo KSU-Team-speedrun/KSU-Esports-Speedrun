@@ -44,7 +44,7 @@ public class EntityDeath implements Listener {
 
             if (ds.getCausingEntity() instanceof Player p) {
 
-                team = teamManager.getTeam(p);
+                team = speedrun.getTeams().getTeam(p);
 
             } else {
 
@@ -71,7 +71,7 @@ public class EntityDeath implements Listener {
 
                 } else if (plugin.getSpeedrun().combatLog.containsKey(uuid)) {
 
-                    Player op = plugin.getSpeedrun().combatLog.get(uuid);
+                    Player op = plugin.getSpeedrun().combatLog.getByKey(uuid);
 
                     if (op.isOnline()) {
 
@@ -81,7 +81,7 @@ public class EntityDeath implements Listener {
 
                     plugin.getSpeedrun().combatTasks.get(uuid).cancel();
                     plugin.getSpeedrun().combatTasks.remove(uuid);
-                    plugin.getSpeedrun().combatLog.remove(uuid);
+                    plugin.getSpeedrun().combatLog.removeByKey(uuid);
 
                 }
             }
@@ -102,6 +102,21 @@ public class EntityDeath implements Listener {
                     /* If the target of the KillObjective is equal to the entity that was killed,
                        then the objective is complete */
                         if (ko.getTarget().equals(e.getEntityType())) {
+
+                            if (ko.getHasCount()) {
+
+                                ko.incrementTeam(team);
+
+                                if (ko.getCount(team) >= ko.getAmount()) {
+
+                                    ko.setComplete(team);
+                                    break;
+
+                                }
+
+                                continue;
+
+                            }
 
                             ko.setComplete(team);
                             break;

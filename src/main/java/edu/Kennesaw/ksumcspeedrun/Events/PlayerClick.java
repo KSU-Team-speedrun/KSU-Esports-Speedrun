@@ -1,7 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
-import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import org.bukkit.Bukkit;
@@ -30,16 +30,15 @@ public class PlayerClick implements Listener {
 
         Player p = e.getPlayer();
 
-        if (e.getAction().isLeftClick() || e.getAction().isLeftClick()) {
+        if (e.getAction().isLeftClick() || e.getAction().isRightClick()) {
 
             if (p.getInventory().getItemInMainHand().equals(Items.getTeamSelector())) {
 
-                p.openInventory(tm.getTeamInventory().getInventory());
-
+                if (plugin.getSpeedrun().isParticipating(p)) {
+                    p.openInventory(tm.getTeamInventory().getInventory());
+                }
             }
-
         }
-
     }
 
     @EventHandler
@@ -47,44 +46,45 @@ public class PlayerClick implements Listener {
 
         if (e.getWhoClicked() instanceof Player p) {
 
-            if (!plugin.getSpeedrun().isStarted()  && !p.isOp()) e.setCancelled(true);
-
-            if (plugin.getSpeedrun().teamCooldown.contains(p)) {
-                p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
-                return;
-            }
-
             if (e.getInventory().equals(tm.getTeamInventory().getInventory())) {
+
+                e.setCancelled(true);
+
+                if (plugin.getSpeedrun().getTeamCooldown().contains(p)) {
+                    p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
+                    return;
+                }
 
                 ItemStack currentItem = e.getCurrentItem();
 
                 if (currentItem != null) {
 
-                    Team team = plugin.getSpeedrun().getTeams().getTeam(currentItem);
+                    TrueTeam trueTeam = plugin.getSpeedrun().getTeams().getTeam(currentItem);
 
-                    if (team != null) {
+                    if (trueTeam != null) {
 
-                        Team oldTeam = tm.getTeam(p);
+                        if (trueTeam.isFull()) {
+                            p.sendMessage(plugin.getMessages().getTeamIsFull());
+                            return;
+                        }
 
-                        if (oldTeam != null) {
+                        TrueTeam oldTrueTeam = (TrueTeam) tm.getTeam(p);
 
-                            if (oldTeam.equals(team)) {
+                        if (oldTrueTeam != null) {
+
+                            if (oldTrueTeam.equals(trueTeam)) {
                                 p.sendMessage(plugin.getMessages().getAlreadyOnTeam());
                                 return;
                             }
 
-                            oldTeam.removePlayer(p);
-                            tm.getTeamInventory().updateTeamInventory(oldTeam);
+                            oldTrueTeam.removePlayer(p);
+                            tm.getTeamInventory().updateTeamInventory(oldTrueTeam);
                         }
 
-                        team.addPlayer(p);
-                        tm.getTeamInventory().updateTeamInventory(team);
+                        trueTeam.addPlayer(p);
+                        tm.getTeamInventory().updateTeamInventory(trueTeam);
 
-                        plugin.getSpeedrun().teamCooldown.add(p);
-
-                        Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask ->
-                                        plugin.getSpeedrun().teamCooldown.remove(p),
-                                plugin.getConfig().getInt("teams.inventory.cooldown"), TimeUnit.SECONDS);
+                        plugin.getSpeedrun().addTeamCooldown(p);
                     }
                 }
             }

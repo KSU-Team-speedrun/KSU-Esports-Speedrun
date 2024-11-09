@@ -35,7 +35,9 @@ public class PortalEvent implements Listener {
 
         Team team = tm.getTeam(p);
 
-        if (team == null) return;
+        if (team == null) {
+            return;
+        }
 
         for (Objective o : team.getIncompleteObjectives()) {
 
@@ -76,7 +78,9 @@ public class PortalEvent implements Listener {
 
                 Team team = tm.getTeam(p);
 
-                if (team == null) return;
+                if (team == null) {
+                    return;
+                }
 
                 for (Objective o : team.getIncompleteObjectives()) {
 
@@ -90,7 +94,7 @@ public class PortalEvent implements Listener {
                                     && e.getTo().distance(e.getFrom()) >= 800) {
 
                                 eo.setComplete(team);
-                                break;
+                                return;
 
                             }
 
@@ -107,7 +111,9 @@ public class PortalEvent implements Listener {
 
             Team team = tm.getTeam(p);
 
-            if (team == null) return;
+            if (team == null) {
+                return;
+            }
 
             if (from.equals(World.Environment.THE_END) && to.equals(World.Environment.NORMAL)) {
 

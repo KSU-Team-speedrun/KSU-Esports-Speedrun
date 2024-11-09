@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun.Events;
 
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
@@ -17,12 +18,17 @@ public class DamageEvent implements Listener {
 
     Main plugin;
     Speedrun speedrun;
+    TeamManager tm;
+    boolean teamPvP = false;
+    boolean PvP = true;
 
     public DamageEvent(Main plugin) {
 
         this.plugin = plugin;
         this.speedrun = plugin.getSpeedrun();
-
+        tm = speedrun.getTeams();
+        teamPvP = plugin.getSpeedrunConfig().getBoolean("teams.teamPvP");
+        PvP = plugin.getSpeedrunConfig().getBoolean("teams.PvP");
     }
 
     @SuppressWarnings("all")
@@ -35,14 +41,32 @@ public class DamageEvent implements Listener {
 
                 if (e.getDamageSource().getCausingEntity() instanceof Player p) {
 
-                    Bukkit.getAsyncScheduler().runNow(plugin, scheduledTask -> {
+                    if (le instanceof Player damaged) {
+
+                        if (!PvP) {
+                            e.setCancelled(true);
+                            return;
+                        }
+
+                        if (tm.getTeam(p).equals(tm.getTeam(damaged))) {
+
+                            if (!teamPvP) {
+                                e.setCancelled(true);
+                                return;
+                            }
+
+                        }
+
+                    }
+
+                    plugin.runAsyncTask(() -> {
 
                         System.out.println("Logging player damage");
 
                         UUID uuid = le.getUniqueId();
 
                         if (plugin.getSpeedrun().combatTasks.containsKey(uuid)) {
-                            plugin.getSpeedrun().combatLog.remove(uuid);
+                            plugin.getSpeedrun().combatLog.removeByKey(uuid);
                             plugin.getSpeedrun().combatTasks.get(uuid).cancel();
                             System.out.println("Updating combat log");
                         } else {
@@ -51,10 +75,10 @@ public class DamageEvent implements Listener {
 
                         plugin.getSpeedrun().combatLog.put(uuid, p);
 
-                        ScheduledTask task = Bukkit.getAsyncScheduler().runDelayed(plugin, scheduledTask1 -> {
-                            plugin.getSpeedrun().combatLog.remove(uuid);
+                        ScheduledTask task = plugin.runAsyncDelayed(() -> {
+                            plugin.getSpeedrun().combatLog.removeByKey(uuid);
                             plugin.getSpeedrun().combatTasks.remove(uuid);
-                        }, 10, TimeUnit.SECONDS);
+                        }, 15, TimeUnit.SECONDS);
 
                         plugin.getSpeedrun().combatTasks.put(uuid, task);
 

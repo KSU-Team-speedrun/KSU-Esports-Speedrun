@@ -4,6 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObtainObjective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Speedrun;
 import org.bukkit.Material;
@@ -84,18 +85,22 @@ public class ItemObtain implements Listener {
 
                 int playerItemCount = 0;
 
-                for (Player teamPlayer : team.getPlayers()) {
+                if (speedrun.getTeamsEnabled() && team instanceof TrueTeam trueTeam) {
 
-                    playerItemCount += getInventoryItemCount(teamPlayer, is.getType());
+                    for (Player teamPlayer : trueTeam.getPlayers()) {
 
-                    System.out.println("total number: " + totalNumber);
-                    System.out.println("total amount: " + playerItemCount);
+                        playerItemCount += getInventoryItemCount(teamPlayer, is.getType());
 
-                    if (playerItemCount >= totalNumber) {
-                        matchedObtainObjective.setComplete(team);
-                        return;
+                        System.out.println("total number: " + totalNumber);
+                        System.out.println("total amount: " + playerItemCount);
+
+                        matchedObtainObjective.setIncrementNumber(team, playerItemCount);
+
+                        if (playerItemCount >= totalNumber) {
+                            matchedObtainObjective.setComplete(team);
+                            return;
+                        }
                     }
-
                 }
 
             }

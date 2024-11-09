@@ -35,9 +35,9 @@ public class MineBlock implements Listener {
         if (speedrun.isStarted()) {
 
             Player p = e.getPlayer();
-            Team team = tm.getTeam(p);
-
             Block b = e.getBlock();
+
+            Team team = tm.getTeam(p);
 
             if (team == null) {
                 return;
@@ -50,6 +50,21 @@ public class MineBlock implements Listener {
                     MineObjective mo = (MineObjective) o;
 
                     if (mo.getBlockTarget().equals(b.getType())) {
+
+                        if (mo.getHasCount()) {
+
+                            mo.incrementTeam(team);
+
+                            if (mo.getCount(team) >= mo.getAmount()) {
+
+                                mo.setComplete(team);
+                                break;
+
+                            }
+
+                            continue;
+
+                        }
 
                         mo.setComplete(team);
                         break;

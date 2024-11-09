@@ -36,6 +36,17 @@ public class KillObjective extends Objective {
 
     }
 
+    // Same as above, but weight & amount included in constructor
+    public KillObjective(EntityType target, int weight, int amount, Main plugin) throws NonLivingEntityException {
+
+        super(ObjectiveType.KILL, weight, amount, plugin);
+        if (!target.isAlive()) throw new NonLivingEntityException(target.name() + " is not a LivingEntity!");
+        this.target = target;
+
+        setTargetName(target.name());
+
+    }
+
     // Return target EntityType
     public EntityType getTarget() {
         return target;

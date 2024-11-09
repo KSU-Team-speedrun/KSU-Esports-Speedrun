@@ -8,14 +8,20 @@ public class MineObjective extends Objective {
 
     private final Material blockTarget;
 
+    public MineObjective(Material blockTarget, Main plugin) {
+        super(ObjectiveType.MINE, plugin);
+        this.blockTarget = blockTarget;
+        setTargetName(blockTarget.name());
+    }
+
     public MineObjective(Material blockTarget, int weight, Main plugin) {
         super(ObjectiveType.MINE, weight, plugin);
         this.blockTarget = blockTarget;
         setTargetName(blockTarget.name());
     }
 
-    public MineObjective(Material blockTarget, Main plugin) {
-        super(ObjectiveType.MINE, plugin);
+    public MineObjective(Material blockTarget, int weight, int amount, Main plugin) {
+        super(ObjectiveType.MINE, weight, amount, plugin);
         this.blockTarget = blockTarget;
         setTargetName(blockTarget.name());
     }

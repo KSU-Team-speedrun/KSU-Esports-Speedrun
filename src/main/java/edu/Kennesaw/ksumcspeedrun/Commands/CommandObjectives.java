@@ -6,9 +6,11 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TeamManager;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Items;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.kyori.adventure.inventory.Book;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CommandObjectives implements BasicCommand {
@@ -31,12 +33,25 @@ public class CommandObjectives implements BasicCommand {
             Team team = tm.getTeam(p);
 
             if (team != null) {
-                p.openBook(Items.getObjectiveBook(team));
+                Book book = Items.getObjectiveBookMain();;
+                if (args.length == 1) {
+                    if (args[0].equalsIgnoreCase("incomplete")) {
+                        book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted(), true);
+                    } else if (args[0].equalsIgnoreCase("complete")) {
+                        book = Items.getObjectiveBook(team, plugin.getSpeedrun().isWeighted(), false);
+                    }
+                }
+                p.openBook(book);
             } else {
-                if (p.isOp()) {
+                if ((!plugin.getSpeedrun().isParticipating(p) || !plugin.getSpeedrun().isStarted()) && p.hasPermission("ksu.speedrun.admin")) {
                     p.openBook(Items.getAdminBook(plugin.getSpeedrun()));
                 }
             }
         }
+    }
+
+    @Override
+    public @Nullable String permission() {
+        return "ksu.speedrun.user";
     }
 }

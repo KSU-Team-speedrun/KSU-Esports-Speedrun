@@ -6,10 +6,13 @@ import java.io.IOException;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;
+import edu.Kennesaw.ksumcspeedrun.Objects.Objective.*;
+import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
+import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
+
 import org.bukkit.entity.EntityType;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
-import org.bukkit.StructureType;
 
 public class ObjectiveReader{
 
@@ -19,9 +22,10 @@ public class ObjectiveReader{
     //Main Processing Method
         //Throws Number Format Exception if the name of an objective is not found
         //Throws invalid argument exceptions if a name of an item entity or location is not found
+        //Throws 
 	public void loadObjectivesFromFile(String filePath, Main plugin) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            this.plugin = plugin
+            this.plugin = plugin;
             String line;
             while ((line = reader.readLine()) != null) {
                 processLine(line);
@@ -39,148 +43,173 @@ public class ObjectiveReader{
         }
 
         String command = parts[0].trim();
-        Objective newObjective = new Objective() {};
+        //for some reason VSCode thinks newObjective is unused
+        @SuppressWarnings({"unused" })
+        Objective newObjective;
+        int weight = 1;
+        int amount = 1;
+
+         //set up Weight
+        if (parts.length == 2 || parts.length == 3) {
+            //Convert weight to int
+            weight = Integer.parseInt(parts[2]);
+        }
+
+        //withamount
+        if (parts.length == 3) {
+            //Convert anmount to int
+            amount = Integer.parseInt(parts[3]);
+        }
+
 
         try {
             switch (command) {
                 case "Kill":
-                    if (parts.length == 1) {//without weight
-                        //convert entity string to EntityType
-                        try{
-                            EntityType target = EntityType.valueOf(parts[1].toUpperCase());
-                        } catch (IllegalArgumentException e) { // Handle the case where the entity name does not exist
-                            System.out.println("Invalid entity name: " + parts[1]);
-                            return null;
-                        }
-                        //Create a new objective
-                        newObjective = new KillObjective(target, plugin)
+                    //convert entity string to EntityType
+                    EntityType target;
+                    try {
+                        target = EntityType.valueOf(parts[1].toUpperCase());
+                    } catch (IllegalArgumentException e) { // Handle the case where the entity name does not exist
+                        System.out.println("Invalid entity name: " + parts[1]);
+                        break;
                     }
-                    if (parts.length == 2) { //with Weight
-                        //convert entity string to EntityType
-                        try{
-                            EntityType target = EntityType.valueOf(parts[1].toUpperCase());
-                        } catch (IllegalArgumentException e) { // Handle the case where the entity name does not exist
-                            System.out.println("Invalid entity name: " + parts[1]);
-                            return null;
+
+                    try {
+                        //without weight
+                        if (parts.length == 1) {
+                            //Create a new objective
+                                newObjective = new KillObjective(target, plugin);
                         }
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Create a new objective
-                        newObjective = new KillObjective(target, weight, plugin)
-                    }
-                    if (parts.length == 3) { //with Weight and amount
-                        //convert entity string ot EntityType
-                        try{
-                            EntityType target = EntityType.valueOf(parts[1].toUpperCase());
-                        } catch (IllegalArgumentException e) { // Handle the case where the entity name does not exist
-                            System.out.println("Invalid entity name: " + parts[1]);
-                            return null;
+
+                        //with Weight
+                        if (parts.length == 2) {
+                            //Create a new objective
+                            try {
+                            newObjective = new KillObjective(target, weight, plugin);
+                            } catch (NonLivingEntityException e) {
+                                System.out.println("Entity must be living: " + parts[1]);
+                                break;
+                            }
                         }
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Convert anmount to int
-                        int amount = parts[3]
-                        //Create a new objective
-                        newObjective = new KillObjective(target, weight, amount, plugin)
+
+                        //with Weight and amount
+                        if (parts.length == 3) {
+                            try {
+                            newObjective = new KillObjective(target, weight, amount, plugin);
+                            } catch (NonLivingEntityException e) {
+                                System.out.println("Entity must be living: " + parts[1]);
+                                break;
+                            }
+                        }
+                    } catch (NonLivingEntityException e) {
+                        System.out.println("Entity must be living: " + parts[1]);
+                        break;
                     }
+
                     break;
 
                 case "Obtain":
-                    if (parts.length == 1) {//without weight
-                        //convert item string to Material
-                        try{
-                            Material item = Material.valueOf(parts[1].toUpperCase());
-                        } catch (IllegalArgumentException e) { // Handle the case where the material name does not exist
-                            System.out.println("Invalid entity name: " + entityName);
-                            return null;
-                        }
-                        //Create a new objective
-                        newObjective = new ObtainObjective(item, plugin)
+                    //convert item string to Material
+                    Material item;
+                    try {
+                        item = Material.valueOf(parts[1].toUpperCase());
+                    } catch (IllegalArgumentException e) { // Handle the case where the material name does not exist
+                        System.out.println("Invalid item name: " + parts[1]);
+                        break;
                     }
-                    if (parts.length == 2) { //with Weight
-                        //convert item string to Material
-                        Material item = Material.valueOf(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
+
+                    //without weight
+                    if (parts.length == 1) {
                         //Create a new objective
-                        newObjective = new ObtainObjective(target, weight, plugin)
+                        newObjective = new ObtainObjective(item, plugin);
                     }
-                    if (parts.length == 3) { //with Weight and amount
-                        //convert item string to Material
-                        Material item = Material.valueOf(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Convert anmount to int
-                        int amount = parts[3]
+
+                    //with Weight
+                    if (parts.length == 2) {
                         //Create a new objective
-                        newObjective = new ObtainObjective(target, weight, amount, plugin)
+                        newObjective = new ObtainObjective(item, weight, plugin);
+                    }
+
+                    //with Weight and amount
+                    if (parts.length == 3) {
+                        //Create a new objective
+                        newObjective = new ObtainObjective(item, weight, amount, plugin);
                     }
                     break;
 
                 case "Mine":
-                    if (parts.length == 1) {//without weight
-                        //convert targetBlock string to Material
-                        Material targetBlock = Material.valueOf(parts[1].toUpperCase());
-                        //Create a new objective
-                        newObjective = new MineObjective(item, plugin)
+                //convert targetBlock string to Material
+                    Material targetBlock = null;
+                    try {
+                        targetBlock = Material.valueOf(parts[1].toUpperCase());
+                    } catch (IllegalArgumentException e) { // Handle the case where the material name does not exist
+                        System.out.println("Invalid block name: " + parts[1]);
+                        break;
                     }
-                    if (parts.length == 2) { //with Weight
-                        //convert targetBlock string to Material
-                        Material targetBlock = Material.valueOf(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
+
+                    //without weight
+                    if (parts.length == 1) {
                         //Create a new objective
-                        newObjective = new MineObjective(target, weight, plugin)
+                        newObjective = new MineObjective(targetBlock, plugin);
                     }
-                    if (parts.length == 3) { //with Weight and amount
-                        //convert targetBlock string to Material
-                        Material targetBlock = Material.valueOf(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Convert anmount to int
-                        int amount = parts[3]
+
+                    //with Weight
+                    if (parts.length == 2) {
                         //Create a new objective
-                        newObjective = new MineObjective(target, weight, amount, plugin)
+                        newObjective = new MineObjective(targetBlock, weight, plugin);
+                    }
+
+                    //with Weight and amount
+                    if (parts.length == 3) {
+                        //Create a new objective
+                        newObjective = new MineObjective(targetBlock, weight, amount, plugin);
+                    }
+
                     break;
 
                 case "Enter":
-                    if (parts.length == 1) {//without weight
-                        //convert Location type string object
-                        Object locationType = getLocationTypeFromString(parts[1].toUpperCase());
-                        //Create a new objective
-                        newObjective = new EnterObjective(locationType, plugin)
+                    //convert Location type string object
+                    Object locationType = getLocationTypeFromString(parts[1].toUpperCase());
+
+                    try{
+                        //without weight
+                        if (parts.length == 1) {
+                            //Create a new objective
+                            newObjective = new EnterObjective(locationType, plugin);
+                        }
+
+                        //with Weight
+                        if (parts.length == 2) {
+                            //Create a new objective
+                            newObjective = new EnterObjective(locationType, weight, plugin);
+                        }
+
+                        //with Weight and amount
+                        if (parts.length == 3) {
+                            //Create a new objective
+                            newObjective = new EnterObjective(locationType, weight, amount, plugin);
+                        }
+                    } catch (InvalidTargetLocationException e) {
+                        System.out.println("Invalid target location: " + parts[1]);
                     }
-                    if (parts.length == 2) { //with Weight
-                        //convert Location type string object
-                        Object locationType = getLocationTypeFromString(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Create a new objective
-                        newObjective = new EnterObjective(target, weight, plugin)
-                    }
-                    if (parts.length == 3) { //with Weight and amount
-                        //convert Location type string object
-                        Object locationType = getLocationTypeFromString(parts[1].toUpperCase());
-                        //Convert weight to int
-                        int weight = parts[2]
-                        //Convert anmount to int
-                        int amount = parts[3]
-                        //Create a new objective
-                        newObjective = new EnterObjective(target, weight, amount, plugin)
-                    }
+
                     break;
+
                 case "#": //This argument is to add comments to larger objective documents
                     break;
+
                 default:
                     System.out.println("Unknown objective: " + command);
                     break;
             }
+
         } catch (NumberFormatException e) {
             System.out.println("Error parsing line: " + line + " - Invalid number format.");
         }
+    }
 
     //Method to get location type from string
-    public static Object getLocationTypeFromString(String locationType) {
+    public Object getLocationTypeFromString(String locationType) {
         locationType = locationType.toLowerCase();
 
         // Check for Biome type
@@ -190,7 +219,7 @@ public class ObjectiveReader{
         }
 
         // Check for Structure type
-        StructureType structure = getStructureFromString(locationType);
+        SRStructure structure = new SRStructure(plugin, locationType);
         if (structure != null) {
             return structure;
         }
@@ -214,14 +243,6 @@ public class ObjectiveReader{
         }
     }
 
-    //method to change string to Structure type
-    private static StructureType getStructureFromString(String structureName) {
-        try {
-            return StructureType.valueOf(structureName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null; // Not a valid StructureType
-        }
-    }
     //method to change string to Portal type
     private static PortalType getPortalFromString(String portalName) {
         switch (portalName) {

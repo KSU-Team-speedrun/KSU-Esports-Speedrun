@@ -1,6 +1,7 @@
 package edu.Kennesaw.ksumcspeedrun;
 
 import edu.Kennesaw.ksumcspeedrun.Events.PlayerMove;
+import edu.Kennesaw.ksumcspeedrun.FileIO.ObjectiveReader;
 import edu.Kennesaw.ksumcspeedrun.Objects.Scoreboard;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.ObjectiveManager;
@@ -178,6 +179,10 @@ public class Speedrun {
         if (objective != null) {
             objectives.addObjective(objective);
         }
+    }
+
+    public void addObjectiveFromFile(String fileName){
+        objectives.addObjectiveFromFile(fileName, plugin);
     }
 
     public void remObjective(int objectiveNum) {

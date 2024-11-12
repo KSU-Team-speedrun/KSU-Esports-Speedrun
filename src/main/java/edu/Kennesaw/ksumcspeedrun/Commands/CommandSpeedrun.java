@@ -2,6 +2,7 @@ package edu.Kennesaw.ksumcspeedrun.Commands;
 
 import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
+import edu.Kennesaw.ksumcspeedrun.FileIO.ObjectiveReader;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.*;
 import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 
 @SuppressWarnings({"UnstableApiUsage", "SpellCheckingInspection", "GrammarInspection"})
@@ -517,6 +519,8 @@ public class CommandSpeedrun implements BasicCommand {
                 case "obtain":
                     obtainObjectiveHandler(sender, args);
                     break;
+                case "fromFile":
+                    objectiveFromFileHandler(sender, args);
                 default:
                     sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "valid event"));
                     break;
@@ -763,6 +767,12 @@ public class CommandSpeedrun implements BasicCommand {
         }
     }
 
+    //method called apon subcommand "/speedrun addObjective fromFile"
+    private void objectiveFromFileHandler(CommandSender sender, String[] args){
+        //try and call objectiveReader with file name given in args[2]
+        speedRun.addObjectiveFromFile(args[2]);
+    }
+
     // Method for parsing the weight flag
     private Optional<Integer> parseWeightFlag(String[] args) {
         for (int i = 3; i < args.length - 1; i++) {
@@ -851,7 +861,7 @@ public class CommandSpeedrun implements BasicCommand {
             } else if (args.length == 2) {
 
                 if (args[0].equalsIgnoreCase("addobjective")) {
-                    addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain");
+                    addMatchingSuggestions(suggestions, args[1], "kill", "enter", "mine", "obtain", "fromFile");
                 } else if (args[0].equalsIgnoreCase("remobjective")) {
                     suggestions.add("[number]");
                 } else if (args[0].equalsIgnoreCase("setteamsize")) {
@@ -910,6 +920,8 @@ public class CommandSpeedrun implements BasicCommand {
                                 suggestions.add(str);
                             }
                         }
+                    } else if (args[1].equalsIgnoreCase("fromFile")){
+                        suggestions.add("[file name]");
                     }
                 }
             } else if (args.length == 4) {

@@ -19,12 +19,14 @@ public class ObjectiveReader{
     //Variable to store plugin instance to send to objectives
     Main plugin;
 
+    //default file path to add the file name too
+    String filePath = "/plugins/KSU-MC-Speedrun/";
+
     //Main Processing Method
         //Throws Number Format Exception if the name of an objective is not found
         //Throws invalid argument exceptions if a name of an item entity or location is not found
-        //Throws 
-	public void loadObjectivesFromFile(String filePath, Main plugin) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+	public void loadObjectivesFromFile(String fileName, Main plugin) { //adds filename to default filePath to complete the path
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath + fileName))) {
             this.plugin = plugin;
             String line;
             while ((line = reader.readLine()) != null) {
@@ -37,15 +39,24 @@ public class ObjectiveReader{
 
     //Method that checks each line for spacific objectives
     private void processLine(String line) {
+        //in the intrest of simplisity, we seperate by " "
         String[] parts = line.split(" ");
+
+        // if there is nothing in the line or if there is a comment line starting wiht "//" ignore that line
         if (parts.length == 0) {
             return;
         }
 
+        //seperate the first string. Thiss wil be the comand string
         String command = parts[0].trim();
-        //for some reason VSCode thinks newObjective is unused
-        @SuppressWarnings({"unused" })
-        Objective newObjective;
+
+        // coments can be added to txt file by using "//" as the command
+        if (command == "//"){
+            return;
+        }
+
+        //keeping a hardcoded default of 1 for ammount and weight to avoid bugs
+        Objective newObjective = null;
         int weight = 1;
         int amount = 1;
 
@@ -55,7 +66,7 @@ public class ObjectiveReader{
             weight = Integer.parseInt(parts[2]);
         }
 
-        //withamount
+        //set up amount
         if (parts.length == 3) {
             //Convert anmount to int
             amount = Integer.parseInt(parts[3]);
@@ -195,13 +206,13 @@ public class ObjectiveReader{
 
                     break;
 
-                case "#": //This argument is to add comments to larger objective documents
-                    break;
-
                 default:
                     System.out.println("Unknown objective: " + command);
                     break;
             }
+            
+            //Finnaly, add the objective to the speedrun
+            plugin.getSpeedrun().addObjective(newObjective);
 
         } catch (NumberFormatException e) {
             System.out.println("Error parsing line: " + line + " - Invalid number format.");

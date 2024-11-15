@@ -74,8 +74,8 @@ public class ObjectiveReader{
 
 
         try {
-            switch (command) {
-                case "Kill":
+            switch (command.toUpperCase()) {
+                case "KILL":
                     //convert entity string to EntityType
                     EntityType target;
                     try {
@@ -119,7 +119,7 @@ public class ObjectiveReader{
 
                     break;
 
-                case "Obtain":
+                case "OBTAIN":
                     //convert item string to Material
                     Material item;
                     try {
@@ -148,7 +148,7 @@ public class ObjectiveReader{
                     }
                     break;
 
-                case "Mine":
+                case "MINE":
                 //convert targetBlock string to Material
                     Material targetBlock = null;
                     try {
@@ -178,7 +178,7 @@ public class ObjectiveReader{
 
                     break;
 
-                case "Enter":
+                case "ENTER":
                     //convert Location type string object
                     Object locationType = getLocationTypeFromString(parts[1].toUpperCase());
 

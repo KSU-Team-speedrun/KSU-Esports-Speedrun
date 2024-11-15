@@ -13,6 +13,7 @@ import edu.Kennesaw.ksumcspeedrun.Exceptions.InvalidTargetLocationException;
 import org.bukkit.entity.EntityType;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
+import org.bukkit.generator.structure.Structure;
 
 public class ObjectiveReader{
 
@@ -230,7 +231,7 @@ public class ObjectiveReader{
         }
 
         // Check for Structure type
-        SRStructure structure = new SRStructure(plugin, locationType);
+        Structure structure = SRStructure.getStructureFromString(locationType);
         if (structure != null) {
             return structure;
         }

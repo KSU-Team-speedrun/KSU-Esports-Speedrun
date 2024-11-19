@@ -7,6 +7,6 @@ team-based speedruns, and player free-for-all. Designed for flexibility, the plu
 Author's Links:
 - Adam Greene: www.linkedin.com/in/adamygreene
 - Rachel Amponsah: https://www.linkedin.com/in/rachelamp
-- Steven Kelsey:
-- Weeldy Benjamin: 
+- Steven Kelsey: https://www.linkedin.com/in/steven-kelsey-9b5a63333
+- Weeldy Benjamin: https://www.linkedin.com/in/weeldy-benjamin-67ab6424b
 - Chris Kirkwood: 

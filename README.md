@@ -26,7 +26,7 @@ For information regarding the actual code and how it works, please view the inli
 
 
 ### Author's Links:
-- Adam Greene: www.linkedin.com/in/adamygreene
+- Adam Greene: https://adamygreene.com/
 - Rachel Amponsah: https://www.linkedin.com/in/rachelamp
 - Steven Kelsey: https://www.linkedin.com/in/steven-kelsey-9b5a63333
 - Weeldy Benjamin: https://www.linkedin.com/in/weeldy-benjamin-67ab6424b

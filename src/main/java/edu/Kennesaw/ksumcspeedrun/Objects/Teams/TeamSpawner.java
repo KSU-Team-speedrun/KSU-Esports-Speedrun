@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The TeamSpawner class is responsible for managing the spawning of teams or individual players
+ * in a circular formation around a central point within a game world.
+ */
 public class TeamSpawner {
 
     public static void spawnTeamsInCircle(Speedrun speedrun, List<Location> locations) {

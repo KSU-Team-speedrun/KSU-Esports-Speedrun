@@ -5,8 +5,37 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Structures.Portal;
 import edu.Kennesaw.ksumcspeedrun.Structures.SRStructure;
 import org.bukkit.block.Biome;
+import org.checkerframework.framework.qual.Unused;
+import java.lang.Deprecated;
 
-// EnterObjective is a subclass of Objective
+/**
+ * The EnterObjective class extends the {@link Objective}  class and represents an objective
+ * where a player enters a specific location. This location can be a Biome, SRStructure,
+ * or Portal, but only one of these can be specified at a time. The class provides
+ * different constructors to create an EnterObjective with different parameters, such as weight
+ * and amount.
+ *
+ * Attributes:
+ * - biomeTarget: The target Biome that the player needs to enter.
+ * - structureTarget: The target SRStructure that the player needs to enter.
+ * - portalType: The target Portal that the player needs to enter.
+ *
+ * Constructors:
+ * - EnterObjective(Object locationType, int weight, Main plugin): Initializes the objective
+ *   with a specified locationType and weight.
+ * - EnterObjective(Object locationType, int weight, int amount, Main plugin): Initializes the
+ *   objective with specified locationType, weight, and amount.
+ * - EnterObjective(Object locationType, Main plugin): Initializes the objective with a
+ *   specified locationType and default weight of 1.
+ *
+ * Methods:
+ * - getTarget(): Returns the target object, which can be a Biome, SRStructure, or Portal.
+ *
+ * Each constructor assigns the locationType attribute based on the provided parameter.
+ * If the provided locationType is not an instance of Biome, SRStructure, or Portal,
+ * an InvalidTargetLocationException is thrown. The target name is also set based
+ * on the provided locationType.
+ */
 public class EnterObjective extends Objective {
 
     /* In addition to default attributes of Objective, EnterObjective either has a biomeTarget, structureTarget,
@@ -37,7 +66,7 @@ public class EnterObjective extends Objective {
 
     }
 
-    // Constructor that includes weight & amount
+    @Deprecated
     public EnterObjective(Object locationType, int weight, int amount, Main plugin) throws InvalidTargetLocationException {
 
         // ObjectiveType.ENTER and weight are passed to abstract Objective class

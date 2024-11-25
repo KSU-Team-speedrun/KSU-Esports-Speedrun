@@ -6,6 +6,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 
+/**
+ * The ItemDrop class prevents players from picking up any dropped items before the game starts.
+ */
 public class ItemPickup implements Listener {
 
     Main plugin;

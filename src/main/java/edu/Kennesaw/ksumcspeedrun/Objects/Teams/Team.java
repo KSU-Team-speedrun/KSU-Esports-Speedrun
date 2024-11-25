@@ -7,6 +7,11 @@ import org.bukkit.Location;
 
 import java.util.List;
 
+/**
+ * Represents an abstract Team that can participate in a game.
+ * This class should be extended to create concrete implementations
+ * of different types of teams.
+ */
 public abstract class Team {
 
     Main plugin;

@@ -12,6 +12,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
+/**
+ * The MineBlock class listens for block break events and updates team objectives.
+ * If a player on a team breaks a block that matches an objective, the objective's progress is updated.
+ * If the objective requires a specific count, the progress is incremented and checked against the required amount.
+ * If the progress meets or exceeds the required amount, the objective is marked as complete.
+ * If the objective does not require a count, it is marked as complete immediately.
+ */
 public class MineBlock implements Listener {
 
     Main plugin;
@@ -32,6 +39,7 @@ public class MineBlock implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
 
+        // Only listen if the game has started
         if (speedrun.isStarted()) {
 
             Player p = e.getPlayer();
@@ -43,6 +51,7 @@ public class MineBlock implements Listener {
                 return;
             }
 
+            // If the player who broke a block is on a team, see if the block type matches any incomplete objectives
             for (Objective o : team.getIncompleteObjectives()) {
 
                 if (o.getType() == Objective.ObjectiveType.MINE) {
@@ -51,10 +60,13 @@ public class MineBlock implements Listener {
 
                     if (mo.getBlockTarget().equals(b.getType())) {
 
+                        // If the event is matched to an objective, see if the amount is specified
                         if (mo.getHasCount()) {
 
+                            // Increment the team amount by one for that objective
                             mo.incrementTeam(team);
 
+                            // If the team surpasses the required amount, set objective as complete
                             if (mo.getCount(team) >= mo.getAmount()) {
 
                                 mo.setComplete(team);
@@ -66,6 +78,7 @@ public class MineBlock implements Listener {
 
                         }
 
+                        // If the amount is not specified, mark the objective as complete
                         mo.setComplete(team);
                         break;
 

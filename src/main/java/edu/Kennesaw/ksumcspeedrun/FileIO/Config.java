@@ -171,7 +171,6 @@ public class Config {
        for the plugin to function correctly */
     private void addDefaults() {
 
-        // Default layout of plugin prefix, can be updated in the Config.yml
         if (!config.contains("message")) {
 
             set("messages.prefix", "<bold><gold>[SPEEDRUN]</gold></bold>");

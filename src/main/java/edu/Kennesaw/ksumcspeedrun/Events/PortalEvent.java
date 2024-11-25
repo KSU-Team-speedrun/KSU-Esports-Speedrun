@@ -13,6 +13,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+/**
+ * Handles portal and teleport related events for players, checking if
+ * specific objectives related to entering portals or teleporting are met.
+ */
 public class PortalEvent implements Listener {
 
     Main plugin;
@@ -23,6 +27,7 @@ public class PortalEvent implements Listener {
         this.tm = plugin.getSpeedrun().getTeams();
     }
 
+    // Event triggers when player goes through standard portal
     @EventHandler
     public void onPlayerPortalMove(PlayerPortalEvent e) {
 
@@ -30,27 +35,29 @@ public class PortalEvent implements Listener {
 
         Player p = e.getPlayer();
 
+        // Get from & to worlds
         World.Environment from = e.getFrom().getWorld().getEnvironment();
         World.Environment to = e.getTo().getWorld().getEnvironment();
 
+        // Ensure player is on a team
         Team team = tm.getTeam(p);
 
         if (team == null) {
             return;
         }
 
+        // Check if matching objective exists for world to and world from
         for (Objective o : team.getIncompleteObjectives()) {
 
             if (o.getType().equals(Objective.ObjectiveType.ENTER)) {
 
                 EnterObjective eo = (EnterObjective) o;
 
-                System.out.println("Enter objective matched!");
-
                 if (eo.getTarget() instanceof Portal portal) {
 
                     if (from.equals(portal.getFrom()) && to.equals(portal.getTo())) {
 
+                        // If world to & from match, set objective as complete
                         eo.setComplete(team);
                         break;
 
@@ -64,6 +71,9 @@ public class PortalEvent implements Listener {
 
     }
 
+    /* This handler does the same as above, but end gateways and end portals are not handled
+       the same as nether portals, thus we have to check if a player teleports. The plugin theoretically
+       supports future dimensions and portals, assuming they fall under PlayerPortalEvent */
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent e) {
 

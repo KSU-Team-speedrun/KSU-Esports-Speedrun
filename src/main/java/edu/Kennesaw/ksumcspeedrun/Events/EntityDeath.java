@@ -16,6 +16,10 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.UUID;
 
+/**
+ * The EntityDeath class implements the Listener interface and handles the event when an entity dies in the game.
+ * It attributes kills to the appropriate teams and updates their objectives accordingly.
+ */
 public class EntityDeath implements Listener {
 
     Main plugin;
@@ -37,11 +41,13 @@ public class EntityDeath implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e) {
 
+        // Only listen if the game is started
         if (speedrun.isStarted()) {
 
             Team team = null;
             DamageSource ds = e.getDamageSource();
 
+            // If the kill is direct, then we know what team the killer is on
             if (ds.getCausingEntity() instanceof Player p) {
 
                 team = speedrun.getTeams().getTeam(p);
@@ -50,6 +56,8 @@ public class EntityDeath implements Listener {
 
                 UUID uuid = e.getEntity().getUniqueId();
 
+                /* If the kill is indirect caused by a bed explosion, use the bedlog to determine the killer &
+                 the team that is attributed the points */
                 if (ds.getDamageType().equals(DamageType.BAD_RESPAWN_POINT)) {
 
                     if (ds.getDamageLocation() != null) {
@@ -69,6 +77,7 @@ public class EntityDeath implements Listener {
 
                     }
 
+                    // If the killed entity is in the combat log, attribute the death to the player mapped to it
                 } else if (plugin.getSpeedrun().combatLog.containsKey(uuid)) {
 
                     Player op = plugin.getSpeedrun().combatLog.getByKey(uuid);
@@ -86,6 +95,7 @@ public class EntityDeath implements Listener {
                 }
             }
 
+            // If the team is successfully determined, continue
             if (team != null) {
 
                 // Loop through every incomplete objective

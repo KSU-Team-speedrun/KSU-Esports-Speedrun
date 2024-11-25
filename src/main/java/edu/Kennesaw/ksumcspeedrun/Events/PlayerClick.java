@@ -14,6 +14,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The PlayerClick class implements the Listener interface and handles player interactions
+ * with the team selection UI in the game. It determines actions performed when a player
+ * clicks with a specific item and manages team assignments through an interactive inventory UI.
+ */
 public class PlayerClick implements Listener {
 
     Main plugin;
@@ -25,6 +30,7 @@ public class PlayerClick implements Listener {
         tm = plugin.getSpeedrun().getTeams();
     }
 
+    // Logic to open team UI when a player lefts or right clicks w/ the compass
     @EventHandler
     public void onPlayerClick(PlayerInteractEvent e) {
 
@@ -41,20 +47,26 @@ public class PlayerClick implements Listener {
         }
     }
 
+    // Logic for clicks within inventory UI
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
 
+        // If clicker is player
         if (e.getWhoClicked() instanceof Player p) {
 
+            // and inventory clicked is the team UI
             if (e.getInventory().equals(tm.getTeamInventory().getInventory())) {
 
+                // then cancel the event
                 e.setCancelled(true);
 
+                // If the clicker is a part of the cooldown, cancel the event
                 if (plugin.getSpeedrun().getTeamCooldown().contains(p)) {
                     p.sendMessage(plugin.getMessages().getTeamCooldownMessage());
                     return;
                 }
 
+                // If the clicked item corresponds to a team inventory item, add that player to the team
                 ItemStack currentItem = e.getCurrentItem();
 
                 if (currentItem != null) {
@@ -63,6 +75,7 @@ public class PlayerClick implements Listener {
 
                     if (trueTeam != null) {
 
+                        // Don't allow the player to join if the team is full
                         if (trueTeam.isFull()) {
                             p.sendMessage(plugin.getMessages().getTeamIsFull());
                             return;
@@ -70,6 +83,7 @@ public class PlayerClick implements Listener {
 
                         TrueTeam oldTrueTeam = (TrueTeam) tm.getTeam(p);
 
+                        // Don't allow the player to join if they're alrady on that team
                         if (oldTrueTeam != null) {
 
                             if (oldTrueTeam.equals(trueTeam)) {
@@ -81,6 +95,7 @@ public class PlayerClick implements Listener {
                             tm.getTeamInventory().updateTeamInventory(oldTrueTeam);
                         }
 
+                        // Ensure the inventory is updated to reflect the changes
                         trueTeam.addPlayer(p);
                         tm.getTeamInventory().updateTeamInventory(trueTeam);
 

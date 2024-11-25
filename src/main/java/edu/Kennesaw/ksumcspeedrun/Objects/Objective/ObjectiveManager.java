@@ -6,8 +6,10 @@ import edu.Kennesaw.ksumcspeedrun.Objects.Teams.TrueTeam;
 import java.util.ArrayList;
 import java.util.List;
 
-/* This class manages all Objective and holds them in a single list which can be adjusted using the methods
-   included below */
+/**
+ * This class manages all objectives and holds them in a single list which can be adjusted using the provided methods.
+ * It keeps track of the objectives and their total weight.
+ */
 public class ObjectiveManager {
 
     // An instance of ObjectiveManager holds a list of Objectives

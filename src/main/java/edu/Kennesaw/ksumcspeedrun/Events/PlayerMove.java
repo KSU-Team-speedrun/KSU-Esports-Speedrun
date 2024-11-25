@@ -12,9 +12,11 @@ import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 
-/* This PlayerMove "Listener" is not a true listener: it is a synchronous repeating tasks that executes every two
-   seconds and checks for the location of all players on the server. This is done to conserve resources, as a standard
-   PlayerMoveEvent listener is executed upon the slightest player movement. */
+/**
+ * This PlayerMove "Listener" is not a true listener: it is a synchronous repeating tasks that executes every two
+ * seconds and checks for the location of all players on the server. This is done to conserve resources, as a standard
+ * PlayerMoveEvent listener is executed upon the slightest player movement.
+ */
 public class PlayerMove {
 
     // Main, Speedrun, and ObjectiveManager (incompleteObjectives) instances from plugin instance passed in constructor

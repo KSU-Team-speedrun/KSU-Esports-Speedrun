@@ -17,6 +17,11 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * The ItemObtain class is responsible for handling events related to item obtaining and crafting
+ * in a speedrun context. It listens to events such as item pickups and item crafts, and checks
+ * if the obtained items fulfill certain objectives for the player's team.
+ */
 public class ItemObtain implements Listener {
 
     Main plugin;
@@ -34,27 +39,29 @@ public class ItemObtain implements Listener {
 
     }
 
-    // TODO - ADD LOGIC TO THESE EVENT LISTENERS BELOW
-
     @EventHandler
     public void pickupItem(EntityPickupItemEvent e) {
 
+        // Only listen if the speedrun is started
         if (speedrun.isStarted()) {
 
             Entity entity = e.getEntity();
 
             ItemStack is = e.getItem().getItemStack();
 
+            // If the entity who picked up an item is a player, continue
             if (entity instanceof Player p) {
 
                 Team team = tm.getTeam(p);
 
+                // Ensure that the player is on a team
                 if (team == null) {
                     return;
                 }
 
                 ObtainObjective matchedObtainObjective = null;
 
+                // See if an objective exists to obtain the item that was picked up
                 for (Objective o : team.getIncompleteObjectives()) {
 
                     if (o.getType().equals(Objective.ObjectiveType.OBTAIN)) {
@@ -72,17 +79,22 @@ public class ItemObtain implements Listener {
 
                 }
 
+                // If no objective exists, return
                 if (matchedObtainObjective == null) {
                     return;
                 }
 
+                // Determine the total amount of items required to complete the objective
                 int totalNumber = matchedObtainObjective.getAmount();
 
+                // If the player alone has the total number of items required to complete the objective, set it as complete
                 if (getInventoryItemCount(p, is.getType()) >= totalNumber) {
                     matchedObtainObjective.setComplete(team);
                     return;
                 }
 
+                /* If not, check and see if the sum of the number of the specified item in all teammates inventories
+                 is greater than the required amount */
                 int playerItemCount = 0;
 
                 if (speedrun.getTeamsEnabled() && team instanceof TrueTeam trueTeam) {
@@ -96,6 +108,7 @@ public class ItemObtain implements Listener {
 
                         matchedObtainObjective.setIncrementNumber(team, playerItemCount);
 
+                        // If the combined number for all teammates is greater than required, the team completes the objective
                         if (playerItemCount >= totalNumber) {
                             matchedObtainObjective.setComplete(team);
                             return;
@@ -123,6 +136,7 @@ public class ItemObtain implements Listener {
 
     }
 
+    // Get the number of items (materials) in a specific player's inventory
     private int getInventoryItemCount(Player p, Material m) {
 
         Inventory i = p.getInventory();

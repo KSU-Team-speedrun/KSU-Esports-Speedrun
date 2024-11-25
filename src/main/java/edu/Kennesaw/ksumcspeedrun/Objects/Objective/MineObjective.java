@@ -3,7 +3,26 @@ package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Material;
 
-// Same as other Objective Subclasses, this time a block is a target
+/**
+ * The MineObjective class extends the {@link Objective} class and represents an objective
+ * where the player must mine a specific type of block. The class provides different
+ * constructors to create a MineObjective with different parameters, such as weight
+ * and amount.
+ *
+ * Attributes:
+ * - blockTarget: The target block (of type Material) that the player needs to mine.
+ *
+ * Constructors:
+ * - MineObjective(Material blockTarget, Main plugin): Initializes the objective
+ *   with a specified blockTarget and default weight and amount.
+ * - MineObjective(Material blockTarget, int weight, Main plugin): Initializes the
+ *   objective with a specified blockTarget and weight.
+ * - MineObjective(Material blockTarget, int weight, int amount, Main plugin): Initializes the
+ *   objective with specified blockTarget, weight, and amount.
+ *
+ * Methods:
+ * - getBlockTarget(): Returns the target block that the player needs to mine.
+ */
 public class MineObjective extends Objective {
 
     private final Material blockTarget;

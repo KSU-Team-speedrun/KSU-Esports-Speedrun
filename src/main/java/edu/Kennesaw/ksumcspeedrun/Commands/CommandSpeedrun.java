@@ -25,6 +25,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * The CommandSpeedrun class is responsible for handling the "/speedrun" command and its subcommands.
+ * It retrieves necessary instances from the Main plugin class and utilizes them to perform various actions
+ * related to speedrunning objectives within the game.
+ */
+
 @SuppressWarnings({"UnstableApiUsage", "SpellCheckingInspection", "GrammarInspection"})
 public class CommandSpeedrun implements BasicCommand {
 
@@ -154,6 +160,7 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("remObjective")) {
 
+                    // Argument length must be 2
                     if (args.length != 2) {
 
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun remobjective [index]"));
@@ -162,15 +169,21 @@ public class CommandSpeedrun implements BasicCommand {
 
                         try {
 
+                            // Syncronously run the following:
                             Bukkit.getScheduler().runTask(plugin, () -> {
 
+                                /* Objectives start at 0, but for readability we increment them to start at 1 on the
+                                   front end. */
                                 int objectiveNum = Integer.parseInt(args[1]) - 1;
                                 ObjectiveManager om = speedRun.getObjectives();
 
+                                // Ensure the number provided exists in the list
                                 if (objectiveNum > om.getLength()) {
                                     sender.sendMessage(plugin.getMessages().getOutOfBounds(args[1], "the objective list"));
                                     return;
                                 }
+
+                                // Get the objective that corresponds to the number in the argument & remove it
                                 Objective objective = om.getObjectives().get(objectiveNum);
                                 String objectiveType = objective.getType().name();
                                 String target = objective.getTargetName();
@@ -179,25 +192,35 @@ public class CommandSpeedrun implements BasicCommand {
 
                             });
 
+                            // The argument must be a number
                         } catch (NumberFormatException e) {
                             sender.sendMessage(plugin.getMessages().getIllegalArguments(args[1], "number"));
                         }
 
                     }
+
                 } else if (args[0].equalsIgnoreCase("setseed")) {
 
+                    // Argument length must be 2
                     if (args.length != 2) {
 
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setseed [seed]"));
 
                     } else {
+
+                        // The seed cannot be set if the speedrun has already started.
                         if (!speedRun.isStarted()) {
+
+                            // Set the seed attribute in the speedrun instance
                             speedRun.setSeed(args[1]);
+
+                            // If a world has already been generated, regenerate the world with the correct seed
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 if (speedRun.getSpeedrunWorld() != null) {
                                     speedRun.generateWorld(sender);
                                 }
                             });
+
                         } else {
                             sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
                             return;
@@ -207,10 +230,12 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("getseed")) {
 
+                    // Return the current seed in that is set
                     sender.sendMessage(plugin.getMessages().getSeed(speedRun.getSeed()));
 
                 } else if (args[0].equalsIgnoreCase("setborder")) {
 
+                    // Argument length must be 2
                     if (args.length != 2) {
 
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setborder [border]"));
@@ -221,7 +246,10 @@ public class CommandSpeedrun implements BasicCommand {
 
                             final String arguments = args[1];
 
+                            // The argument provided must be a number
                             try {
+
+                                // If the argument is a number, set the border to the argument
                                 int size = Integer.parseInt(arguments);
                                 speedRun.setBorder(size);
                                 sender.sendMessage(plugin.getMessages().getWorldBorderSet(arguments));
@@ -235,10 +263,12 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("getborder")) {
 
+                    // Return the current world border that is set
                     sender.sendMessage(plugin.getMessages().getWorldBorder(speedRun.getBorder() + ""));
 
                 } else if (args[0].equalsIgnoreCase("setteamsize")) {
 
+                    // Argument length must be 2
                     if (args.length != 2) {
 
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setteamsize [number]"));
@@ -249,9 +279,14 @@ public class CommandSpeedrun implements BasicCommand {
 
                             final String arguments = args[1];
 
+                            // The argument provided must be a number
                             try {
                                 int size = Integer.parseInt(arguments);
+
+                                // Team size cannot change if the speedrun has started
                                 if (!speedRun.isStarted()) {
+
+                                    // If the game is not yet started, change the team size limit
                                     speedRun.setTeamSizeLimit(size);
                                 } else {
                                     sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
@@ -268,14 +303,21 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("getteamsize")) {
 
+                    // Return the current team size that is set
                     sender.sendMessage(plugin.getMessages().getTeamSizeLimit(speedRun.getTeamSizeLimit() + ""));
 
                 } else if (args[0].equalsIgnoreCase("settimelimit")) {
+
+                    // The argument length must be 2
                     if (args.length != 2) {
                         sender.sendMessage(plugin.getMessages()
                                 .getInvalidArguments("/speedrun settimelimit [timeInMinutes]"));
                     } else {
+
+                        // The argument provided must be a number
                         try {
+
+                            // If the argument is a number, set the time limit attribute to the argument
                             Bukkit.getScheduler().runTask(plugin, () -> speedRun.setTimeLimit(Integer.parseInt(args[1])));
                             sender.sendMessage(plugin.getMessages().getTimeLimitSet(args[1]));
 
@@ -284,6 +326,7 @@ public class CommandSpeedrun implements BasicCommand {
                         }
                     }
 
+                    // Return the set time limit
                 } else if (args[0].equalsIgnoreCase("gettimelimit")) {
 
                     sender.sendMessage(plugin.getMessages().getTimeLimit(speedRun.getTimeLimit() + ""));
@@ -300,24 +343,42 @@ public class CommandSpeedrun implements BasicCommand {
 
                             final String arguments = args[1];
 
+                            // The argument provided must be a number
                             try {
+
                                 int size = Integer.parseInt(arguments);
+
+                                // The command cannot run if the speedrun is started
                                 if (!speedRun.isStarted()) {
+
+                                    // Change the spawn radius attribute
                                     speedRun.setSpawnRadius(size);
+
+                                    /* If the world has already been generated, then the team spawn locations
+                                       must also be relocated. */
                                     if (speedRun.getSpeedrunWorld() != null) {
+
                                         sender.sendMessage(plugin.getMessages().getSpawnsGenerating());
+
+                                        // Locate new team spawn locations
                                         TeamSpawner.getTeamSpawnLocations(plugin).thenAccept(locations -> {
+
+                                            // Set new team spawn locations
                                             speedRun.setTeamSpawnLocations(locations);
+
                                             Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(
                                                     plugin.getMessages().getSpawnsGenerated())
                                             );
                                         });
                                     }
+
                                 } else {
                                     sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
                                     return;
                                 }
+
                                 sender.sendMessage(plugin.getMessages().getSpawnRadiusSet(arguments));
+
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(plugin.getMessages().getIllegalArguments(arguments, "number"));
                             }
@@ -332,6 +393,7 @@ public class CommandSpeedrun implements BasicCommand {
 
                 } else if (args[0].equalsIgnoreCase("setpointlimit")) {
 
+                    // Arg length must be 2 - updates the point limit required to win the game
                     if (args.length != 2) {
 
                         sender.sendMessage(plugin.getMessages().getInvalidArguments("/speedrun setpointlimit [number]"));
@@ -361,6 +423,10 @@ public class CommandSpeedrun implements BasicCommand {
                 } else if (args[0].equalsIgnoreCase("resetattributes")) {
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
+
+                        // If the speedrun has not yet started, all speedrun attributes are reset
+                        // The generated world is also reset: team points are NOT reset (bug)
+                        // Recommended to restart the server between speedruns instead of using this command
                         if (!speedRun.isStarted()) {
                             speedRun.resetAttributes();
                         } else {
@@ -370,6 +436,8 @@ public class CommandSpeedrun implements BasicCommand {
                         sender.sendMessage(plugin.getMessages().getResetAttributes());
                     });
 
+                    /* The game does not include admins in the game by default, this command allows them
+                       to participate */
                 } else if (args[0].equalsIgnoreCase("participate")) {
 
                     if (sender instanceof Player p) {
@@ -382,6 +450,7 @@ public class CommandSpeedrun implements BasicCommand {
                         });
                     }
 
+                    // If the game has not already started and there is at least one team, start the game
                 } else if (args[0].equalsIgnoreCase("start")) {
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
@@ -398,6 +467,7 @@ public class CommandSpeedrun implements BasicCommand {
                         }
                     });
 
+                    // Force stop the game
                 } else if (args[0].equalsIgnoreCase("stop")) {
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
@@ -408,12 +478,16 @@ public class CommandSpeedrun implements BasicCommand {
                         }
                     });
 
+                    // Debug command - "/speedrun test (args)" virtually updates the amount of players that are on the
+                    // server for purposes of testing team inventory UI
                 } else if (args[0].equalsIgnoreCase("test")) {
 
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.createTeams(Integer.parseInt(args[1])));
 
+                    // Toggle teams as either enabled (default) or disabled
                 } else if (args[0].equalsIgnoreCase("toggleTeams")) {
 
+                    // Cannot toggle teams if the game is started
                     if (speedRun.isStarted()) {
                         sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
                         return;
@@ -422,9 +496,15 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(plugin.getMessages().getToggleTeams(!speedRun.getTeamsEnabled()));
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.setTeamsEnabled(!speedRun.getTeamsEnabled()));
 
+
+                    /* Return a list of all team spawn locations alongside a number - this returns the spawn locations
+                       of all possible teams, not just the currently active teams */
                 } else if (args[0].equalsIgnoreCase("getTeamSpawnLocations")) {
+
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         List<Location> locations = speedRun.getTeamSpawnLocations();
+
+                        // Cannot get team locations if the world is not generated
                         if (locations.isEmpty()) {
                             sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
                         } else {
@@ -433,29 +513,43 @@ public class CommandSpeedrun implements BasicCommand {
                                 sender.sendMessage(plugin.getMessages().getTeamSpawnLocation(sender.getName(), loc, locations.indexOf(loc) + 1));
                             }
                         }
+
                     });
+
+                    // Update the spawn location of a team (corresponds to the number returned in getTeamSpawnLocations)
                 } else if (args[0].equalsIgnoreCase("setTeamSpawnLocation")) {
+
+                    // Sender must be a player (this should probably be updated)
                     if (sender instanceof Player p) {
+
+                        // Argument length must be 2
                         if (args.length != 2) {
                             Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin
                                     .getMessages().getInvalidArguments("/speedrun setTeamSpawnLocation [teamNumber]"))
                             );
+
                         } else {
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 if (speedRun.getTeamSpawnLocations().isEmpty()) {
                                     sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
                                 } else {
                                     try {
+
+                                        // Get the team that corresponds to the argument number
                                         int arg = Integer.parseInt(args[1]);
                                         try {
                                             if (speedRun.isStarted()) {
+
+                                                // Teams go from 0 to x, but are displayed as 1 to (x+1)
                                                 Team team = speedRun.getTeamFromSpawnLocationIndex(arg - 1);
                                                 if (team != null) {
                                                     team.setRespawnLocation(p.getLocation());
                                                 }
+
                                             }
                                             speedRun.setTeamSpawnLocation(arg - 1, p.getLocation());
                                             sender.sendMessage(plugin.getMessages().getTeamSpawnSet(arg));
+
                                         } catch (IndexOutOfBoundsException e) {
                                             sender.sendMessage(plugin.getMessages().getOutOfBounds(args[1], "teams"));
                                         }
@@ -466,8 +560,11 @@ public class CommandSpeedrun implements BasicCommand {
                             });
                         }
                     }
+
+                    // Delete the speedrun world if it is generated
                 } else if (args[0].equalsIgnoreCase("deleteWorld")) {
 
+                    // Cannot run this command if the game is started
                     if (speedRun.isStarted()) {
                         sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
                         return;
@@ -476,8 +573,10 @@ public class CommandSpeedrun implements BasicCommand {
                     sender.sendMessage(plugin.getMessages().getWorldDeleted());
                     Bukkit.getScheduler().runTask(plugin, () -> speedRun.deleteSpeedrunWorld());
 
+                    // Generate the speedrun world according to the attributes set
                 } else if (args[0].equalsIgnoreCase("generateWorld")) {
 
+                    // World cannot be regenerated if a game is already started
                     if (speedRun.isStarted()) {
                         sender.sendMessage(plugin.getMessages().getGameStartedCannotChange());
                         return;
@@ -808,6 +907,7 @@ public class CommandSpeedrun implements BasicCommand {
             suggestions.add("objectives");
             suggestions.add("getBorder");
             suggestions.add("getPointLimit");
+            suggestions.add("generateWorld");
             suggestions.add("getSeed");
             suggestions.add("getSpawnRadius");
             suggestions.add("getTeamSize");

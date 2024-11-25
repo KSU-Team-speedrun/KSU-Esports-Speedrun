@@ -5,6 +5,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 
+/**
+ * The ItemDrop class prevents players from dropping their compass (or any item) before the game starts.
+ */
 public class ItemDrop implements Listener {
 
     Main plugin;

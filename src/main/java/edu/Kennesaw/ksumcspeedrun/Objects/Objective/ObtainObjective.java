@@ -3,10 +3,24 @@ package edu.Kennesaw.ksumcspeedrun.Objects.Objective;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.Material;
 
-/* Same as other objective subclasses, Material is target
-   For ObtainObjective, there is an additional possible flag: amount
-   The number of items needed to be obtained can be specified */
-
+/**
+ * Represents an obtain objective in the game, where the player must gather a specified material type.
+ * This class is a specific type of {@link Objective} aimed at collecting a certain type of material.
+ *
+ * Attributes:
+ * - item: The material that needs to be obtained
+ *
+ * Constructors:
+ * - ObtainObjective(Material item, Main plugin): Initializes the objective with
+ *   a specified item and default weight of 1 and amount of 1.
+ * - ObtainObjective(Material item, int weight, Main plugin): Initializes the objective
+ *   with a specified item and weight.
+ * - ObtainObjective(Material item, int weight, int amount, Main plugin): Initializes the
+ *   objective with a specified item, weight, and amount.
+ *
+ * Methods:
+ * - getItem(): Returns the target material.
+ */
 public class ObtainObjective extends Objective {
 
     private final Material item;

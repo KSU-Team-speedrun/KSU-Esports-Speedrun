@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * CommandHelp is a command class that provides help messages to players.
+ * It shows different messages based on the player's permissions.
+ */
 public class CommandHelp implements BasicCommand {
 
     Main plugin;
@@ -20,11 +24,18 @@ public class CommandHelp implements BasicCommand {
     @Override
     public void execute(CommandSourceStack commandSourceStack, @NotNull String @NotNull [] args) {
 
+        // The command sender must be a player
+
         if (commandSourceStack.getSender() instanceof Player p) {
+
+            // If the player is an admin/operator, they will be shown the admin help message
 
             if (p.hasPermission("ksu.speedrun.admin") || p.isOp()) {
 
                 if (args.length == 1) {
+
+                    /* If the argument length is a number and corresponds to a page number, display that page number:
+                       if not, display the default page. */
 
                     try {
 
@@ -51,6 +62,8 @@ public class CommandHelp implements BasicCommand {
                 }
 
             } else {
+
+                // If the player is not an admin or operator, they will be shown the default help message
 
                 for (Component line : plugin.getMessages().getPlayerHelpMessage()) {
                     p.sendMessage(line);

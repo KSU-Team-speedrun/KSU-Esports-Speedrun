@@ -10,10 +10,13 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Date;
 
+/**
+ * The Logger class provides static methods for logging different types of messages such as errors and informational messages.
+ * These messages are logged both to the console and to specific log files within the plugin's directory.
+ */
 @SuppressWarnings("SpellCheckingInspection")
 public class Logger {
 
-    // This Async method can be used to log severe error messages if necessary in an errorlog folder
     public static void logError(String message, Throwable e, Main plugin) {
 
         plugin.runAsyncTask(() -> {

@@ -12,6 +12,12 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a SoloTeam, which is a type of Team with a single player.
+ * A SoloTeam has points, completed objectives, and other player-specific attributes.
+ * Most functions below pass their parameters on to the player, effectively making this class "extend",
+ * but only with the functions needed for this plugin as well as some implemented to support teams.
+ */
 public class SoloTeam extends Team {
 
     Main plugin;

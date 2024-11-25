@@ -4,6 +4,23 @@ import edu.Kennesaw.ksumcspeedrun.Exceptions.NonLivingEntityException;
 import edu.Kennesaw.ksumcspeedrun.Main;
 import org.bukkit.entity.EntityType;
 
+/**
+ * Represents a kill objective in the game, where the player must kill a specified entity type.
+ * This class is a specific type of {@link Objective} aimed at eliminating a certain type of living entity.
+ * Attributes:
+ * - target: A living entity
+ *
+ * Constructors:
+ * - KillObjective(EntityType target, int weight, Main plugin): Initializes the objective
+ *   with a specified target and weight.
+ * - KillObjective(EntityType target, int weight, int amount, Main plugin): Initializes the
+ *   objective with specified target, weight, and amount.
+ * - KillObjective(EntityType target, Main plugin): Initializes the objective with a
+ *   specified target and default weight of 1 & amount of 1.
+ *
+ * Methods:
+ * - getTarget(): Returns the target object, which is an entity
+ */
 // KillObjective is a subclass of Objective
 public class KillObjective extends Objective {
 

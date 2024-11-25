@@ -10,6 +10,11 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The BedInteract class handles player interactions with beds in the game.
+ * It listens for the PlayerBedEnterEvent and asynchronously adds players to a map <bedLocation, player>
+ * so that if an entity is killed by a bed explosion, it can be attributed to the player who caused it.
+ */
 public class BedInteract implements Listener {
 
     Main plugin;

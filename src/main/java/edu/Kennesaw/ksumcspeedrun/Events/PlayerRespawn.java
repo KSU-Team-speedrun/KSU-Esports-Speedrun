@@ -10,6 +10,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
+/**
+ * This class ensures players respawn at their team spawn point if they die after a game is started.
+ */
 public class PlayerRespawn implements Listener {
 
     Main plugin;

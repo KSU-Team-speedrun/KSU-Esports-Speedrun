@@ -10,6 +10,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * CommandScoreboard class implements the BasicCommand interface to handle the
+ * toggling of the scoreboard for a player within the Minecraft server.
+ */
 public class CommandScoreboard implements BasicCommand {
 
     Main plugin;
@@ -24,6 +28,8 @@ public class CommandScoreboard implements BasicCommand {
         if (commandSourceStack.getSender() instanceof Player p) {
 
             boolean isEnabled = plugin.getSpeedrun().toggleScoreboard(p);
+
+            // If the user disables the scoreboard, remove it
             if (!isEnabled) {
                 p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }

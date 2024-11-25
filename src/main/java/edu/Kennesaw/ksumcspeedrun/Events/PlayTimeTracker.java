@@ -14,6 +14,13 @@ import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+/**
+ * The PlayTimeTracker class implements the Listener interface to track and manage player playtime on a Minecraft server.
+ * It records login and logout events to calculate the total time spent by each player on the server.
+ *
+ * The class tracks the session duration for each player and updates their total playtime accordingly.
+ * It also saves and loads player playtimes to and from a configuration file (playtimes.yml) to maintain continuity across server restarts.
+ */
 public class PlayTimeTracker implements Listener {
 
     private final HashMap<UUID, Long> loginTimes = new HashMap<>();

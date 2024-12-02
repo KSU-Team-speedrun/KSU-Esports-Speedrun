@@ -152,10 +152,14 @@ public class TeamManager {
 
     // Reset the team manager & delete all teams & mappings
     public void reset() {
+        teams.clear();
         teams = new ArrayList<>();
         teamSizeLimit = 4;
+        playerTeam.clear();
         playerTeam = new HashMap<>();
+        teamName.clear();
         teamName = new HashMap<>();
+        teamItem.clear();
         teamItem = new HashMap<>();
         teamInventory = new TeamInventory(this, plugin.getSpeedrunConfig()
                 .getComponent("teams.inventory.title"));

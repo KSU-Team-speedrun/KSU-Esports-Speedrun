@@ -17,12 +17,29 @@ public class PlayerLeave implements Listener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
+
         Speedrun sr = plugin.getSpeedrun();
+        Player p = e.getPlayer();
+
+        // If game has not yet started,
         if (!sr.isStarted()) {
-            Player p = e.getPlayer();
+
+            // If player was participating, toggle participation off
             if (sr.isParticipating(p)) {
                 sr.participate(p);
             }
+
+        } else {
+
+            // If game has started & player is participating,
+            if (sr.isParticipating(p)) {
+                // Keep track of player in offline participants mapping
+                plugin.addOfflineParticipant(p.getUniqueId(), sr.getTeams().getTeam(p));
+
+            }
+
         }
+
     }
+
 }

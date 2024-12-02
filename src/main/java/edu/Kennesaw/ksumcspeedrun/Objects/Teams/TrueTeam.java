@@ -40,15 +40,11 @@ public class TrueTeam extends Team {
 
     public void addPlayer(Player player) {
         if (players.contains(player)) {
-            if (player instanceof Player onlinePlayer) {
-                onlinePlayer.sendMessage(plugin.getMessages().getAlreadyOnTeam());
-            }
+            player.sendMessage(plugin.getMessages().getAlreadyOnTeam());
             return;
         }
         players.add(player);
-        if (player instanceof Player onlinePlayer) {
-            onlinePlayer.sendMessage(plugin.getMessages().getAlreadyOnTeam());
-        }
+        player.sendMessage(plugin.getMessages().getTeamJoinMessage(this.name));
         tm.setPlayerTeam(player, this);
         updateItemLore(true, player);
     }
@@ -125,7 +121,7 @@ public class TrueTeam extends Team {
         ItemMeta im = item.getItemMeta();
         List<Component> lore = im.lore();
         if (lore != null) {
-            if (isFull()) {
+            if (isFull() && adding) {
                 lore.set(1, Component.text("This team is FULL!")
                         .color(TextColor.fromHexString("#ff0000")).decorate(TextDecoration.BOLD));
             } else {

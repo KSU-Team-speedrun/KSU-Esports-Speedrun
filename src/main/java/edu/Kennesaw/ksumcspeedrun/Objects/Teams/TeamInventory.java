@@ -38,7 +38,15 @@ public class TeamInventory {
         if (tm.getTeams().isEmpty()) return;
 
         // Item Count = number of active teams
-        int itemCount = tm.getTeams().size();
+        int itemCount;
+
+        // If the overflow team exists, we have to make sure we are not including it in the team selection inventory
+        TrueTeam overFlow = (TrueTeam) tm.getTeam(Component.text("Overflow Team"));
+        if (overFlow != null) {
+            itemCount = tm.getTeams().size() - 1;
+        } else {
+            itemCount = tm.getTeams().size();
+        }
 
         // Determine the number of rows needed based on the item count
         int rowsNeeded = Items.determineRows(itemCount);
@@ -52,6 +60,9 @@ public class TeamInventory {
 
         // Team inventory is only used when teams are enabled, this all teams are instances of TrueTeams
         List<TrueTeam> trueTrueTeams = tm.convertAbstractToTeam(tm.getTeams());
+
+        // Do not include the overflow team
+        trueTrueTeams.remove(overFlow);
 
         // All "TrueTeams" have an assigned item, we need to add all team items into the itemstack list
         for (TrueTeam trueTeam : trueTrueTeams) {

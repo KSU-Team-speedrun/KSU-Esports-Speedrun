@@ -83,7 +83,7 @@ public class PlayerClick implements Listener {
 
                         TrueTeam oldTrueTeam = (TrueTeam) tm.getTeam(p);
 
-                        // Don't allow the player to join if they're alrady on that team
+                        // Don't allow the player to join if they're already on that team
                         if (oldTrueTeam != null) {
 
                             if (oldTrueTeam.equals(trueTeam)) {

@@ -1,4 +1,4 @@
-name: KSU-MC-Speedrun
-version: '0.2'
+name: KSU-Esports-Speedrun
+version: '1.0'
 main: edu.Kennesaw.ksumcspeedrun.Main
 api-version: '1.21'

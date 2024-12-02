@@ -4,6 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Main;
 import edu.Kennesaw.ksumcspeedrun.Objects.Objective.Objective;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -26,6 +27,8 @@ public class SoloTeam extends Team {
     private int points;
     private Location respawnLocation;
 
+    private OfflinePlayer playerBackup;
+
     public SoloTeam(Main plugin, Player player) {
         super(plugin);
         this.player = player;
@@ -33,6 +36,7 @@ public class SoloTeam extends Team {
         this.completedObjectives = new ArrayList<>();
         points = 0;
         plugin.getSpeedrun().getTeams().setPlayerTeam(player, this);
+        playerBackup = player;
     }
 
     @Override
@@ -110,6 +114,14 @@ public class SoloTeam extends Team {
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void setPlayerBackup(OfflinePlayer op) {
+        this.playerBackup = op;
+    }
+
+    public OfflinePlayer getPlayerBackup() {
+        return playerBackup;
     }
 
 }

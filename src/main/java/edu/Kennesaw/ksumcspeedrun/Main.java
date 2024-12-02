@@ -4,6 +4,7 @@ import edu.Kennesaw.ksumcspeedrun.Commands.*;
 import edu.Kennesaw.ksumcspeedrun.Events.*;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Config;
 import edu.Kennesaw.ksumcspeedrun.FileIO.Logger;
+import edu.Kennesaw.ksumcspeedrun.Objects.Teams.Team;
 import edu.Kennesaw.ksumcspeedrun.Utilities.Messages;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +45,9 @@ public class Main extends JavaPlugin {
 
     // Game Rules specified in the config.yml are stored here. Values are either Integers or Booleans.
     private Map<GameRule<?>, Object> gameRules;
+
+    // Keep track of players on teams that disconnected during a speedrun
+    private Map<UUID, Team> offlineParticipants;
 
     // Initial Startup Functionalities: This is what the plugin does first.
     @SuppressWarnings("UnstableApiUsage")
@@ -108,6 +114,8 @@ public class Main extends JavaPlugin {
 
         // Load game rules that are set in the config, if applicable.
         loadGameRules();
+
+        offlineParticipants = new HashMap<>();
 
     }
     // Runs when plugin is disabled
@@ -189,6 +197,27 @@ public class Main extends JavaPlugin {
                 if (p.hasPermission(permission) || permission.isEmpty()) p.sendMessage(message);
             }
         });
+    }
+
+    // Map OfflinePlayer to Team incase disconnection occurs during speedrun
+    public void addOfflineParticipant(UUID uuid, Team team) {
+        offlineParticipants.put(uuid, team);
+    }
+
+    // Get Team from OfflinePlayer
+    public Team getOfflineParticipantTeam(UUID uuid) {
+        if (offlineParticipants.containsKey(uuid)) { return offlineParticipants.get(uuid); }
+        return null;
+    }
+
+    // Default getter for offline participants
+    public Map<UUID, Team> getOfflineParticipants() {
+        return offlineParticipants;
+    }
+
+    // Default setter for offline participants
+    public void setOfflineParticipants(Map<UUID, Team> offlineParticipants) {
+        this.offlineParticipants = offlineParticipants;
     }
 
     // Log error using edu.Kennesaw.ksumcspeedrun.FileIO.Logger - saves error log to plugin file

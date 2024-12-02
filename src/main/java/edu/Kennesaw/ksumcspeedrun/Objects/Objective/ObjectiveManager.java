@@ -74,7 +74,6 @@ public class ObjectiveManager {
         return totalWeight;
     }
 
-    @SuppressWarnings("unused")
     public void setTotalWeight(int totalWeight) {
         this.totalWeight = totalWeight;
     }

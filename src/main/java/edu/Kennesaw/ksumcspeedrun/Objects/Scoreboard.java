@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class Scoreboard {
 
@@ -22,11 +23,15 @@ public class Scoreboard {
     private int timeLeftInSeconds;
     private boolean replaced;
 
-    public Scoreboard(Main plugin, int timeInMinutes) {
+    public Scoreboard(Main plugin, int time, TimeUnit tu) {
         this.plugin = plugin;
         this.teamManager = plugin.getSpeedrun().getTeams();
         this.teamScoreboards = new HashMap<>();
-        this.timeLeftInSeconds = timeInMinutes * 60;
+        if (tu.equals(TimeUnit.MINUTES)) {
+            this.timeLeftInSeconds = time * 60;
+        } else if (tu.equals(TimeUnit.SECONDS)) {
+            this.timeLeftInSeconds = time;
+        }
         this.interval = plugin.getSpeedrunConfig().getInt("scoreboard.interval");
         replaced = false;
 
@@ -61,6 +66,10 @@ public class Scoreboard {
                 timeLeftInSeconds -= interval;
             }
         }.runTaskTimer(plugin, 0L, interval * 20L);
+    }
+
+    public org.bukkit.scoreboard.Scoreboard getTeamScoreboard(Team team) {
+        return teamScoreboards.get(team);
     }
 
     private void setupScoreboards() {

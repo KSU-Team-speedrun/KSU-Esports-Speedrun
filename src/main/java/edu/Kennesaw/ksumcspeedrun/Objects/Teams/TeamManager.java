@@ -7,6 +7,21 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
+/**
+ * This class manages all teams and holds them in a single list which can be adjusted using the provided methods.
+ * It keeps track of all teams and provides mappings for:
+ *
+ * - Players to their respective teams for quick lookups (`playerTeam` map).
+ * - Team names to corresponding team objects for easy access (`teamName` map).
+ * - Items to their respective `TrueTeam` objects for handling inventory clicks in the UI (`teamItem` map).
+ *
+ * Key Features:
+ * - Adds, removes, and retrieves teams or their associated data.
+ * - Manages team size limits and dynamically adjusts teams based on the limit.
+ * - Maintains a `TeamInventory` object for the team selection UI, with a configurable cooldown.
+ * - Supports resetting all teams and their mappings to clear the state during a game reset.
+ * - Differentiates between abstract `Team` objects and concrete `TrueTeam` objects for specific operations.
+ */
 public class TeamManager {
 
     private final Main plugin;

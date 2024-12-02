@@ -63,7 +63,8 @@ public class ObjectiveManager {
         return objectives.size();
     }
 
-    // Remove objective by the number that it appears in the list
+    /* Remove objective by the number that it appears in the admin objective book
+       Adjust total weight to not include weight of removed objective */
     public void removeObjective(int number) {
         totalWeight-=objectives.get(number).getWeight();
         objectives.remove(number);

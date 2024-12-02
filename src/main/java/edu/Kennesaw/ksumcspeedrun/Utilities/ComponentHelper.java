@@ -5,6 +5,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 
+/**
+ * This class contains helper methods used to convert MiniMessage strings to components & vice versa
+ */
+
 public class ComponentHelper {
 
     static MiniMessage mm = MiniMessage.miniMessage();

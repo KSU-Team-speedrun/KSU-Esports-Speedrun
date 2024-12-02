@@ -13,14 +13,26 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is initialized in the 'Main' class during plugin startup.
+ * It loads all plugin messages into memory to provide efficient access during the game.
+ *
+ * Design Trade-offs:
+ * - Slightly increased memory usage and startup time.
+ * - Significantly reduced IO operations during gameplay, improving runtime performance.
+ *
+ * Purpose:
+ * - Stores and formats almost all messages (chat & otherwise) used by the plugin.
+ * - Messages are retrieved from the plugin's configuration file via the 'Config' dependency.
+ */
 public class Messages {
 
     Main plugin;
 
-    // Messages
     private Component prefix;
     private TagResolver.Single prefixPlaceholder;
 
+    // Messages
     private List<String> playerHelpMessage;
     private String toggleScoreboard;
     private String teamJoinMessage;
@@ -91,6 +103,7 @@ public class Messages {
     private String gameOverTitle;
     private String gameOverSubtitle;
 
+    // Loads all message from config upon initialization, store them privately
     public Messages(Main plugin) {
 
         this.plugin = plugin;
@@ -173,6 +186,8 @@ public class Messages {
         });
 
     }
+
+    // *** GETTERS FOR ALL MESSAGES *** //
 
     public List<Component> getPlayerHelpMessage() {
         List<Component> helpMessage = new ArrayList<>();

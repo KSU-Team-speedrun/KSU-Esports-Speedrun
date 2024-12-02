@@ -28,24 +28,35 @@ import java.util.concurrent.TimeUnit;
    can be accessed from any class */
 public class Main extends JavaPlugin {
 
+    /* The main class holds the main instance of the config. During runtime, the config is always
+       accessed through the main class. */
     private Config config;
+
+    // ^^ Likewise for "Speedrun" and "Messages"
     private Speedrun speedrun;
     private Messages messages;
+
+    /* If a spawnpoint and specified and enabled in the config, it will be stored
+       here on startup - not fetched during runtime */
     private Location spawnPoint = null;
+
+    // Game Rules specified in the config.yml are stored here. Values are either Integers or Booleans.
     private Map<GameRule<?>, Object> gameRules;
 
-    // The following method runs when the plugin is Enabled
+    // Initial Startup Functionalities: This is what the plugin does first.
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onEnable() {
 
+        // All uncaught errors thrown on the main thread should be logged
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             logError(throwable, thread);
         });
 
-        // Config instance is initialized
+        // The Main & Only Config Instance is Initialized
         config = new Config(this);
 
+        // The Main & Only Speedrun Instance is Initialized
         speedrun = new Speedrun(this);
 
         // Events are Registered
@@ -63,12 +74,13 @@ public class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerRespawn(this), this);
 
 
-        getLogger().info("Playtime tracker enabled");
-        Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
+        //getLogger().info("Playtime tracker enabled");
+        //Bukkit.getServer().getPluginManager().registerEvents(new PlayTimeTracker(this), this);
 
+        // The Main & Only Messages Instance is Initialized - Config must be FULLY loaded before this line is reached
         messages = new Messages(this);
 
-        // Speedrun Command is Registered
+        // All Commands are Registered
         LifecycleEventManager<@NotNull Plugin> manager = this.getLifecycleManager();
         manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
@@ -80,6 +92,7 @@ public class Main extends JavaPlugin {
             commands.register("spawn", "Teleport to your team's spawnpoint", new CommandSpawn(this));
         });
 
+        // If the spawn point is set & enabled in the config, we parse the data and save it to access when players join
         if (config.getBoolean("world.spawnPoint.enabled")) {
             double y = 100.0;
             spawnPoint = new Location(Bukkit.getWorld(config.getString("world.spawnPoint.world")),
@@ -93,6 +106,7 @@ public class Main extends JavaPlugin {
             }
         }
 
+        // Load game rules that are set in the config, if applicable.
         loadGameRules();
 
     }
@@ -103,22 +117,26 @@ public class Main extends JavaPlugin {
         getLogger().info("PlayTimeTracker has been disabled.");
     }
 
-    // Getter for Plugin Config file, can be accessed by any class that passes Main instance in constructor
+    // Getter for access to plugin Config file, can be accessed by any class that passes Main instance in constructor
     public Config getSpeedrunConfig() {
         return config;
     }
 
-    // Getter for Speedrun object, can be accessed by any class that passes Main instance in constructor
+    // Getter for Speedrun instance, can be accessed by any class that passes Main instance in constructor
     public Speedrun getSpeedrun() {
         return speedrun;
     }
 
+    // Getter for Messages instance, can be accessed by any class that passes Main instance in constructor
     public Messages getMessages() { return messages; }
 
+    // Getter for spawn point Location, if set & enabled in the Config
     public Location getSpawnPoint() {
         return spawnPoint;
     }
 
+    /* All Async tasks are run through this function - the purpose is so that uncaught errors thrown on an asynchronous
+       thread can still be logged - it doesn't always work, however. Feel free to update & pull request */
     public void runAsyncTask(Runnable task) {
         Bukkit.getAsyncScheduler().runNow(this, scheduledTask -> {
             try {
@@ -129,6 +147,10 @@ public class Main extends JavaPlugin {
         });
     }
 
+    /* Runs a task asynchronously and returns a CompletableFuture that is completed when the task finishes execution.
+       This can be useful for asynchronous operations that need to signal their completion or handle errors.
+       The implementations of this were removed so this function is unused. Could be handy
+       in the future - or can be removed. */
     public CompletableFuture<Void> runCompletableFutureAsyncTask(Runnable task) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         Bukkit.getAsyncScheduler().runNow(this, scheduledTask -> {
@@ -143,6 +165,7 @@ public class Main extends JavaPlugin {
         return future;
     }
 
+    // Run an Async Delayed Task & log any errors that are thrown
     public ScheduledTask runAsyncDelayed(Runnable task, long delay, TimeUnit unit) {
         return Bukkit.getAsyncScheduler().runDelayed(this, scheduledTask -> {
             try {
@@ -153,10 +176,13 @@ public class Main extends JavaPlugin {
         }, delay, unit);
     }
 
+    // Getter method for GameRules map
     public Map<GameRule<?>, Object> getGameRules() {
         return gameRules;
     }
 
+    // Broadcast messages asynchronously to all players
+    ///  @param permission - Only players w/ this permission can see the message, put "" for all players
     public void asyncBroadcast(Component message, String permission) {
         runAsyncTask(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -165,12 +191,22 @@ public class Main extends JavaPlugin {
         });
     }
 
+    // Log error using edu.Kennesaw.ksumcspeedrun.FileIO.Logger - saves error log to plugin file
     private void logError(Throwable throwable, Thread thread) {
         Logger.logError("Unhandled exception in thread " + thread.getName() + ": " +
                 throwable.getMessage(), throwable, this);
         getLogger().warning("Saving error to errorlogs...");
     }
 
+    // If gamerules are enabled in the config.yml, gamerules will be updated in-game
+    // according to their setting in the config:
+    // For boolean Game Rules:
+    // - Can be set to their boolean value (supports both string format & boolean format) or "default"
+    // - Any other setting will not change the game rule; it will be left as is
+    // For integer Game Rules:
+    // - Must be assigned integer value or "default"
+    // - Any other setting will not change the game rule; it will be left as is
+    // If game rule setting is unexpected, a warning will print in the console on plugin initialization
     private void loadGameRules() {
         gameRules = new LinkedHashMap<>();
         for (String gameRule : config.getConfigurationSection("gameRules").getKeys(false)) {

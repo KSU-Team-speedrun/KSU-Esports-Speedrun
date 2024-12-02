@@ -3,6 +3,13 @@ package edu.Kennesaw.ksumcspeedrun.Utilities;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Two-way HashMaps were necessary for combat logs (A player is in combat if they attack or are attacked),
+ * but since the map may be accessed asynchronously, we need to ensure it can support those operations.
+ * This class essentially just holds to ConcurrentHashMaps - each mirroring each other.
+ * ReentrantLocks are used to ensure threads don't intervene during actions.
+ */
+
 public class ConcurrentTwoWayMap<K, V> {
     private final ConcurrentHashMap<K, V> keyToValue = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<V, K> valueToKey = new ConcurrentHashMap<>();

@@ -9,6 +9,9 @@ import org.bukkit.entity.EntityType;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Helper class that returns various string lists to be utilized for command suggestions
+ */
 public class SpeedrunSuggestions {
 
     // Returns a list of the names of all Living Entity types in the game

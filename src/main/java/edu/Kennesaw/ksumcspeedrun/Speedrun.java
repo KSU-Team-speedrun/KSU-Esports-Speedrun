@@ -36,48 +36,84 @@ public class Speedrun {
     Main plugin;
 
     // Speedrun Attributes
-    private String seed;
-    private int border;
-    private int timeLimit;
-    private TimeUnit timeUnit;
-    private int spawnRadius;
-    private int playerLimit;
-    private World speedrunWorld;
+    private String seed; // Seed -> Random if Never Specified
+    private int border; // World Border -> 5000 by Default
+    private int timeLimit; // Game Time Limit -> 1hr by Default
+    private TimeUnit timeUnit; // Only supports minutes as of latest version
+    private int spawnRadius; // Team Spawn Radius -> 300 by Default
+
+    // The maximum amount of teams is equal to the number of teams defined in the config
+    // If teams are disabled (SoloTeams are used), maximum teams are 32
+    /*
+     * TODO - Allow maximum number of soloteams to be defined in config:
+     *  - Explanation: This must be a set number because the plugin finds this number of team spawn points when
+     *  - a world is generated, which should theoretically be prior to the server filling with players.
+     */
     private int maxTeams;
 
     // True if the Speedrun has started
     private boolean isStarted;
 
+    /* The total points to win IF SET BY AN ADMIN - If an admin does not adjust this number, then the sum
+       of the weight of all objectives will be used instead of this number (objectives.getTotalWeight()) */
     private int totalWeight = 0;
 
-    // ObjectiveManager contains the list of all Objectives & all incomplete objectives, can be modified
+    /* ObjectiveManager manages all objectives and holds them in a single list which can be adjusted using the provided
+       methods. It keeps track of the objectives and their total weight. */
     private final ObjectiveManager objectives;
+
+    /* This class manages teams in the plugin, including their creation, removal, and associated data mappings for
+       players, names, and inventory items. It also provides functionality for handling team size limits, UI interactions,
+       and resetting team states during gameplay. */
     private final TeamManager tm;
 
+    // This is edu.Kennesaw.Objects.Scoreboard - not org.Bukkit...
     private Scoreboard ct;
 
-    // GameRules set by admins will be located in this HashMap
-    private Map<GameRule<?>, Boolean> gameRules;
-
+    /* Combat Logs stored here: any entity can initiate combat (players or NPC), but combat can only be initiated
+       with a player */
     public ConcurrentTwoWayMap<UUID, Player> combatLog;
+
+    /* Store the actual combat log deletion task so it can be canceled if the player is removed from the combat log
+       for a reason other than time expiration */
     public Map<UUID, ScheduledTask> combatTasks;
 
+    /* The location of a bed and the player that activated it are mapped together:
+       This is used to attribute bed explosion kills to players who activated them */
     public Map<Location, Player> bedLog;
 
+    // Players are temporarily added to this set when they pick/change their team. They are removed after a set time.
+    // They cannot change their team while they are in this set.
     private Set<Player> teamCooldown;
 
-    // Admins are left unincluded from games and team calculations unless they specify
+    /* Admins are left unincluded from games and team calculations unless they specify with /speedrun participate:
+       Thus, we use this list instead of Bukkit.getOnlinePlayers() */
     private final List<Player> onlinePlayers;
+
+    // True by default - if teams are disabled then SoloTeams are used: each player is their own "team"
     private boolean teamsEnabled;
 
+    // Specific players can disable their scoreboard during a game - they are stored here
     private final Set<Player> scoreboardDisabled;
 
+    // This is the folder where the speedrun world is stored. Kept here for easy access & deletion if necessary
     final File worldFolder = new File(Bukkit.getWorldContainer(), "speedrunworld");
 
+    // This is the actual speedrun world object
+    private World speedrunWorld;
+
+    /* When a world is generated, team spawn locations are calculated & then stored here. The spawn locations for the
+       maximum possible number of teams is calculated: e.g., if there are 16 teams defined in the config but only
+       4 teams in use, the spawn location for all 16 teams will calculate, but when the game starts only spawnpoints
+       4, 8, 12, & 16 will be used */
     List<Location> teamSpawnLocations;
+
+    /* We want to be able to get a team easily from the corresponding team number so that spawn locations
+       can be updated if necessary */
     Map<Integer, Team> spawnLocationIndexToTeam;
 
-    // Main Constructor with default attributes assigned
+    // Speedrun Constructor for Initialization
+    // All objects explained above are initialized or set to their default value
     public Speedrun(Main plugin) {
 
         this.plugin = plugin;
@@ -95,8 +131,6 @@ public class Speedrun {
 
         onlinePlayers = new ArrayList<>();
 
-        gameRules = new ConcurrentHashMap<>();
-
         combatLog = new ConcurrentTwoWayMap<>();
         combatTasks = new ConcurrentHashMap<>();
 
@@ -107,13 +141,19 @@ public class Speedrun {
 
         spawnLocationIndexToTeam = new ConcurrentHashMap<>();
 
+        // If set in the config, the existing speedrun world (if applicable) will delete on startup
         if (plugin.getConfig().getBoolean("world.deleteOnStart")) {
             plugin.getLogger().info("Deleting old speedrun world...");
             deleteWorldFolder(worldFolder);
         }
 
+        // Speedrun World is null until generated
         speedrunWorld = null;
 
+        /* The max teams is equal to the number of teams defined in the config.
+           We subtract 4 because the first 4 options under "teams" in the config
+           are not actually teams, but configuration options that are handled differently
+           (i.e., inventory, objectiveIncrement, teamPvP, & PvP) */
         ConfigurationSection teamsSection = plugin.getConfig().getConfigurationSection("teams");
         if (teamsSection != null) {
             this.maxTeams = teamsSection.getKeys(false).size() - 4;
@@ -125,16 +165,17 @@ public class Speedrun {
 
     }
 
-    // Setters & Getters below should be quite self-explanatory
-
+    // Default Seed Setter
     public void setSeed(String seed) {
         this.seed = seed;
     }
 
+    // Default Seed Getter
     public String getSeed() {
         return seed;
     }
 
+    // Default Border Setter - If Speedrun is already started, then border changes take effect immediately
     public void setBorder(int border) {
         this.border = border;
         if (isStarted) {
@@ -142,10 +183,12 @@ public class Speedrun {
         }
     }
 
+    // Default Border Getter
     public int getBorder() {
         return border;
     }
 
+    // Default Time Limit Setter - If Speedrun is already started, then time limit changes take effect immediately
     public void setTimeLimit(int time) {
         this.timeLimit = time;
         if (isStarted) {
@@ -154,45 +197,80 @@ public class Speedrun {
         }
     }
 
+    // Default Time Limit Getter
     public int getTimeLimit() {
         return timeLimit;
     }
 
+    // Default Time Unit Setter
     public void setTimeUnit(TimeUnit timeUnit) {
         this.timeUnit = timeUnit;
     }
 
+    // Default Time Unit Getter
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }
 
+    // Default Spawn Radius Setter
     public void setSpawnRadius(int spawnRadius) {
         this.spawnRadius = spawnRadius;
     }
 
+    // Default Time Radius Getter
     public int getSpawnRadius() {
         return spawnRadius;
     }
 
+    // Add an objective to the objectives list in ObjectiveManager
     public void addObjective(Objective objective) {
         if (objective != null) {
             objectives.addObjective(objective);
         }
     }
 
+    /* Remove an objective from the objective list in ObjectiveManager
+       If total weight was explicitly set, it will remain unchanged
+       If total weight is default, then total weight will decrease by the weight of the removed objective
+       If a team has completed the objective & it is removed, the team's points will decrease by the weight of the objective
+       If a team has not completed the objective, the game will check if they have enough points to win since conditions
+       have changed */
+    /// @param objectiveNum - Corresponds to the number displayed next to the objective in the admin objective book
     public void remObjective(int objectiveNum) {
+        // Get objective corresponding to number
         Objective objective = objectives.getObjective(objectiveNum);
+
+        // Remove that objective (reduce default calculated total weight by weight of specific objective)
         objectives.removeObjective(objectiveNum);
+
+        // A game cannot continue if there are no objectives
         if (objectives.getLength() == 0) {
             endGame();
             return;
         }
+
+        // For each team...
         for (Team team : tm.getTeams()) {
+
+            // If the team has completed the removed objective
             if (team.getCompleteObjectives().contains(objective)) {
+
+                // Remove that objective from the team's completed objectives
                 team.getCompleteObjectives().remove(objective);
+
+                // Remove the objective's weight from the team's points
                 team.removePoints(objective.getWeight());
+
+                /* Note: There is no condition where a team could win when the objective is removed if the team has
+                   yet to win after they have completed the objective. */
             } else {
+
+                /* If the team hasn't completed the objective, remove it from their incomplete objectives
+                   objectives.getTotalWeight() automatically updates to account for this change. */
                 team.getIncompleteObjectives().remove(objective);
+
+                /* If the team's total points is now greater or equal to the total weight after the objective is
+                   removed, then the team wins. */
                 if (team.getPoints() >= getTotalWeight()) {
                     endGame(team);
                 }
@@ -200,117 +278,187 @@ public class Speedrun {
         }
     }
 
+    // Default ObjectiveManager Getter
+    // TODO - getObjectives is misleading - this should maybe be changed to getObjectiveManager
     public ObjectiveManager getObjectives() {
         return objectives;
     }
 
+    // Use the team manager to add a new team
     public void addTeam(Team team) {
         if (team != null) {
             tm.addTeam(team);
         }
     }
 
+    // Use the team manager to remove a current team
     public void remTeam(Team team) {
         tm.removeTeam(team);
     }
 
+    // Use the team manager to adjust team size limit
     public void setTeamSizeLimit(int sizeLimit) {
         tm.setSizeLimit(sizeLimit);
     }
 
+    // Get the team size limit from the team manager
     public int getTeamSizeLimit() {
         return tm.getSizeLimit();
     }
 
+    // Default Getter for TeamManager
+    // TODO - Change this to getTeamManager
     public TeamManager getTeams() {
         return tm;
     }
 
-    public void setGameRule(GameRule<?> gameRule, boolean value) {
-        gameRules.put(gameRule, value);
-    }
-
-    public boolean getGameRule(GameRule<?> gameRule) {
-        return gameRules.getOrDefault(gameRule, false);
-    }
-
-    public void setPlayerLimit(int playerLimit) {
-        this.playerLimit = playerLimit;
-    }
-
-    public int getPlayerLimit() {
-        return playerLimit;
-    }
-
+    // Start the Game
+    /// @param sender - This method is called in the CommandSpeedrun class and returns update messages to command sender
+    /// based on certain conditions - it can be left null, then it just will not return any messages
     public Boolean setStarted(CommandSender sender) {
+
+        // The game can only be started if it is not already started
         if (!this.isStarted) {
+
+            // If the speedrun world is not yet generated, the sender will be instructed to do that first
             if (speedrunWorld == null) {
-                sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
+                if (sender != null) sender.sendMessage(plugin.getMessages().getWorldNotGenerated());
                 return false;
             }
+
+            // If no objectives are set, the sender will be instructed to set objectives first
             if (objectives.getObjectives().isEmpty()) {
-                sender.sendMessage(plugin.getMessages().getNoObjectives());
+                if (sender != null) sender.sendMessage(plugin.getMessages().getNoObjectives());
                 return false;
             }
+
+            /* If config game rules are enabled, they are implemented into the speedrun world once the game starts.
+               Game rules are deleted with speedrun worlds. If you change these configurations, the changes will take
+               effect the next time a speedrun is started using a new map (& plugin is reloaded). */
             if (plugin.getSpeedrunConfig().getBoolean("gameRules.enabled")) {
+
+                // Loop through all game rules (pre-loaded when plugin first started)
                 for (Map.Entry<GameRule<?>, Object> entry : plugin.getGameRules().entrySet()) {
+
+                    // If the gamerule type is not boolean, then it must be integer
                     if (entry.getKey().getType() == Boolean.class) {
                         speedrunWorld.setGameRule((GameRule<Boolean>) entry.getKey(), (Boolean) entry.getValue());
                     } else {
                         speedrunWorld.setGameRule((GameRule<Integer>) entry.getKey(), (Integer) entry.getValue());
                     }
+
+                    // Gamerules that are changed by the plugin are logged in the console
                     plugin.getLogger().info("Setting GameRule '" + entry.getKey() + "' to '" + entry.getValue()+ "'.");
                 }
             }
+
+            // Initialize the PlayerMoveEvent alternative listener
             new PlayerMove(plugin);
+
+            // Initialize the Scoreboard
             ct = new Scoreboard(plugin, timeLimit);
+
+            // Assign players that have not picked a team to a team
             if (teamsEnabled) assignPlayers();
+
+            // Clear all participating players' inventories
             for (Player p : tm.getAssignedPlayers()) {
                 p.getInventory().clear();
             }
+
+            /* For objectives that specifically have a "count" (i.e., must be completed x number of times before it
+               counts as a completion. e.g., KILL 10 ZOMBIES), the objective actually holds the counts for all teams,
+               rather than the team holding the count for all objectives. It doesn't make much sense to do it this way
+               but that's how it was implemented. */
+            // TODO - Look into mapping objective count in teams or justifying why the objective should hold this info
             for (Team team : tm.getTeams()) {
                 for (Objective o : objectives.getObjectives()) {
                     if (o.getHasCount()) o.addTeam(team);
                 }
             }
+
+            // Spawn the teams in a circle around (0, 0) according to the team spawn radius
+            // Teams spawn together in groups - players will always spawn seperately in SoloTeams
             TeamSpawner.spawnTeamsInCircle(this, teamSpawnLocations);
+
+            // Broadcast that the game has started
             Bukkit.broadcast(plugin.getMessages().getStart(timeLimit));
+
+            // Officially set isStarted to true; the game has officially started
             isStarted = true;
+
+            // If this method returns true you know the game has successfully started
             return true;
         }
+
+        // Return null if the game has already started
         return null;
     }
 
+
+    // Generate the Speedrun Map
+    /// @param sender - This method is called in the CommandSpeedrun class and returns update messages to command sender
+    /// based on certain conditions - it can be left null, then it just will not return any messages
     public Boolean generateWorld(CommandSender sender) {
+
+        // Cannot Generate a World if the game has already started
         if (isStarted) {
             sender.sendMessage(plugin.getMessages().getGameAlreadyStarted());
             return null;
         }
+
+        /* If a world is already generated (but game is not started), the current world must
+           be deleted to generate a new one. */
         if (speedrunWorld != null) {
             deleteSpeedrunWorld();
         }
+
+        // The sender will be told when world generation initiates
         if (sender != null) {
             plugin.runAsyncTask(() -> sender.sendMessage(plugin.getMessages().getWorldGenerating()));
         }
+
+        // Initialize edu.Kennesaw.Objects.Utilities.WorldGenerator
         WorldGenerator wg = new WorldGenerator();
+
+        // Ensure that a data folder for the world exists
         File file = new File(plugin.getDataFolder() + "/speedrunworld");
         file.mkdirs();
+
         try {
+
+            // Assume the seed is an integer (long) value first, generate world with that seed
             speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(Long.parseLong(seed)));
+
         } catch (NumberFormatException e) {
+
+            /* If NumberFormatException is caught, then convert the string to a hash code (this is what default
+               Minecraft does w/ string seeds according to my research) */
             speedrunWorld = Bukkit.createWorld(new WorldCreator("speedrunworld").seed(seed.hashCode()));
+
         }
+
+        // Create the world border after the world finishes generating
         createWorldBorder();
+
+        // Let the sender know world generation is finish - inform them spawn points are now being located
         if (sender != null) {
             sender.sendMessage(plugin.getMessages().getWorldGenerated());
             sender.sendMessage(plugin.getMessages().getSpawnsGenerating());
         }
+
+        // maxTeams = number of teams defined in config, if teams are disabled # is 32
+        // TODO - Make this number customizable via config.yml or otherwise
         if (!teamsEnabled) maxTeams = 32;
-        // Call getTeamSpawnLocations and handle the future directly
+
+        /* TeamSpawnLocations can be located asynchronously - this is an intensive tasks, so it saves many resources
+           for the main thread. We call getTeamSpawnLocations & Handle the Future Directly */
         TeamSpawner.getTeamSpawnLocations(plugin).thenAccept(locations -> {
+
+            // Set teamSpawnLocations equal to locations returned
             teamSpawnLocations = locations;
 
-            // Schedule the next steps to run on the main thread
+            // We want to message the sender only after the asynchronous task is completed
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (sender != null) {
                     sender.sendMessage(plugin.getMessages().getSpawnsGenerated());
@@ -545,8 +693,6 @@ public class Speedrun {
             objectives.clearObjectives();
             tm.reset();
             createTeams(null);
-
-            gameRules = new ConcurrentHashMap<>();
 
             combatLog = new ConcurrentTwoWayMap<>();
             combatTasks = new ConcurrentHashMap<>();

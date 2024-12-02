@@ -21,6 +21,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
  * The class tracks the session duration for each player and updates their total playtime accordingly.
  * It also saves and loads player playtimes to and from a configuration file (playtimes.yml) to maintain continuity across server restarts.
  */
+@Deprecated
 public class PlayTimeTracker implements Listener {
 
     private final HashMap<UUID, Long> loginTimes = new HashMap<>();
